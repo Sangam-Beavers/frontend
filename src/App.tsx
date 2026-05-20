@@ -15,6 +15,12 @@ import ExchangeCompletePage from '@/pages/ExchangeCompletePage';
 import RecurringTransferSetupPage from '@/pages/RecurringTransferSetupPage';
 import RecurringTransferListPage from '@/pages/RecurringTransferListPage';
 import RecurringTransferCompletePage from '@/pages/RecurringTransferCompletePage';
+import TransferSelectPage from '@/pages/TransferSelectPage';
+import TransferAppPage from '@/pages/TransferAppPage';
+import TransferBankPage from '@/pages/TransferBankPage';
+import TransferConfirmPage from '@/pages/TransferConfirmPage';
+import TransferAuthPage from '@/pages/TransferAuthPage';
+import TransferCompletePage from '@/pages/TransferCompletePage';
 
 function App() {
   return (
@@ -35,6 +41,12 @@ function App() {
       <Route path="/recurring" element={<RecurringTransferListPage />} />
       <Route path="/recurring/setup" element={<RecurringTransferSetupPage />} />
       <Route path="/recurring/complete" element={<RecurringTransferCompletePage />} />
+      <Route path="/transfer" element={<TransferSelectPage />} />
+      <Route path="/transfer/app" element={<TransferAppPage />} />
+      <Route path="/transfer/bank" element={<TransferBankPage />} />
+      <Route path="/transfer/confirm" element={<TransferConfirmPage />} />
+      <Route path="/transfer/auth" element={<TransferAuthPage />} />
+      <Route path="/transfer/complete" element={<TransferCompletePage />} />
     </Routes>
   );
 }
