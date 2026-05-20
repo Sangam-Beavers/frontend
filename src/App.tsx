@@ -12,6 +12,12 @@ import ExchangeSelectPage from '@/pages/ExchangeSelectPage';
 import ExchangeFormPage from '@/pages/ExchangeFormPage';
 import ExchangeReversePage from '@/pages/ExchangeReversePage';
 import ExchangeCompletePage from '@/pages/ExchangeCompletePage';
+import TransferSelectPage from '@/pages/TransferSelectPage';
+import TransferAppPage from '@/pages/TransferAppPage';
+import TransferBankPage from '@/pages/TransferBankPage';
+import TransferConfirmPage from '@/pages/TransferConfirmPage';
+import TransferAuthPage from '@/pages/TransferAuthPage';
+import TransferCompletePage from '@/pages/TransferCompletePage';
 
 function App() {
   return (
@@ -29,6 +35,12 @@ function App() {
       <Route path="/exchange/form" element={<ExchangeFormPage />} />
       <Route path="/exchange/reverse" element={<ExchangeReversePage />} />
       <Route path="/exchange/complete" element={<ExchangeCompletePage />} />
+      <Route path="/transfer" element={<TransferSelectPage />} />
+      <Route path="/transfer/app" element={<TransferAppPage />} />
+      <Route path="/transfer/bank" element={<TransferBankPage />} />
+      <Route path="/transfer/confirm" element={<TransferConfirmPage />} />
+      <Route path="/transfer/auth" element={<TransferAuthPage />} />
+      <Route path="/transfer/complete" element={<TransferCompletePage />} />
     </Routes>
   );
 }
