@@ -33,6 +33,11 @@ import CommunityJobPage from '@/pages/CommunityJobPage';
 import CommunityFreePage from '@/pages/CommunityFreePage';
 import CommunityPostDetailPage from '@/pages/CommunityPostDetailPage';
 import CommunityWritePage from '@/pages/CommunityWritePage';
+import AllMenuPage from '@/pages/AllMenuPage';
+import MyPage from '@/pages/MyPage';
+import ProfileEditPage from '@/pages/ProfileEditPage';
+import BadgeCertPage from '@/pages/BadgeCertPage';
+import BadgeCertCompletePage from '@/pages/BadgeCertCompletePage';
 
 function App() {
   return (
@@ -71,6 +76,11 @@ function App() {
       <Route path="/community/free" element={<CommunityFreePage />} />
       <Route path="/community/write" element={<CommunityWritePage />} />
       <Route path="/community/posts/:postId" element={<CommunityPostDetailPage />} />
+      <Route path="/menu" element={<AllMenuPage />} />
+      <Route path="/mypage" element={<MyPage />} />
+      <Route path="/mypage/profile" element={<ProfileEditPage />} />
+      <Route path="/mypage/badge" element={<BadgeCertPage />} />
+      <Route path="/mypage/badge/complete" element={<BadgeCertCompletePage />} />
     </Routes>
   );
 }
