@@ -1,6 +1,6 @@
 # React + TypeScript + Vite
 
-## 테스트용입니다!!
+## 연습용~~
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
