@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './TopBar.module.css';
 
@@ -5,9 +6,10 @@ interface TopBarProps {
   title: string;
   showBack?: boolean;
   onBack?: () => void;
+  rightAction?: ReactNode;
 }
 
-export default function TopBar({ title, showBack = true, onBack }: TopBarProps) {
+export default function TopBar({ title, showBack = true, onBack, rightAction }: TopBarProps) {
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -28,7 +30,7 @@ export default function TopBar({ title, showBack = true, onBack }: TopBarProps) 
         <div className={styles.iconPlaceholder} />
       )}
       <div className={styles.title}>{title}</div>
-      <div className={styles.iconPlaceholder} />
+      {rightAction ?? <div className={styles.iconPlaceholder} />}
     </div>
   );
 }
