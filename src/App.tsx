@@ -38,6 +38,10 @@ import MyPage from '@/pages/MyPage';
 import ProfileEditPage from '@/pages/ProfileEditPage';
 import BadgeCertPage from '@/pages/BadgeCertPage';
 import BadgeCertCompletePage from '@/pages/BadgeCertCompletePage';
+import AccountManagePage from '@/pages/AccountManagePage';
+import NotificationSettingsPage from '@/pages/NotificationSettingsPage';
+import LanguageSettingsPage from '@/pages/LanguageSettingsPage';
+import SubscriptionPage from '@/pages/SubscriptionPage';
 
 function App() {
   return (
@@ -81,6 +85,10 @@ function App() {
       <Route path="/mypage/profile" element={<ProfileEditPage />} />
       <Route path="/mypage/badge" element={<BadgeCertPage />} />
       <Route path="/mypage/badge/complete" element={<BadgeCertCompletePage />} />
+      <Route path="/mypage/accounts" element={<AccountManagePage />} />
+      <Route path="/mypage/notifications" element={<NotificationSettingsPage />} />
+      <Route path="/mypage/language" element={<LanguageSettingsPage />} />
+      <Route path="/mypage/subscription" element={<SubscriptionPage />} />
     </Routes>
   );
 }
