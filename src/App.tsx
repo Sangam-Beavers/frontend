@@ -26,6 +26,8 @@ import CommunityResidencePage from '@/pages/CommunityResidencePage';
 import CommunityLifePage from '@/pages/CommunityLifePage';
 import CommunityJobPage from '@/pages/CommunityJobPage';
 import CommunityFreePage from '@/pages/CommunityFreePage';
+import CommunityPostDetailPage from '@/pages/CommunityPostDetailPage';
+import CommunityWritePage from '@/pages/CommunityWritePage';
 
 function App() {
   return (
@@ -57,6 +59,8 @@ function App() {
       <Route path="/community/life" element={<CommunityLifePage />} />
       <Route path="/community/job" element={<CommunityJobPage />} />
       <Route path="/community/free" element={<CommunityFreePage />} />
+      <Route path="/community/write" element={<CommunityWritePage />} />
+      <Route path="/community/posts/:postId" element={<CommunityPostDetailPage />} />
     </Routes>
   );
 }
