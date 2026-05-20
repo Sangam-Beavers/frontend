@@ -38,6 +38,9 @@ import MyPage from '@/pages/MyPage';
 import ProfileEditPage from '@/pages/ProfileEditPage';
 import BadgeCertPage from '@/pages/BadgeCertPage';
 import BadgeCertCompletePage from '@/pages/BadgeCertCompletePage';
+import WalletHistoryPage from '@/pages/WalletHistoryPage';
+import ExchangeHistoryPage from '@/pages/ExchangeHistoryPage';
+import DocAnalysisHistoryPage from '@/pages/DocAnalysisHistoryPage';
 
 function App() {
   return (
@@ -81,6 +84,9 @@ function App() {
       <Route path="/mypage/profile" element={<ProfileEditPage />} />
       <Route path="/mypage/badge" element={<BadgeCertPage />} />
       <Route path="/mypage/badge/complete" element={<BadgeCertCompletePage />} />
+      <Route path="/mypage/wallet-history" element={<WalletHistoryPage />} />
+      <Route path="/mypage/exchange-history" element={<ExchangeHistoryPage />} />
+      <Route path="/mypage/doc-analysis-history" element={<DocAnalysisHistoryPage />} />
     </Routes>
   );
 }
