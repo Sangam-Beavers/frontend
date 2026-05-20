@@ -21,6 +21,11 @@ import TransferBankPage from '@/pages/TransferBankPage';
 import TransferConfirmPage from '@/pages/TransferConfirmPage';
 import TransferAuthPage from '@/pages/TransferAuthPage';
 import TransferCompletePage from '@/pages/TransferCompletePage';
+import DocAnalysisSelectPage from '@/pages/DocAnalysisSelectPage';
+import DocAnalysisPreviewPage from '@/pages/DocAnalysisPreviewPage';
+import DocAnalysisLoadingPage from '@/pages/DocAnalysisLoadingPage';
+import DocAnalysisResultPage from '@/pages/DocAnalysisResultPage';
+import DocAnalysisPaymentPage from '@/pages/DocAnalysisPaymentPage';
 import CommunityPage from '@/pages/CommunityPage';
 import CommunityResidencePage from '@/pages/CommunityResidencePage';
 import CommunityLifePage from '@/pages/CommunityLifePage';
@@ -54,6 +59,11 @@ function App() {
       <Route path="/transfer/confirm" element={<TransferConfirmPage />} />
       <Route path="/transfer/auth" element={<TransferAuthPage />} />
       <Route path="/transfer/complete" element={<TransferCompletePage />} />
+      <Route path="/doc-analysis" element={<DocAnalysisSelectPage />} />
+      <Route path="/doc-analysis/preview" element={<DocAnalysisPreviewPage />} />
+      <Route path="/doc-analysis/loading" element={<DocAnalysisLoadingPage />} />
+      <Route path="/doc-analysis/result" element={<DocAnalysisResultPage />} />
+      <Route path="/doc-analysis/payment" element={<DocAnalysisPaymentPage />} />
       <Route path="/community" element={<CommunityPage />} />
       <Route path="/community/residence" element={<CommunityResidencePage />} />
       <Route path="/community/life" element={<CommunityLifePage />} />
