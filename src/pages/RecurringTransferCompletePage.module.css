@@ -1,0 +1,54 @@
+.checkOnly {
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blue);
+  font-size: 62px;
+  font-weight: 700;
+}
+
+.card {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 8px 18px rgba(7, 91, 255, 0.05);
+}
+
+.cardTitle {
+  font-weight: 900;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.cardText {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.primary,
+.ghost {
+  border-radius: 15px;
+  padding: 14px 16px;
+  text-align: center;
+  font-weight: 900;
+  margin: 10px 0;
+  width: 100%;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.primary {
+  background: linear-gradient(135deg, #0b66ff, #0348dd);
+  color: #fff;
+}
+
+.ghost {
+  background: var(--soft);
+  color: var(--blue);
+  border: 1px solid var(--line);
+}
