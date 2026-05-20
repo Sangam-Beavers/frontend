@@ -4,6 +4,10 @@ import PasswordRecovery from './pages/PasswordRecovery';
 import Signup from './pages/Signup';
 import GoogleSignupInfo from './pages/GoogleSignupInfo';
 import HomePage from './pages/HomePage';
+import ChargePage from './pages/ChargePage';
+import AddAccountPage from './pages/AddAccountPage';
+import AutoDebitAuthPage from './pages/AutoDebitAuthPage';
+import AccountRegisteredPage from './pages/AccountRegisteredPage';
 
 function App() {
   return (
@@ -13,8 +17,10 @@ function App() {
       <Route path="/password-recovery" element={<PasswordRecovery />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/google-signup-info" element={<GoogleSignupInfo />} />
-
-      <Route path="/login" element={<div>로그인</div>} />
+      <Route path="/charge" element={<ChargePage />} />
+      <Route path="/charge/add-account" element={<AddAccountPage />} />
+      <Route path="/charge/auto-debit" element={<AutoDebitAuthPage />} />
+      <Route path="/charge/account-registered" element={<AccountRegisteredPage />} />
     </Routes>
   );
 }
