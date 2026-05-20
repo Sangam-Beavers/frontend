@@ -42,6 +42,9 @@ import AccountManagePage from '@/pages/AccountManagePage';
 import NotificationSettingsPage from '@/pages/NotificationSettingsPage';
 import LanguageSettingsPage from '@/pages/LanguageSettingsPage';
 import SubscriptionPage from '@/pages/SubscriptionPage';
+import WalletHistoryPage from '@/pages/WalletHistoryPage';
+import ExchangeHistoryPage from '@/pages/ExchangeHistoryPage';
+import DocAnalysisHistoryPage from '@/pages/DocAnalysisHistoryPage';
 
 function App() {
   return (
@@ -89,6 +92,9 @@ function App() {
       <Route path="/mypage/notifications" element={<NotificationSettingsPage />} />
       <Route path="/mypage/language" element={<LanguageSettingsPage />} />
       <Route path="/mypage/subscription" element={<SubscriptionPage />} />
+      <Route path="/mypage/wallet-history" element={<WalletHistoryPage />} />
+      <Route path="/mypage/exchange-history" element={<ExchangeHistoryPage />} />
+      <Route path="/mypage/doc-analysis-history" element={<DocAnalysisHistoryPage />} />
     </Routes>
   );
 }
