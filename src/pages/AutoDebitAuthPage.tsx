@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import BottomNav from '../components/BottomNav';
-import MobileScreen from '../components/MobileScreen';
-import TopBar from '../components/TopBar';
-import type { AuthStep } from '../types/charge';
+import BottomNav from '@/components/BottomNav';
+import MobileScreen from '@/components/MobileScreen';
+import TopBar from '@/components/TopBar';
+import type { AuthStep } from '@/types/charge';
 import styles from './AutoDebitAuthPage.module.css';
 
 const STEPS: AuthStep[] = [

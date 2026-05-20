@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BottomNav from '../components/BottomNav';
-import MobileScreen from '../components/MobileScreen';
-import TopBar from '../components/TopBar';
-import type { BankAccount } from '../types/charge';
+import BottomNav from '@/components/BottomNav';
+import MobileScreen from '@/components/MobileScreen';
+import TopBar from '@/components/TopBar';
+import type { BankAccount } from '@/types/charge';
 import styles from './ChargePage.module.css';
 
 const ACCOUNTS: BankAccount[] = [

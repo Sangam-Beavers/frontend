@@ -1,4 +1,4 @@
-import type { NavItem } from '../types/home';
+import type { NavItem } from '@/types/home';
 import styles from './BottomNav.module.css';
 
 interface BottomNavProps {
