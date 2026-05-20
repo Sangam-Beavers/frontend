@@ -21,6 +21,11 @@ import TransferBankPage from '@/pages/TransferBankPage';
 import TransferConfirmPage from '@/pages/TransferConfirmPage';
 import TransferAuthPage from '@/pages/TransferAuthPage';
 import TransferCompletePage from '@/pages/TransferCompletePage';
+import CommunityPage from '@/pages/CommunityPage';
+import CommunityResidencePage from '@/pages/CommunityResidencePage';
+import CommunityLifePage from '@/pages/CommunityLifePage';
+import CommunityJobPage from '@/pages/CommunityJobPage';
+import CommunityFreePage from '@/pages/CommunityFreePage';
 
 function App() {
   return (
@@ -47,6 +52,11 @@ function App() {
       <Route path="/transfer/confirm" element={<TransferConfirmPage />} />
       <Route path="/transfer/auth" element={<TransferAuthPage />} />
       <Route path="/transfer/complete" element={<TransferCompletePage />} />
+      <Route path="/community" element={<CommunityPage />} />
+      <Route path="/community/residence" element={<CommunityResidencePage />} />
+      <Route path="/community/life" element={<CommunityLifePage />} />
+      <Route path="/community/job" element={<CommunityJobPage />} />
+      <Route path="/community/free" element={<CommunityFreePage />} />
     </Routes>
   );
 }
