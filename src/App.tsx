@@ -26,6 +26,11 @@ import DocAnalysisPreviewPage from '@/pages/DocAnalysisPreviewPage';
 import DocAnalysisLoadingPage from '@/pages/DocAnalysisLoadingPage';
 import DocAnalysisResultPage from '@/pages/DocAnalysisResultPage';
 import DocAnalysisPaymentPage from '@/pages/DocAnalysisPaymentPage';
+import AllMenuPage from '@/pages/AllMenuPage';
+import MyPage from '@/pages/MyPage';
+import ProfileEditPage from '@/pages/ProfileEditPage';
+import BadgeCertPage from '@/pages/BadgeCertPage';
+import BadgeCertCompletePage from '@/pages/BadgeCertCompletePage';
 
 function App() {
   return (
@@ -57,6 +62,11 @@ function App() {
       <Route path="/doc-analysis/loading" element={<DocAnalysisLoadingPage />} />
       <Route path="/doc-analysis/result" element={<DocAnalysisResultPage />} />
       <Route path="/doc-analysis/payment" element={<DocAnalysisPaymentPage />} />
+      <Route path="/menu" element={<AllMenuPage />} />
+      <Route path="/mypage" element={<MyPage />} />
+      <Route path="/mypage/profile" element={<ProfileEditPage />} />
+      <Route path="/mypage/badge" element={<BadgeCertPage />} />
+      <Route path="/mypage/badge/complete" element={<BadgeCertCompletePage />} />
     </Routes>
   );
 }
