@@ -1,13 +1,13 @@
 import { Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
-import PasswordRecovery from './pages/PasswordRecovery';
-import Signup from './pages/Signup';
-import GoogleSignupInfo from './pages/GoogleSignupInfo';
-import HomePage from './pages/HomePage';
-import ChargePage from './pages/ChargePage';
-import AddAccountPage from './pages/AddAccountPage';
-import AutoDebitAuthPage from './pages/AutoDebitAuthPage';
-import AccountRegisteredPage from './pages/AccountRegisteredPage';
+import Login from '@/pages/Login';
+import PasswordRecovery from '@/pages/PasswordRecovery';
+import Signup from '@/pages/Signup';
+import GoogleSignupInfo from '@/pages/GoogleSignupInfo';
+import HomePage from '@/pages/HomePage';
+import ChargePage from '@/pages/ChargePage';
+import AddAccountPage from '@/pages/AddAccountPage';
+import AutoDebitAuthPage from '@/pages/AutoDebitAuthPage';
+import AccountRegisteredPage from '@/pages/AccountRegisteredPage';
 
 function App() {
   return (

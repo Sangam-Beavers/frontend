@@ -1,5 +1,5 @@
-import BottomNav from '../components/BottomNav';
-import type { CurrencyChip, ExchangeRate, NotificationCard } from '../types/home';
+import BottomNav from '@/components/BottomNav';
+import type { CurrencyChip, ExchangeRate, NotificationCard } from '@/types/home';
 import styles from './HomePage.module.css';
 
 const CURRENCIES: CurrencyChip[] = [

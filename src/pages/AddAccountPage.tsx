@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BottomNav from '../components/BottomNav';
-import MobileScreen from '../components/MobileScreen';
-import TopBar from '../components/TopBar';
+import BottomNav from '@/components/BottomNav';
+import MobileScreen from '@/components/MobileScreen';
+import TopBar from '@/components/TopBar';
 import styles from './AddAccountPage.module.css';
 
 export default function AddAccountPage() {

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import BottomNav from '../components/BottomNav';
-import MobileScreen from '../components/MobileScreen';
-import TopBar from '../components/TopBar';
+import BottomNav from '@/components/BottomNav';
+import MobileScreen from '@/components/MobileScreen';
+import TopBar from '@/components/TopBar';
 import styles from './AccountRegisteredPage.module.css';
 
 export default function AccountRegisteredPage() {
