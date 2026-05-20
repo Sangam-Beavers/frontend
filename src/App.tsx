@@ -26,6 +26,13 @@ import DocAnalysisPreviewPage from '@/pages/DocAnalysisPreviewPage';
 import DocAnalysisLoadingPage from '@/pages/DocAnalysisLoadingPage';
 import DocAnalysisResultPage from '@/pages/DocAnalysisResultPage';
 import DocAnalysisPaymentPage from '@/pages/DocAnalysisPaymentPage';
+import CommunityPage from '@/pages/CommunityPage';
+import CommunityResidencePage from '@/pages/CommunityResidencePage';
+import CommunityLifePage from '@/pages/CommunityLifePage';
+import CommunityJobPage from '@/pages/CommunityJobPage';
+import CommunityFreePage from '@/pages/CommunityFreePage';
+import CommunityPostDetailPage from '@/pages/CommunityPostDetailPage';
+import CommunityWritePage from '@/pages/CommunityWritePage';
 
 function App() {
   return (
@@ -57,6 +64,13 @@ function App() {
       <Route path="/doc-analysis/loading" element={<DocAnalysisLoadingPage />} />
       <Route path="/doc-analysis/result" element={<DocAnalysisResultPage />} />
       <Route path="/doc-analysis/payment" element={<DocAnalysisPaymentPage />} />
+      <Route path="/community" element={<CommunityPage />} />
+      <Route path="/community/residence" element={<CommunityResidencePage />} />
+      <Route path="/community/life" element={<CommunityLifePage />} />
+      <Route path="/community/job" element={<CommunityJobPage />} />
+      <Route path="/community/free" element={<CommunityFreePage />} />
+      <Route path="/community/write" element={<CommunityWritePage />} />
+      <Route path="/community/posts/:postId" element={<CommunityPostDetailPage />} />
     </Routes>
   );
 }

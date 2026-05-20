@@ -1,0 +1,216 @@
+.reportBtn {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #334155;
+  font-weight: 800;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.authorCard {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 8px 18px rgba(7, 91, 255, 0.05);
+}
+
+.authorRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef6ff;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.avatarBest {
+  border-color: #2563eb;
+}
+
+.authorMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.authorName {
+  font-weight: 900;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.authorMeta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--soft2);
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.title {
+  margin: 16px 0 10px;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.body {
+  line-height: 1.55;
+  color: #334155;
+  font-size: 14px;
+  margin: 0;
+}
+
+.preview {
+  height: 150px;
+  border: 1.5px dashed #a8c9ff;
+  border-radius: 18px;
+  background: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #7b8aa4;
+  text-align: center;
+  font-size: 14px;
+  margin: 12px 0;
+  gap: 4px;
+}
+
+.btnRow {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.secondary {
+  flex: 1;
+  border-radius: 15px;
+  padding: 14px 16px;
+  text-align: center;
+  font-weight: 900;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--blue);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.section {
+  font-size: 17px;
+  font-weight: 900;
+  margin: 18px 0 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comment {
+  display: flex;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid #e5eaf5;
+}
+
+.comment:last-of-type {
+  border-bottom: none;
+}
+
+.commentAvatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #eaf2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.commentBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.commentName {
+  font-weight: 900;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.commentText {
+  font-size: 13px;
+  margin: 5px 0;
+  color: #334155;
+}
+
+.commentMeta {
+  font-size: 12px;
+  color: #8a97aa;
+}
+
+.commentInputRow {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 72px;
+  display: flex;
+  gap: 8px;
+}
+
+.commentInput {
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px 14px;
+  color: #34445f;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.commentSubmit {
+  width: 64px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #0b66ff, #0348dd);
+  color: #fff;
+  font-weight: 900;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
