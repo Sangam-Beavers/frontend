@@ -1,0 +1,151 @@
+.card {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 8px 18px rgba(7, 91, 255, 0.05);
+}
+
+.cardInfo {
+  background: var(--soft);
+}
+
+.cardTitle {
+  font-weight: 900;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.cardBalance {
+  font-size: 24px;
+  color: #111827;
+  font-weight: 900;
+}
+
+.section {
+  font-size: 17px;
+  font-weight: 900;
+  margin: 18px 0 10px;
+}
+
+.list {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  border-bottom: 1px solid #eef4ff;
+  width: 100%;
+  background: #fff;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  font-family: inherit;
+  text-align: left;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.itemMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.itemTitle {
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.itemMeta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--soft2);
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #334155;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.field {
+  margin: 12px 0;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 800;
+  margin: 0 0 6px 2px;
+}
+
+.input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px 14px;
+  color: #34445f;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.primaryFixed {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 80px;
+}
+
+.primary {
+  border-radius: 15px;
+  padding: 14px 16px;
+  text-align: center;
+  font-weight: 900;
+  margin: 10px 0;
+  background: linear-gradient(135deg, #0b66ff, #0348dd);
+  color: #fff;
+  border: none;
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+}

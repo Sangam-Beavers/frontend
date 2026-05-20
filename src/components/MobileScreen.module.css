@@ -1,0 +1,36 @@
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  min-height: 100dvh;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 18px 18px 96px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.content::-webkit-scrollbar {
+  display: none;
+}
+
+.contentNoNav {
+  padding-bottom: 22px;
+}
+
+@media (min-width: 431px) {
+  .screen {
+    min-height: min(844px, 100dvh);
+    height: min(844px, 100dvh);
+    margin: 16px 0;
+    border-radius: 28px;
+    border: 1px solid var(--line);
+    box-shadow: 0 16px 40px rgba(27, 90, 185, 0.12);
+  }
+}
