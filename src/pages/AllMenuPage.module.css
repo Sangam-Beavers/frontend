@@ -1,6 +1,6 @@
 .page {
   position: relative;
-  width: 390px;
+  width: 100%;
   height: 100dvh;
   background: #fff;
   overflow: hidden;
