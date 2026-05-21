@@ -1,0 +1,85 @@
+.card {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 8px 18px rgba(7, 91, 255, 0.05);
+}
+
+.cardInfo {
+  background: var(--soft);
+  box-shadow: none;
+}
+
+.cardTitle {
+  font-weight: 900;
+  font-size: 16px;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.cardText {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.list {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+  overflow: hidden;
+  margin: 12px 0;
+  box-shadow: 0 8px 18px rgba(7, 91, 255, 0.05);
+}
+
+.item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 16px;
+  border-bottom: 1px solid #eef4ff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item:active {
+  background: var(--soft);
+}
+
+.itemMain {
+  flex: 1;
+}
+
+.itemTitle {
+  font-weight: 900;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.itemMeta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.arrowIcon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #334155;
+  font-weight: 800;
+  font-size: 20px;
+  flex-shrink: 0;
+}

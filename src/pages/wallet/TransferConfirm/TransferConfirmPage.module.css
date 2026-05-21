@@ -1,0 +1,171 @@
+/* Cards */
+.card {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 8px 18px rgba(7, 91, 255, 0.05);
+}
+
+.cardOk {
+  background: var(--ok);
+  box-shadow: none;
+}
+
+.cardTitle {
+  font-weight: 900;
+  font-size: 16px;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.cardText {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* Recipient row inside card */
+.recipientRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef6ff;
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.recipientInfo {
+  flex: 1;
+}
+
+.recipientName {
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.recipientMeta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--soft2);
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 11px;
+}
+
+/* Summary rows */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eef4ff;
+  font-size: 13px;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row span {
+  color: var(--muted);
+}
+
+.row b {
+  color: var(--ink);
+  font-weight: 900;
+}
+
+/* Confirm checkbox row */
+.checkRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  border-bottom: 1px solid #eef4ff;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: #fff;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkboxChecked {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  font-size: 12px;
+}
+
+/* Button row */
+.btnRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.secondaryBtn {
+  border-radius: 15px;
+  padding: 15px 16px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--blue);
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.primaryBtn {
+  border-radius: 15px;
+  padding: 15px 16px;
+  background: linear-gradient(135deg, #0b66ff, #0348dd);
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
