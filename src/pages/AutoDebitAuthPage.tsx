@@ -34,7 +34,11 @@ export default function AutoDebitAuthPage() {
         ))}
       </div>
 
-      <button type="button" className={styles.primary}>
+      <button
+        type="button"
+        className={styles.primary}
+        onClick={() => navigate('/charge/account-registered')}
+      >
         인증 요청하기
       </button>
       <button

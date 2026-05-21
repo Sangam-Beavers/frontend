@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BottomNav from '@/components/BottomNav';
 import TopBar from '@/components/TopBar';
@@ -15,6 +16,13 @@ export default function DocAnalysisLoadingPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { docType } = (location.state as { docType?: string }) ?? {};
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate('/doc-analysis/result', { state: { docType } });
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [navigate, docType]);
 
   return (
     <div className={styles.page}>

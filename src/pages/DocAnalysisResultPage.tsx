@@ -27,7 +27,11 @@ export default function DocAnalysisResultPage() {
         <div className={`${styles.card} ${styles.cardPurple}`}>
           <div className={styles.cardTitle}>전문가 상담</div>
           <div className={styles.cardText}>노동/체류 관련 전문가 무료 상담 제공</div>
-          <button type="button" className={styles.secondaryBtn}>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={() => navigate('/community/job')}
+          >
             바로 알아보기
           </button>
         </div>
@@ -50,13 +54,17 @@ export default function DocAnalysisResultPage() {
         </div>
 
         <div className={styles.btnRow}>
-          <button type="button" className={styles.secondaryBtn}>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={() => navigate('/mypage/doc-analysis-history')}
+          >
             저장 내보내기
           </button>
           <button
             type="button"
             className={styles.primaryBtn}
-            onClick={() => navigate('/community')}
+            onClick={() => navigate('/community/write')}
           >
             커뮤니티 공유
           </button>

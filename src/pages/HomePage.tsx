@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import BottomNav from '@/components/BottomNav';
 import type { CurrencyChip, ExchangeRate, NotificationCard } from '@/types/home';
 import styles from './HomePage.module.css';
@@ -19,6 +20,7 @@ const NOTIFICATIONS: NotificationCard[] = [
 ];
 
 export default function HomePage() {
+  const navigate = useNavigate();
   return (
     <div className={styles.page}>
       <div className={styles.content}>
@@ -28,9 +30,15 @@ export default function HomePage() {
             Global Bridge
           </div>
           <div className={styles.headerActions}>
-            <button className={styles.langBtn}>🌐 KO ▾</button>
-            <button className={styles.iconBtn}>🔔</button>
-            <button className={styles.iconBtn}>👤</button>
+            <button className={styles.langBtn} onClick={() => navigate('/mypage/language')}>
+              🌐 KO ▾
+            </button>
+            <button className={styles.iconBtn} onClick={() => navigate('/mypage/notifications')}>
+              🔔
+            </button>
+            <button className={styles.iconBtn} onClick={() => navigate('/mypage')}>
+              👤
+            </button>
           </div>
         </header>
 
@@ -52,9 +60,15 @@ export default function HomePage() {
             ))}
           </div>
           <div className={styles.walletActions}>
-            <button className={styles.walletBtn}>가져오기</button>
-            <button className={styles.walletBtn}>보내기</button>
-            <button className={styles.walletBtn}>환전하기</button>
+            <button className={styles.walletBtn} onClick={() => navigate('/charge')}>
+              가져오기
+            </button>
+            <button className={styles.walletBtn} onClick={() => navigate('/transfer')}>
+              보내기
+            </button>
+            <button className={styles.walletBtn} onClick={() => navigate('/exchange')}>
+              환전하기
+            </button>
           </div>
           <p className={styles.walletFooter}>Global Bridge 전자지갑</p>
         </div>
@@ -67,11 +81,22 @@ export default function HomePage() {
 
         <div className={styles.section}>
           실시간 환율
-          <span className={styles.pill}>전체보기</span>
+          <span
+            className={styles.pill}
+            onClick={() => navigate('/exchange')}
+            style={{ cursor: 'pointer' }}
+          >
+            전체보기
+          </span>
         </div>
         <div className={styles.scrollRow}>
           {EXCHANGE_RATES.map((rate) => (
-            <div key={rate.code} className={styles.rateCard}>
+            <div
+              key={rate.code}
+              className={styles.rateCard}
+              onClick={() => navigate('/exchange/form')}
+              style={{ cursor: 'pointer' }}
+            >
               <span className={styles.rateLabel}>
                 {rate.country} {rate.code}
               </span>
@@ -88,7 +113,14 @@ export default function HomePage() {
         <div className={styles.section}>알림</div>
         <div className={styles.scrollRow}>
           {NOTIFICATIONS.map((notif) => (
-            <div key={notif.id} className={`${styles.card} ${styles.notifCard}`}>
+            <div
+              key={notif.id}
+              className={`${styles.card} ${styles.notifCard}`}
+              onClick={() =>
+                navigate(notif.id === 'legal' ? '/doc-analysis' : '/mypage/wallet-history')
+              }
+              style={{ cursor: 'pointer' }}
+            >
               <div className={styles.cardTitle}>{notif.title}</div>
               <div className={styles.cardText}>{notif.description}</div>
             </div>

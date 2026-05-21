@@ -70,7 +70,7 @@ function Login() {
               비밀번호 찾기
             </button>
 
-            <button type="submit" className="auth-primary">
+            <button type="submit" className="auth-primary" onClick={() => navigate('/')}>
               이메일로 로그인
             </button>
           </form>
@@ -81,7 +81,11 @@ function Login() {
             <span />
           </div>
 
-          <button type="button" className="auth-google">
+          <button
+            type="button"
+            className="auth-google"
+            onClick={() => navigate('/google-signup-info')}
+          >
             <span className="auth-google-mark">G</span>
             Google로 계속하기
           </button>

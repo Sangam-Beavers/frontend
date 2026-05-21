@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import type { AvatarTone, FeedPostItem } from '@/types/community';
 import styles from './FeedPost.module.css';
 
@@ -16,10 +17,15 @@ const AVATAR_CLASS: Record<AvatarTone, string> = {
 };
 
 export default function FeedPost({ post }: FeedPostProps) {
+  const navigate = useNavigate();
   const avatarClass = `${styles.avatar} ${AVATAR_CLASS[post.avatarTone]}`.trim();
 
   return (
-    <article className={styles.post}>
+    <article
+      className={styles.post}
+      onClick={() => navigate(`/community/posts/${post.id}`)}
+      style={{ cursor: 'pointer' }}
+    >
       <div className={styles.head}>
         <div className={avatarClass}>{post.avatarInitial}</div>
         <div>

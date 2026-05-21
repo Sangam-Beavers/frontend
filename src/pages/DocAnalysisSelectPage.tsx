@@ -76,7 +76,12 @@ export default function DocAnalysisSelectPage() {
 
         <div className={styles.list}>
           {RECENT.map((item, i) => (
-            <div key={i} className={styles.item}>
+            <div
+              key={i}
+              className={styles.item}
+              onClick={() => navigate('/mypage/doc-analysis-history')}
+              style={{ cursor: 'pointer' }}
+            >
               <div className={styles.itemMain}>
                 <div className={styles.itemTitle}>{item.title}</div>
                 <div className={styles.itemMeta}>{item.meta}</div>

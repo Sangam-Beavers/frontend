@@ -37,7 +37,7 @@ export default function ExchangeCompletePage() {
           </div>
         </div>
 
-        <button className={styles.primaryBtn} onClick={() => navigate('/wallet')}>
+        <button className={styles.primaryBtn} onClick={() => navigate('/mypage/wallet-history')}>
           전자지갑으로 돌아가기
         </button>
         <button className={styles.ghostBtn} onClick={() => navigate('/')}>

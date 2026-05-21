@@ -56,7 +56,11 @@ export default function TransferCompletePage() {
           <button type="button" className={styles.primaryBtn} onClick={() => navigate('/')}>
             홈으로 돌아가기
           </button>
-          <button type="button" className={styles.ghostBtn} onClick={() => navigate('/wallet')}>
+          <button
+            type="button"
+            className={styles.ghostBtn}
+            onClick={() => navigate('/mypage/wallet-history')}
+          >
             전자지갑 내역 보기
           </button>
           <button type="button" className={styles.ghostBtn}>
