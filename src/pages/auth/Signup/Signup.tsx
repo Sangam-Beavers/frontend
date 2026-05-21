@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../auth.css';
+import '@/pages/auth/auth.css';
 
 import { NATIONALITIES } from '@/constants/nationalities';
 import { SIGNUP_LANGUAGES as LANGUAGES } from '@/constants/languages';

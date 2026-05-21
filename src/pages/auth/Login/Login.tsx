@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import '../auth.css';
+import '@/pages/auth/auth.css';
 
 function Login() {
   const navigate = useNavigate();
