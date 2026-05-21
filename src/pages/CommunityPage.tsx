@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import BottomNav from '@/components/BottomNav';
 import CommunityTabs from '@/components/CommunityTabs';
 import FeedPost from '@/components/FeedPost';
@@ -34,6 +35,7 @@ const POSTS: FeedPostItem[] = [
 ];
 
 export default function CommunityPage() {
+  const navigate = useNavigate();
   return (
     <MobileScreen bottomSlot={<BottomNav activeIndex={2} />}>
       <TopBar
@@ -51,10 +53,18 @@ export default function CommunityPage() {
       <div className={styles.search}>궁금한 생활 정보, 일자리, 거주 후기를 검색해보세요</div>
 
       <div className={styles.actions}>
-        <button type="button" className={`${styles.actionBtn} ${styles.primary}`}>
+        <button
+          type="button"
+          className={`${styles.actionBtn} ${styles.primary}`}
+          onClick={() => navigate('/community/write')}
+        >
           글쓰기
         </button>
-        <button type="button" className={`${styles.actionBtn} ${styles.ghost}`}>
+        <button
+          type="button"
+          className={`${styles.actionBtn} ${styles.ghost}`}
+          onClick={() => navigate('/mypage')}
+        >
           내 관심글
         </button>
       </div>

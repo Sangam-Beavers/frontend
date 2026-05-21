@@ -31,7 +31,7 @@ export default function TransferSelectPage() {
             </div>
             <div className={styles.arrowIcon}>›</div>
           </div>
-          <div className={styles.item}>
+          <div className={styles.item} onClick={() => navigate('/recurring')}>
             <div className={styles.itemMain}>
               <div className={styles.itemTitle}>정기 송금 설정</div>
               <div className={styles.itemMeta}>대상, 금액, 일정을 지정해 반복 송금</div>

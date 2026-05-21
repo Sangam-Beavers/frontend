@@ -6,42 +6,87 @@ import styles from './AllMenuPage.module.css';
 const LEFT_NAV = ['금융', '문서 분석', '커뮤니티', '마이페이지', '고객센터'] as const;
 type NavKey = (typeof LEFT_NAV)[number];
 
-const MENU: Record<NavKey, { title: string; items: string[] }[]> = {
+interface MenuItem {
+  label: string;
+  path: string;
+}
+
+const MENU: Record<NavKey, { title: string; items: MenuItem[] }[]> = {
   금융: [
     {
       title: '금융',
       items: [
-        '앱 내 송금',
-        '타행 송금',
-        '정기 송금',
-        '충전하기 / 인출',
-        '환전 / 재환전',
-        '자동이체 설정',
-        '환전 내역',
-        '송금 내역',
+        { label: '앱 내 송금', path: '/transfer/app' },
+        { label: '타행 송금', path: '/transfer/bank' },
+        { label: '정기 송금', path: '/recurring' },
+        { label: '충전하기 / 인출', path: '/charge' },
+        { label: '환전 / 재환전', path: '/exchange' },
+        { label: '자동이체 설정', path: '/charge/auto-debit' },
+        { label: '환전 내역', path: '/mypage/exchange-history' },
+        { label: '송금 내역', path: '/mypage/wallet-history' },
       ],
     },
+  ],
+  '문서 분석': [
     {
       title: '문서 분석',
-      items: ['AI 문서 분석', '문서 분석 내역', '결제 내역'],
-    },
-    {
-      title: '마이페이지',
-      items: ['프로필 설정', '보안 설정', '알림 설정', '언어 설정', '구독 관리'],
+      items: [
+        { label: 'AI 문서 분석', path: '/doc-analysis' },
+        { label: '문서 분석 내역', path: '/mypage/doc-analysis-history' },
+        { label: '결제 내역', path: '/doc-analysis/payment' },
+      ],
     },
   ],
-  '문서 분석': [{ title: '문서 분석', items: ['AI 문서 분석', '문서 분석 내역', '결제 내역'] }],
-  커뮤니티: [{ title: '커뮤니티', items: ['커뮤니티 홈', '내 게시물', '즐겨찾기'] }],
+  커뮤니티: [
+    {
+      title: '커뮤니티',
+      items: [
+        { label: '커뮤니티 홈', path: '/community' },
+        { label: '체류/비자', path: '/community/residence' },
+        { label: '생활 정보', path: '/community/life' },
+        { label: '구인구직', path: '/community/job' },
+        { label: '자유 게시판', path: '/community/free' },
+        { label: '글쓰기', path: '/community/write' },
+      ],
+    },
+  ],
   마이페이지: [
     {
       title: '마이페이지',
-      items: ['프로필 설정', '보안 설정', '알림 설정', '언어 설정', '구독 관리'],
+      items: [
+        { label: '프로필 설정', path: '/mypage/profile' },
+        { label: '보안 설정', path: '/mypage/badge' },
+        { label: '알림 설정', path: '/mypage/notifications' },
+        { label: '언어 설정', path: '/mypage/language' },
+        { label: '구독 관리', path: '/mypage/subscription' },
+        { label: '계좌 관리', path: '/mypage/accounts' },
+      ],
     },
   ],
-  고객센터: [{ title: '고객센터', items: ['공지사항', '자주 묻는 질문', '1:1 문의'] }],
+  고객센터: [
+    {
+      title: '고객센터',
+      items: [
+        { label: '공지사항', path: '/community' },
+        { label: '자주 묻는 질문', path: '/community' },
+        { label: '1:1 문의', path: '/community/write' },
+      ],
+    },
+  ],
 };
 
-const TAGS = ['#앱 내 송금', '#타행 송금', '#문서분석', '#거주증명서'];
+const TAGS: MenuItem[] = [
+  { label: '#앱 내 송금', path: '/transfer/app' },
+  { label: '#타행 송금', path: '/transfer/bank' },
+  { label: '#문서분석', path: '/doc-analysis' },
+  { label: '#거주증명서', path: '/doc-analysis' },
+];
+
+const QUICK_LINKS: MenuItem[] = [
+  { label: '금융서비스', path: '/charge' },
+  { label: '언어/번역', path: '/mypage/language' },
+  { label: 'Language', path: '/mypage/language' },
+];
 
 export default function AllMenuPage() {
   const navigate = useNavigate();
@@ -52,7 +97,11 @@ export default function AllMenuPage() {
       <div className={styles.content}>
         {/* Profile header */}
         <div className={styles.head}>
-          <div className={styles.profileRow}>
+          <div
+            className={styles.profileRow}
+            onClick={() => navigate('/mypage')}
+            style={{ cursor: 'pointer' }}
+          >
             <div className={styles.avatar}>G</div>
             <div>
               <div className={styles.username}>
@@ -63,20 +112,30 @@ export default function AllMenuPage() {
             </div>
           </div>
           <div className={styles.headIcons}>
-            <span>🔔</span>
-            <span>⚙️</span>
+            <span onClick={() => navigate('/mypage/notifications')} style={{ cursor: 'pointer' }}>
+              🔔
+            </span>
+            <span onClick={() => navigate('/mypage')} style={{ cursor: 'pointer' }}>
+              ⚙️
+            </span>
           </div>
         </div>
 
         {/* Quick access */}
         <div className={styles.quickGrid}>
-          <span>금융서비스</span>
-          <span>언어/번역</span>
-          <span>Language</span>
+          {QUICK_LINKS.map((q) => (
+            <span key={q.label} onClick={() => navigate(q.path)}>
+              {q.label}
+            </span>
+          ))}
         </div>
 
         {/* Search */}
-        <div className={styles.searchBar}>
+        <div
+          className={styles.searchBar}
+          onClick={() => navigate('/community')}
+          style={{ cursor: 'pointer' }}
+        >
           <span className={styles.searchPlaceholder}>메뉴를 검색해보세요.</span>
           <span className={styles.searchIcon}>🔍</span>
         </div>
@@ -84,8 +143,8 @@ export default function AllMenuPage() {
         {/* Tags */}
         <div className={styles.tagRow}>
           {TAGS.map((tag) => (
-            <span key={tag} className={styles.tag}>
-              {tag}
+            <span key={tag.label} className={styles.tag} onClick={() => navigate(tag.path)}>
+              {tag.label}
             </span>
           ))}
         </div>
@@ -111,8 +170,12 @@ export default function AllMenuPage() {
               <div key={block.title} className={styles.menuBlock}>
                 <b className={styles.blockTitle}>{block.title}</b>
                 {block.items.map((item) => (
-                  <div key={item} className={styles.menuItem}>
-                    <span>{item}</span>
+                  <div
+                    key={item.label}
+                    className={styles.menuItem}
+                    onClick={() => navigate(item.path)}
+                  >
+                    <span>{item.label}</span>
                     <span className={styles.arrow}>›</span>
                   </div>
                 ))}
@@ -123,8 +186,8 @@ export default function AllMenuPage() {
 
         {/* Footer links */}
         <div className={styles.footer}>
-          <span>개인정보</span>
-          <span>이용약관</span>
+          <span onClick={() => navigate('/mypage')}>개인정보</span>
+          <span onClick={() => navigate('/mypage')}>이용약관</span>
           <span onClick={() => navigate('/login')}>로그아웃</span>
         </div>
       </div>

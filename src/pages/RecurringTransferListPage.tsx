@@ -40,7 +40,12 @@ export default function RecurringTransferListPage() {
 
       <div className={styles.list}>
         {TRANSFERS.map((transfer) => (
-          <button key={transfer.id} type="button" className={styles.item}>
+          <button
+            key={transfer.id}
+            type="button"
+            className={styles.item}
+            onClick={() => navigate('/recurring/setup')}
+          >
             <div className={styles.itemMain}>
               <div className={styles.itemTitle}>{transfer.title}</div>
               <div className={styles.itemMeta}>

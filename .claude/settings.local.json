@@ -11,7 +11,9 @@
       "PowerShell($lines = Get-Content \"C:/final-project/frontend/figma/01_login_register.html\"; for \\($i = 30; $i -lt $lines.Length; $i++\\) { Write-Output \"===LINE $\\($i+1\\) \\(len=$\\($lines[$i].Length\\)\\)===\" })",
       "PowerShell($bytes = [System.IO.File]::ReadAllBytes\\(\"C:/final-project/frontend/figma/01_login_register.html\"\\); $content = [System.Text.Encoding]::UTF8.GetString\\($bytes\\); $lines = $content -split \"`n\"; Write-Output $lines[30])",
       "Bash(pnpm dev *)",
-      "Bash(powershell *)"
+      "Bash(powershell *)",
+      "Bash(Get-ChildItem \"C:\\\\final-project\\\\frontend\\\\src\\\\pages\" -Filter \"*.tsx\")",
+      "Bash(Select-Object Name)"
     ]
   }
 }

@@ -3,14 +3,16 @@ import BottomNav from '@/components/BottomNav';
 import styles from './MyPage.module.css';
 
 const MY_ACTIVITY = [
-  { label: '송금내역 조회', path: '/mypage/transfer-history' },
+  { label: '송금내역 조회', path: '/mypage/wallet-history' },
   { label: '환전 내역', path: '/mypage/exchange-history' },
-  { label: '문서 분석 내역', path: '/mypage/doc-history' },
+  { label: '문서 분석 내역', path: '/mypage/doc-analysis-history' },
   { label: '정기 송금 내역', path: '/recurring' },
+  { label: '계좌 관리', path: '/mypage/accounts' },
+  { label: '구독 관리', path: '/mypage/subscription' },
 ];
 
 const SETTINGS = [
-  { label: '보안 설정', badge: '완료' as const, path: '/mypage/security' },
+  { label: '보안 설정', badge: '완료' as const, path: '/mypage/badge' },
   { label: '알림 설정', badge: null, path: '/mypage/notifications' },
   { label: '언어 설정', badge: null, path: '/mypage/language' },
 ];
@@ -30,7 +32,7 @@ export default function MyPage() {
           <button
             type="button"
             className={styles.iconBtn}
-            onClick={() => navigate('/mypage/settings')}
+            onClick={() => navigate('/mypage/notifications')}
           >
             ⚙️
           </button>

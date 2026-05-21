@@ -41,6 +41,7 @@ export default function DocAnalysisHistoryPage() {
               type="button"
               className={`${styles.item} ${locked ? styles.itemLocked : ''}`}
               disabled={locked}
+              onClick={() => !locked && navigate('/doc-analysis/result')}
             >
               <div className={styles.itemMain}>
                 <div className={styles.itemTitle}>{entry.title}</div>

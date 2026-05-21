@@ -78,7 +78,11 @@ export default function ChargePage() {
       </div>
 
       <div className={styles.primaryFixed}>
-        <button type="button" className={styles.primary}>
+        <button
+          type="button"
+          className={styles.primary}
+          onClick={() => navigate('/mypage/wallet-history')}
+        >
           충전하기
         </button>
       </div>
