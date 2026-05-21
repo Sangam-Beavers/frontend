@@ -1,0 +1,73 @@
+.list {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 14px;
+  border-bottom: 1px solid #eef4ff;
+  cursor: pointer;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.itemLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Toggle switch */
+.toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: 99px;
+  background: #d7e4ff;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.toggle::after {
+  content: '';
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  transition: left 0.2s, background 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+.toggleOn {
+  background: var(--blue);
+}
+
+.toggleOn::after {
+  left: 23px;
+}
+
+.primaryBtn {
+  width: 100%;
+  border-radius: 15px;
+  padding: 15px 16px;
+  background: linear-gradient(135deg, #0b66ff, #0348dd);
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 4px;
+}

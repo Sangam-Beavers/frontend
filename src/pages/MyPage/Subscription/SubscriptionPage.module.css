@@ -1,0 +1,77 @@
+.card {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 8px 18px rgba(7, 91, 255, 0.05);
+}
+
+.cardInfo {
+  background: var(--soft);
+  box-shadow: none;
+}
+
+.cardTitle {
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.cardText {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.primaryBtn {
+  width: 100%;
+  border-radius: 15px;
+  padding: 15px 16px;
+  background: linear-gradient(135deg, #0b66ff, #0348dd);
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  margin: 4px 0;
+}
+
+/* Subscription info rows */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eef4ff;
+  font-size: 13px;
+}
+
+.row:last-of-type {
+  border-bottom: none;
+}
+
+.row span:first-child {
+  color: var(--muted);
+}
+
+.row span:last-child {
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.dangerBtn {
+  width: 100%;
+  border-radius: 15px;
+  padding: 13px 16px;
+  background: #ffefef;
+  color: #e11d48;
+  font-weight: 900;
+  font-size: 14px;
+  border: 1px solid #fecaca;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 12px;
+}

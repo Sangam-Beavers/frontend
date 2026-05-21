@@ -1,0 +1,94 @@
+/* Thumbnail preview */
+.preview {
+  height: 140px;
+  border: 1.5px dashed #a8c9ff;
+  border-radius: 18px;
+  background: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.previewIcon {
+  font-size: 30px;
+}
+
+.previewLabel {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+/* Steps */
+.steps {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.dotOff {
+  background: #d7e4ff;
+  color: #6b7b92;
+}
+
+.stepLabel {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.stepActive {
+  color: var(--ink);
+  font-weight: 900;
+}
+
+/* Cards */
+.card {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 8px 18px rgba(7, 91, 255, 0.05);
+}
+
+.cardInfo {
+  background: var(--soft);
+  box-shadow: none;
+}
+
+.cardTitle {
+  font-weight: 900;
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.cardText {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
