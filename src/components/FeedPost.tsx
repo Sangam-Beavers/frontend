@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { buildCommunityPostPath } from '@/constants/routes';
 import type { AvatarTone, FeedPostItem } from '@/types/community';
 import styles from './FeedPost.module.css';
 
@@ -23,7 +24,7 @@ export default function FeedPost({ post }: FeedPostProps) {
   return (
     <article
       className={styles.post}
-      onClick={() => navigate(`/community/posts/${post.id}`)}
+      onClick={() => navigate(buildCommunityPostPath(post.id))}
       style={{ cursor: 'pointer' }}
     >
       <div className={styles.head}>

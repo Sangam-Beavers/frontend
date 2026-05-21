@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/constants/routes';
 import type { NavItem } from '@/types/home';
 import styles from './BottomNav.module.css';
 
@@ -7,10 +8,10 @@ interface BottomNavProps {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { icon: '⌂', label: '홈', path: '/' },
-  { icon: '▣', label: '문서 분석', path: '/doc-analysis' },
-  { icon: '◌', label: '커뮤니티', path: '/community' },
-  { icon: '☰', label: '전체메뉴', path: '/menu' },
+  { icon: '⌂', label: '홈', path: ROUTES.HOME },
+  { icon: '▣', label: '문서 분석', path: ROUTES.DOC_ANALYSIS },
+  { icon: '◌', label: '커뮤니티', path: ROUTES.COMMUNITY },
+  { icon: '☰', label: '전체메뉴', path: ROUTES.ALL_MENU },
 ];
 
 export default function BottomNav({ activeIndex }: BottomNavProps) {

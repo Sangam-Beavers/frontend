@@ -40,10 +40,12 @@ export interface PostComment {
 
 export type WriteCategory = 'residence' | 'life' | 'job' | 'free';
 
+import { ROUTES } from '@/constants/routes';
+
 export const COMMUNITY_TABS: CommunityTabItem[] = [
-  { category: 'all', label: '전체', path: '/community' },
-  { category: 'residence', label: '거주', path: '/community/residence' },
-  { category: 'life', label: '생활', path: '/community/life' },
-  { category: 'job', label: '취업', path: '/community/job' },
-  { category: 'free', label: '자유게시판', path: '/community/free' },
+  { category: 'all', label: '전체', path: ROUTES.COMMUNITY },
+  { category: 'residence', label: '거주', path: ROUTES.COMMUNITY_RESIDENCE },
+  { category: 'life', label: '생활', path: ROUTES.COMMUNITY_LIFE },
+  { category: 'job', label: '취업', path: ROUTES.COMMUNITY_JOB },
+  { category: 'free', label: '자유게시판', path: ROUTES.COMMUNITY_FREE },
 ];
