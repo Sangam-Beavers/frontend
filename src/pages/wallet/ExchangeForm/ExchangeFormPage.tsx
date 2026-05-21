@@ -16,7 +16,8 @@ export default function ExchangeFormPage() {
   const num = parseFloat(amount) || 0;
   const rateInfo = RATES[toCurrency];
   const toSymbol = FOREIGN_CURRENCIES.find((c) => c.code === toCurrency)?.symbol ?? '';
-  const received = num > 0 ? (num * rateInfo.rate - FEE_KRW * rateInfo.rate).toFixed(2) : null;
+  const netKrw = num - FEE_KRW;
+  const received = netKrw > 0 ? (netKrw * rateInfo.rate).toFixed(2) : null;
 
   return (
     <>

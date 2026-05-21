@@ -37,7 +37,7 @@ export default function TransferAppPage() {
     setCurrency(user.currency);
   }
 
-  const canSubmit = verified !== null && amount !== '';
+  const canSubmit = verified !== null && Number(amount) > 0;
 
   return (
     <>
