@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
-import styles from './BadgeCertCompletePage.module.css';
+import styles from './AdditionalCertCompletePage.module.css';
 
-export default function BadgeCertCompletePage() {
+export default function AdditionalCertCompletePage() {
   const navigate = useNavigate();
 
   return (
@@ -12,8 +12,8 @@ export default function BadgeCertCompletePage() {
       <div className={styles.checkOnly}>✓</div>
 
       <div className={styles.card}>
-        <div className={styles.cardTitle}>배지 인증이 완료되었습니다</div>
-        <div className={styles.cardText}>커뮤니티에서 배지를 확인할 수 있습니다.</div>
+        <div className={styles.cardTitle}>추가 인증이 완료되었습니다</div>
+        <div className={styles.cardText}>프로필에 인증 배지가 표시됩니다.</div>
       </div>
 
       <button type="button" className={styles.primaryBtn} onClick={() => navigate('/mypage')}>

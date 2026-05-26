@@ -19,8 +19,8 @@ import DocAnalysisSelectPage from '@/pages/docAnalysis/Select/DocAnalysisSelectP
 import HomePage from '@/pages/home/HomePage';
 import AccountManagePage from '@/pages/MyPage/AccountManage/AccountManagePage';
 import AllMenuPage from '@/pages/MyPage/AllMenu/AllMenuPage';
-import BadgeCertPage from '@/pages/MyPage/BadgeCert/BadgeCertPage';
-import BadgeCertCompletePage from '@/pages/MyPage/BadgeCertComplete/BadgeCertCompletePage';
+import AdditionalCertPage from '@/pages/MyPage/AdditionalCert/AdditionalCertPage';
+import AdditionalCertCompletePage from '@/pages/MyPage/AdditionalCertComplete/AdditionalCertCompletePage';
 import DocAnalysisHistoryPage from '@/pages/MyPage/DocAnalysisHistory/DocAnalysisHistoryPage';
 import ExchangeHistoryPage from '@/pages/MyPage/ExchangeHistory/ExchangeHistoryPage';
 import LanguageSettingsPage from '@/pages/MyPage/Language/LanguageSettingsPage';
@@ -75,8 +75,8 @@ export const mainRoutes: PageRoute[] = [
 
   { path: ROUTES.MYPAGE, Component: MyPage },
   { path: ROUTES.MYPAGE_PROFILE, Component: ProfileEditPage },
-  { path: ROUTES.MYPAGE_BADGE, Component: BadgeCertPage },
-  { path: ROUTES.MYPAGE_BADGE_COMPLETE, Component: BadgeCertCompletePage },
+  { path: ROUTES.MYPAGE_BADGE, Component: AdditionalCertPage },
+  { path: ROUTES.MYPAGE_BADGE_COMPLETE, Component: AdditionalCertCompletePage },
   { path: ROUTES.MYPAGE_ACCOUNTS, Component: AccountManagePage },
   { path: ROUTES.MYPAGE_NOTIFICATIONS, Component: NotificationSettingsPage },
   { path: ROUTES.MYPAGE_LANGUAGE, Component: LanguageSettingsPage },
