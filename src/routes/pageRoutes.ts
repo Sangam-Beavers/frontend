@@ -16,6 +16,7 @@ import DocAnalysisPaymentPage from '@/pages/docAnalysis/Payment/DocAnalysisPayme
 import DocAnalysisPreviewPage from '@/pages/docAnalysis/Preview/DocAnalysisPreviewPage';
 import DocAnalysisResultPage from '@/pages/docAnalysis/Result/DocAnalysisResultPage';
 import DocAnalysisSelectPage from '@/pages/docAnalysis/Select/DocAnalysisSelectPage';
+import CurrencySettingsPage from '@/pages/home/CurrencySettings/CurrencySettingsPage';
 import HomePage from '@/pages/home/HomePage';
 import NotificationsPage from '@/pages/home/Notifications/NotificationsPage';
 import AccountManagePage from '@/pages/MyPage/AccountManage/AccountManagePage';
@@ -66,6 +67,7 @@ export const authRoutes: PageRoute[] = [
 // 하단탭 진입 가능 영역: 홈/전체메뉴/커뮤니티/마이페이지
 export const mainRoutes: PageRoute[] = [
   { path: ROUTES.HOME, Component: HomePage },
+  { path: ROUTES.HOME_CURRENCY_SETTINGS, Component: CurrencySettingsPage },
   { path: ROUTES.ALL_MENU, Component: AllMenuPage },
   { path: ROUTES.NOTIFICATIONS, Component: NotificationsPage },
 

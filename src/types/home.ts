@@ -17,6 +17,12 @@ export interface NotificationCard {
   description: string;
 }
 
+export interface CurrencyOption {
+  code: string;
+  label: string;
+  displayAmount: string;
+}
+
 export interface NavItem {
   icon: string;
   label: string;
