@@ -11,7 +11,7 @@ const MY_ACTIVITY = [
 ];
 
 const SETTINGS = [
-  { label: '보안 설정', badge: '완료' as const, path: '/mypage/badge' },
+  { label: '추가 인증', badge: '완료' as const, path: '/mypage/badge' },
   { label: '알림 설정', badge: null, path: '/mypage/notifications' },
   { label: '언어 설정', badge: null, path: '/mypage/language' },
 ];
@@ -28,13 +28,7 @@ export default function MyPage() {
             ‹
           </button>
           <span className={styles.topTitle}>마이페이지</span>
-          <button
-            type="button"
-            className={styles.iconBtn}
-            onClick={() => navigate('/mypage/notifications')}
-          >
-            ⚙️
-          </button>
+          <div style={{ width: 40 }} />
         </div>
 
         {/* Profile card */}
@@ -46,7 +40,6 @@ export default function MyPage() {
                 global_neighbor
                 <span className={styles.pill}>프리미엄</span>
               </div>
-              <div className={styles.profileBio}>베트남어 및 친구들과 이용 중인데 매우 만족</div>
             </div>
           </div>
           <button

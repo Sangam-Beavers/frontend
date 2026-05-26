@@ -10,7 +10,24 @@
   margin: 0 0 6px 2px;
 }
 
-.input,
+.input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px 14px;
+  color: #34445f;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--blue);
+}
+
 .select {
   width: 100%;
   min-height: 44px;
@@ -21,19 +38,17 @@
   color: #34445f;
   font-size: 14px;
   font-family: inherit;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.select {
+  box-sizing: border-box;
+  outline: none;
   cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2370809a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
 }
 
-.confirm {
-  color: var(--blue);
-  font-weight: 800;
+.select:focus {
+  border-color: var(--blue);
 }
 
 .card {

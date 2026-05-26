@@ -9,8 +9,14 @@ const LANGUAGES = SETTING_LANGUAGES;
 export default function ProfileEditPage() {
   const navigate = useNavigate();
   const [nickname, setNickname] = useState('global_neighbor');
+  const [nicknameStatus, setNicknameStatus] = useState<null | 'ok' | 'fail'>(null);
   const [language, setLanguage] = useState('한국어');
   const [bio, setBio] = useState('안녕하세요.');
+
+  const checkNickname = () => {
+    if (!nickname.trim()) return;
+    setNicknameStatus('ok');
+  };
 
   return (
     <>
@@ -36,12 +42,19 @@ export default function ProfileEditPage() {
               type="text"
               className={styles.input}
               value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
+              onChange={(e) => {
+                setNickname(e.target.value);
+                setNicknameStatus(null);
+              }}
             />
-            <button type="button" className={styles.inlineBtn}>
+            <button type="button" className={styles.inlineBtn} onClick={checkNickname}>
               중복확인
             </button>
           </div>
+          {nicknameStatus === 'ok' && <p className={styles.fieldOk}>✓ 사용 가능한 닉네임입니다</p>}
+          {nicknameStatus === 'fail' && (
+            <p className={styles.fieldFail}>✗ 이미 사용 중인 닉네임입니다</p>
+          )}
         </div>
 
         {/* Language */}
