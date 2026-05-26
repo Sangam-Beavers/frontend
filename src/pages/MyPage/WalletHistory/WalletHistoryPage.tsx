@@ -35,7 +35,7 @@ export default function WalletHistoryPage() {
 
   return (
     <>
-      <TopBar title="전자지갑 내역" />
+      <TopBar title="전자지갑" />
 
       <div className={styles.tabs}>
         {TABS.map((tab) => (
