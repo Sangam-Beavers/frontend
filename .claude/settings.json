@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm lint)",
+      "Bash(pnpm run lint)",
+      "Bash(npx tsc --noEmit)",
+      "PowerShell(pnpm lint)"
+    ]
+  }
+}
