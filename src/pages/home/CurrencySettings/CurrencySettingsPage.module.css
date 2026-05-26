@@ -1,0 +1,109 @@
+.content {
+  padding-bottom: 88px;
+}
+
+.desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.list {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 14px;
+  border-bottom: 1px solid #eef4ff;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item:active:not(.itemDisabled) {
+  background: var(--soft);
+}
+
+.itemDisabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.itemInfo {
+  flex: 1;
+}
+
+.itemCode {
+  font-weight: 900;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.itemLabel {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+  color: #fff;
+}
+
+.checkboxChecked {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+/* Fixed save button */
+.fixedBtn {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 66px;
+  padding: 10px 18px 12px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+}
+
+.primaryBtn {
+  width: 100%;
+  border-radius: 15px;
+  padding: 15px 16px;
+  background: linear-gradient(135deg, #0b66ff, #0348dd);
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
