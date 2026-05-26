@@ -3,13 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import styles from './CommunityWritePage.module.css';
 
+const CATEGORIES = ['거주', '생활', '취업', '자유게시판'] as const;
+type Category = (typeof CATEGORIES)[number];
+
+const SUB_CATEGORIES: Record<Category, string[]> = {
+  거주: ['룸메 구하기', '집 구하기', '거주 후기'],
+  생활: ['생활 꿀팁', '음식/맛집', '문화'],
+  취업: ['일자리 정보', '취업 후기', '노무/법률'],
+  자유게시판: ['잡담', '질문', '정보 공유'],
+};
+
 export default function CommunityWritePage() {
   const navigate = useNavigate();
-  const [category, setCategory] = useState<string>('거주 / 생활 / 취업 / 자유게시판');
-  const [subCategory, setSubCategory] = useState<string>('룸메 구하기');
+  const [category, setCategory] = useState<Category>('거주');
+  const [subCategory, setSubCategory] = useState<string>(SUB_CATEGORIES['거주'][0]);
   const [title, setTitle] = useState<string>('');
   const [body, setBody] = useState<string>('');
   const [allowAutoTranslate, setAllowAutoTranslate] = useState<boolean>(false);
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const next = e.target.value as Category;
+    setCategory(next);
+    setSubCategory(SUB_CATEGORIES[next][0]);
+  };
 
   const handleSubmit = () => {
     navigate('/community');
@@ -21,28 +37,34 @@ export default function CommunityWritePage() {
 
       <div className={styles.field}>
         <label htmlFor="write-category">카테고리</label>
-        <button
+        <select
           id="write-category"
-          type="button"
           className={styles.select}
-          onClick={() => setCategory(category)}
+          value={category}
+          onChange={handleCategoryChange}
         >
-          <span>{category}</span>
-          <span aria-hidden>▾</span>
-        </button>
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className={styles.field}>
         <label htmlFor="write-sub-category">세부 카테고리</label>
-        <button
+        <select
           id="write-sub-category"
-          type="button"
           className={styles.select}
-          onClick={() => setSubCategory(subCategory)}
+          value={subCategory}
+          onChange={(e) => setSubCategory(e.target.value)}
         >
-          <span>{subCategory}</span>
-          <span aria-hidden>▾</span>
-        </button>
+          {SUB_CATEGORIES[category].map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className={styles.field}>
