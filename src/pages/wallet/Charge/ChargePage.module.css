@@ -120,6 +120,8 @@
   color: #34445f;
   font-size: 14px;
   font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
 }
 
 .row {
