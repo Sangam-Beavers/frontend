@@ -2,10 +2,19 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '@/pages/auth/auth.css';
 
+const LANG_OPTIONS = [
+  { value: 'KO', label: '🌐 KO' },
+  { value: 'EN', label: '🌐 EN' },
+  { value: 'VI', label: '🌐 VI' },
+  { value: 'ZH', label: '🌐 ZH' },
+  { value: 'TH', label: '🌐 TH' },
+];
+
 function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [lang, setLang] = useState('KO');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,9 +29,18 @@ function Login() {
               <div className="auth-logo">GB</div>
               <span>Global Bridge</span>
             </div>
-            <button type="button" className="auth-lang-pill">
-              🌐 KO ▾
-            </button>
+            <select
+              className="auth-lang-pill"
+              value={lang}
+              onChange={(e) => setLang(e.target.value)}
+              aria-label="언어 선택"
+            >
+              {LANG_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="auth-hero">

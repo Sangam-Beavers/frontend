@@ -14,13 +14,22 @@ function GoogleSignupInfo() {
     language: '',
     agreeAll: false,
   });
+  const [nicknameStatus, setNicknameStatus] = useState<null | 'ok' | 'fail'>(null);
 
   const set =
-    (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
+      if (key === 'nickname') setNicknameStatus(null);
+    };
+
+  const checkNickname = () => {
+    if (!form.nickname.trim()) return;
+    setNicknameStatus('ok');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    navigate('/');
   };
 
   return (
@@ -37,9 +46,7 @@ function GoogleSignupInfo() {
               ‹
             </button>
             <div className="auth-title">추가 정보 입력</div>
-            <button type="button" className="auth-icon" aria-label="언어 선택">
-              🌐
-            </button>
+            <div style={{ width: 40 }} />
           </div>
 
           <div className="auth-card ok">
@@ -70,10 +77,16 @@ function GoogleSignupInfo() {
                   value={form.nickname}
                   onChange={set('nickname')}
                 />
-                <button type="button" className="auth-duplicate-btn">
+                <button type="button" className="auth-duplicate-btn" onClick={checkNickname}>
                   중복확인
                 </button>
               </div>
+              {nicknameStatus === 'ok' && (
+                <p className="auth-field-ok">✓ 사용 가능한 닉네임입니다</p>
+              )}
+              {nicknameStatus === 'fail' && (
+                <p className="auth-field-fail">✗ 이미 사용 중인 닉네임입니다</p>
+              )}
             </div>
 
             <div className="auth-field">
