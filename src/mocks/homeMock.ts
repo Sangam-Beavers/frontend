@@ -1,4 +1,4 @@
-import type { CurrencyChip, ExchangeRate, NotificationCard } from '@/types/home';
+import type { CurrencyChip, CurrencyOption, ExchangeRate, NotificationCard } from '@/types/home';
 
 export const HOME_CURRENCIES_MOCK = {
   isSuccess: true,
@@ -27,6 +27,16 @@ export const HOME_NOTIFICATIONS_MOCK = {
     { id: 'legal', title: '변호사 상담', description: '근로계약서 확인 상담을 받아보세요.' },
   ] as NotificationCard[],
 };
+
+export const HOME_ALL_CURRENCIES_MOCK: CurrencyOption[] = [
+  { code: 'USD', label: '미국 달러', displayAmount: 'USD $240.50' },
+  { code: 'VND', label: '베트남 동', displayAmount: 'VND ₫1,200,000' },
+  { code: 'THB', label: '태국 바트', displayAmount: 'THB ฿6,820' },
+  { code: 'CNY', label: '중국 위안', displayAmount: 'CNY ¥1,740' },
+  { code: 'JPY', label: '일본 엔', displayAmount: 'JPY ¥24,300' },
+  { code: 'EUR', label: '유로', displayAmount: 'EUR €174.50' },
+  { code: 'PHP', label: '필리핀 페소', displayAmount: 'PHP ₱14,200' },
+];
 
 export const HOME_WALLET_BALANCE_MOCK = {
   isSuccess: true,

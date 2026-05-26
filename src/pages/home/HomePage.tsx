@@ -1,17 +1,36 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  HOME_CURRENCIES_MOCK,
+  HOME_ALL_CURRENCIES_MOCK,
   HOME_EXCHANGE_RATES_MOCK,
   HOME_NOTIFICATIONS_MOCK,
 } from '@/mocks/homeMock';
+import type { CurrencyOption } from '@/types/home';
 import styles from './HomePage.module.css';
 
-const CURRENCIES = HOME_CURRENCIES_MOCK.result;
 const EXCHANGE_RATES = HOME_EXCHANGE_RATES_MOCK.result;
 const NOTIFICATIONS = HOME_NOTIFICATIONS_MOCK.result;
+const STORAGE_KEY = 'homeCurrencies';
+
+function loadCurrencies(): CurrencyOption[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const codes: string[] = raw ? JSON.parse(raw) : ['USD', 'VND'];
+    return codes
+      .map((code) => HOME_ALL_CURRENCIES_MOCK.find((c) => c.code === code))
+      .filter((c): c is CurrencyOption => c !== undefined);
+  } catch {
+    return HOME_ALL_CURRENCIES_MOCK.slice(0, 2);
+  }
+}
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [currencies, setCurrencies] = useState<CurrencyOption[]>(loadCurrencies);
+
+  useEffect(() => {
+    setCurrencies(loadCurrencies());
+  }, []);
   return (
     <>
       <header className={styles.header}>
@@ -38,12 +57,15 @@ export default function HomePage() {
           <span>메인 통화 KRW · 변경</span>
         </div>
         <div className={styles.amount}>₩1,250,000</div>
-        <div className={styles.walletRow}>
-          <span>선택 표시 통화 2개</span>
-          <span>설정</span>
+        <div
+          className={styles.walletRowClickable}
+          onClick={() => navigate('/home/currency-settings')}
+        >
+          <span>선택 표시 통화 {currencies.length}개</span>
+          <span>설정 ›</span>
         </div>
         <div className={styles.currencyGrid}>
-          {CURRENCIES.map((currency) => (
+          {currencies.map((currency) => (
             <div key={currency.code} className={styles.currencyChip}>
               {currency.displayAmount}
             </div>

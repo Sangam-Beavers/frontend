@@ -9,6 +9,7 @@ export const ROUTES = {
   HOME: '/',
   ALL_MENU: '/menu',
   NOTIFICATIONS: '/notifications',
+  HOME_CURRENCY_SETTINGS: '/home/currency-settings',
 
   // ===== Main: Community =====
   COMMUNITY: '/community',
