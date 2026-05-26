@@ -90,21 +90,52 @@
 .searchBar {
   height: 42px;
   border-bottom: 2px solid #e7eefb;
-  color: #9aa7b8;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: 800;
-  font-size: 13px;
+  gap: 8px;
   margin-bottom: 0;
 }
 
-.searchPlaceholder {
+.searchInput {
   flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #3c4658;
+  font-weight: 800;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 0;
+}
+
+.searchInput::placeholder {
+  color: #9aa7b8;
 }
 
 .searchIcon {
   font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* Search results */
+.searchResults {
+  flex: 1;
+  border-top: 1px solid #edf3ff;
+  padding: 4px 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.searchResults::-webkit-scrollbar {
+  display: none;
+}
+
+.searchEmpty {
+  padding: 32px 14px;
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
 }
 
 /* Tags */
