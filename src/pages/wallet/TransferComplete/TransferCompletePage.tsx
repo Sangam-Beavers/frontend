@@ -61,7 +61,19 @@ export default function TransferCompletePage() {
         >
           전자지갑 내역 보기
         </button>
-        <button type="button" className={styles.ghostBtn}>
+        <button
+          type="button"
+          className={styles.ghostBtn}
+          onClick={() =>
+            navigate('/transfer/receipt', {
+              state: {
+                recipient: state.recipientName,
+                currency: state.currency,
+                amount: state.amount,
+              },
+            })
+          }
+        >
           송금 확인증 출력
         </button>
       </div>

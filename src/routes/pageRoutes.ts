@@ -17,6 +17,7 @@ import DocAnalysisPreviewPage from '@/pages/docAnalysis/Preview/DocAnalysisPrevi
 import DocAnalysisResultPage from '@/pages/docAnalysis/Result/DocAnalysisResultPage';
 import DocAnalysisSelectPage from '@/pages/docAnalysis/Select/DocAnalysisSelectPage';
 import HomePage from '@/pages/home/HomePage';
+import NotificationsPage from '@/pages/home/Notifications/NotificationsPage';
 import AccountManagePage from '@/pages/MyPage/AccountManage/AccountManagePage';
 import AllMenuPage from '@/pages/MyPage/AllMenu/AllMenuPage';
 import BadgeCertPage from '@/pages/MyPage/BadgeCert/BadgeCertPage';
@@ -44,6 +45,8 @@ import TransferAppPage from '@/pages/wallet/TransferApp/TransferAppPage';
 import TransferAuthPage from '@/pages/wallet/TransferAuth/TransferAuthPage';
 import TransferBankPage from '@/pages/wallet/TransferBank/TransferBankPage';
 import TransferCompletePage from '@/pages/wallet/TransferComplete/TransferCompletePage';
+import TransferReceiptPage from '@/pages/wallet/TransferReceipt/TransferReceiptPage';
+import ExchangeRateFullPage from '@/pages/wallet/ExchangeRateFull/ExchangeRateFullPage';
 import TransferConfirmPage from '@/pages/wallet/TransferConfirm/TransferConfirmPage';
 import TransferSelectPage from '@/pages/wallet/TransferSelect/TransferSelectPage';
 
@@ -64,6 +67,7 @@ export const authRoutes: PageRoute[] = [
 export const mainRoutes: PageRoute[] = [
   { path: ROUTES.HOME, Component: HomePage },
   { path: ROUTES.ALL_MENU, Component: AllMenuPage },
+  { path: ROUTES.NOTIFICATIONS, Component: NotificationsPage },
 
   { path: ROUTES.COMMUNITY, Component: CommunityPage },
   { path: ROUTES.COMMUNITY_RESIDENCE, Component: CommunityResidencePage },
@@ -97,6 +101,7 @@ export const serviceRoutes: PageRoute[] = [
   { path: ROUTES.EXCHANGE_FORM, Component: ExchangeFormPage },
   { path: ROUTES.EXCHANGE_REVERSE, Component: ExchangeReversePage },
   { path: ROUTES.EXCHANGE_COMPLETE, Component: ExchangeCompletePage },
+  { path: ROUTES.EXCHANGE_RATES_FULL, Component: ExchangeRateFullPage },
 
   { path: ROUTES.RECURRING, Component: RecurringTransferListPage },
   { path: ROUTES.RECURRING_SETUP, Component: RecurringTransferSetupPage },
@@ -108,6 +113,7 @@ export const serviceRoutes: PageRoute[] = [
   { path: ROUTES.TRANSFER_CONFIRM, Component: TransferConfirmPage },
   { path: ROUTES.TRANSFER_AUTH, Component: TransferAuthPage },
   { path: ROUTES.TRANSFER_COMPLETE, Component: TransferCompletePage },
+  { path: ROUTES.TRANSFER_RECEIPT, Component: TransferReceiptPage },
 
   { path: ROUTES.DOC_ANALYSIS, Component: DocAnalysisSelectPage },
   { path: ROUTES.DOC_ANALYSIS_PREVIEW, Component: DocAnalysisPreviewPage },

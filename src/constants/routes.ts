@@ -8,6 +8,7 @@ export const ROUTES = {
   // ===== Main: bottom-tab destinations =====
   HOME: '/',
   ALL_MENU: '/menu',
+  NOTIFICATIONS: '/notifications',
 
   // ===== Main: Community =====
   COMMUNITY: '/community',
@@ -42,6 +43,7 @@ export const ROUTES = {
   EXCHANGE_FORM: '/exchange/form',
   EXCHANGE_REVERSE: '/exchange/reverse',
   EXCHANGE_COMPLETE: '/exchange/complete',
+  EXCHANGE_RATES_FULL: '/exchange/rates',
 
   // ===== Service: Recurring transfer =====
   RECURRING: '/recurring',
@@ -55,6 +57,7 @@ export const ROUTES = {
   TRANSFER_CONFIRM: '/transfer/confirm',
   TRANSFER_AUTH: '/transfer/auth',
   TRANSFER_COMPLETE: '/transfer/complete',
+  TRANSFER_RECEIPT: '/transfer/receipt',
 
   // ===== Service: Document analysis =====
   DOC_ANALYSIS: '/doc-analysis',

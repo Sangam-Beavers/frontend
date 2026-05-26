@@ -11,6 +11,12 @@ export const WALLET_TRANSACTIONS_MOCK = {
       meta: 'Linh · 2026.05.15 · 완료',
       amountDisplay: '-₫1,200,000',
       isOutgoing: true,
+      receiptInfo: {
+        recipient: 'Linh',
+        amount: '₫1,200,000',
+        txId: 'GB-20260515-00082',
+        dateTime: '2026.05.15',
+      },
     },
     {
       id: 'tx-2',

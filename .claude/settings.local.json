@@ -14,7 +14,8 @@
       "Bash(powershell *)",
       "Bash(Get-ChildItem \"C:\\\\final-project\\\\frontend\\\\src\\\\pages\" -Filter \"*.tsx\")",
       "Bash(Select-Object Name)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\1-07\\\\IdeaProjects\\\\frontend\" -Force)"
     ]
   }
 }
