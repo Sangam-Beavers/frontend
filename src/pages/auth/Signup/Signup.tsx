@@ -43,6 +43,7 @@ function Signup() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    navigate('/');
   };
 
   return (

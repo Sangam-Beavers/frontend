@@ -97,6 +97,9 @@
   font-weight: 800;
   font-size: 12px;
   cursor: pointer;
+  appearance: none;
+  outline: none;
+  font-family: inherit;
 }
 
 .auth-hero {
@@ -430,10 +433,28 @@
 
 .auth-fixed {
   position: fixed;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
   bottom: 0;
   padding: 12px 18px 22px;
   background: rgba(255, 255, 255, 0.95);
   box-sizing: border-box;
+}
+
+/* 닉네임 중복확인 피드백 */
+.auth-field-ok,
+.auth-field-fail {
+  margin: 5px 2px 0;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.auth-field-ok {
+  color: #059669;
+}
+
+.auth-field-fail {
+  color: #e11d48;
 }
