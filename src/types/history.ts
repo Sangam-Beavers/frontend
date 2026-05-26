@@ -1,6 +1,13 @@
 export type WalletTxKind = 'charge' | 'send' | 'receive';
 export type WalletTabKey = 'all' | 'charge' | 'send' | 'receive';
 
+export interface WalletReceiptInfo {
+  recipient?: string;
+  amount?: string;
+  txId?: string;
+  dateTime?: string;
+}
+
 export interface WalletTransaction {
   id: string;
   kind: WalletTxKind;
@@ -8,6 +15,7 @@ export interface WalletTransaction {
   meta: string;
   amountDisplay: string;
   isOutgoing: boolean;
+  receiptInfo?: WalletReceiptInfo;
 }
 
 export interface ExchangeTransaction {

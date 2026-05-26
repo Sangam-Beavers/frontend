@@ -79,3 +79,11 @@
 .amountIn {
   color: var(--blue);
 }
+
+.itemClickable {
+  cursor: pointer;
+}
+
+.itemClickable:hover {
+  background: var(--soft);
+}

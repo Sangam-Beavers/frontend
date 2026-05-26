@@ -1,0 +1,183 @@
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #334155;
+  font-weight: 900;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Receipt card */
+.receipt {
+  background: #fff;
+  border: 1px dashed #93b8ff;
+  border-radius: 18px;
+  padding: 18px;
+  margin: 12px 0;
+}
+
+.receiptHead {
+  text-align: center;
+  border-bottom: 1px dashed var(--line);
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+}
+
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border: 3px solid var(--blue);
+  border-radius: 50%;
+  color: var(--blue);
+  font-size: 28px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.receiptTitle {
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.receiptSub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eef4ff;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.rowLabel {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.rowValue {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.rowValueBlue {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--blue);
+}
+
+/* QR card */
+.qrCard {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  margin: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 18px rgba(7, 91, 255, 0.05);
+}
+
+.qr {
+  width: 92px;
+  height: 92px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(45deg, #dbeafe 25%, transparent 25%),
+    linear-gradient(-45deg, #dbeafe 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #dbeafe 75%),
+    linear-gradient(-45deg, transparent 75%, #dbeafe 75%);
+  background-size: 18px 18px;
+  background-position:
+    0 0,
+    0 9px,
+    9px -9px,
+    -9px 0;
+}
+
+.qrInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.qrTitle {
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.qrDesc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Buttons */
+.btnCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.primaryBtn {
+  width: 100%;
+  border-radius: 15px;
+  padding: 15px 16px;
+  background: linear-gradient(135deg, #0b66ff, #0348dd);
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.secondaryBtn {
+  width: 100%;
+  border-radius: 15px;
+  padding: 13px 16px;
+  background: #fff;
+  color: var(--blue);
+  font-weight: 900;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.ghostBtn {
+  width: 100%;
+  border-radius: 15px;
+  padding: 13px 16px;
+  background: var(--soft);
+  color: var(--blue);
+  font-weight: 900;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-family: inherit;
+}

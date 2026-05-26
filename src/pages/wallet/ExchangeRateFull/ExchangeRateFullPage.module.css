@@ -1,0 +1,152 @@
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #334155;
+  font-weight: 900;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.softbox {
+  background: linear-gradient(160deg, #eef7ff, #fff);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.softboxTitle {
+  font-weight: 900;
+  font-size: 15px;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.softboxText {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-bottom: 12px;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: #fff;
+  color: #50627b;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.tabActive {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+
+/* Rate list */
+.list {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.rate {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 14px;
+  border-bottom: 1px solid #eef4ff;
+}
+
+.rate:last-child {
+  border-bottom: none;
+}
+
+.rateCountry {
+  font-weight: 900;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.rateCode {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.rateRight {
+  text-align: right;
+}
+
+.rateValue {
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.rateUp {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.rateDown {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.starBtn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #cbd5e1;
+  padding: 0 2px;
+  line-height: 1;
+  transition: color 0.15s, transform 0.1s;
+}
+
+.starBtn:active {
+  transform: scale(1.3);
+}
+
+.starOn {
+  color: #f59e0b;
+}
+
+.empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+

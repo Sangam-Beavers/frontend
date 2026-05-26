@@ -23,7 +23,7 @@ export default function HomePage() {
           <button className={styles.langBtn} onClick={() => navigate('/mypage/language')}>
             🌐 KO ▾
           </button>
-          <button className={styles.iconBtn} onClick={() => navigate('/mypage/notifications')}>
+          <button className={styles.iconBtn} onClick={() => navigate('/notifications')}>
             🔔
           </button>
           <button className={styles.iconBtn} onClick={() => navigate('/mypage')}>
@@ -73,7 +73,7 @@ export default function HomePage() {
         실시간 환율
         <span
           className={styles.pill}
-          onClick={() => navigate('/exchange')}
+          onClick={() => navigate('/exchange/rates')}
           style={{ cursor: 'pointer' }}
         >
           전체보기

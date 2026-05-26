@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { WALLET_TRANSACTIONS_MOCK } from '@/mocks/mypageMock';
 import type { WalletTabKey, WalletTransaction } from '@/types/history';
@@ -22,8 +23,15 @@ const matchesTab = (kind: WalletTransaction['kind'], tab: WalletTabKey) =>
   tab === 'all' || tab === kind;
 
 export default function WalletHistoryPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<WalletTabKey>('all');
   const visible = TRANSACTIONS.filter((tx) => matchesTab(tx.kind, activeTab));
+
+  const handleItemClick = (tx: WalletTransaction) => {
+    if (tx.kind === 'send' && tx.receiptInfo) {
+      navigate('/transfer/receipt', { state: tx.receiptInfo });
+    }
+  };
 
   return (
     <>
@@ -44,7 +52,11 @@ export default function WalletHistoryPage() {
 
       <div className={styles.list}>
         {visible.map((tx) => (
-          <div key={tx.id} className={styles.item}>
+          <div
+            key={tx.id}
+            className={`${styles.item} ${tx.kind === 'send' && tx.receiptInfo ? styles.itemClickable : ''}`}
+            onClick={() => handleItemClick(tx)}
+          >
             <div className={styles.itemMain}>
               <div className={styles.itemTitle}>{tx.title}</div>
               <div className={styles.itemMeta}>{tx.meta}</div>
