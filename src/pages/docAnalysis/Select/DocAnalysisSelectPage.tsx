@@ -20,7 +20,7 @@ export default function DocAnalysisSelectPage() {
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>문서를 업로드하세요</div>
         <div className={styles.cardText}>
-          거소증명서, 급여명세서, 고용계약서를 AI가 다국어로 분석합니다.
+          근로계약서, 급여명세서, 고용계약서를 AI가 다국어로 분석합니다.
         </div>
       </div>
 
