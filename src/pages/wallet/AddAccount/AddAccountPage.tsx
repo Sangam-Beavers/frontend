@@ -3,6 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import styles from './AddAccountPage.module.css';
 
+const BANKS = [
+  '국민은행',
+  '신한은행',
+  '하나은행',
+  '우리은행',
+  '농협은행',
+  '카카오뱅크',
+  '기업은행',
+  '케이뱅크',
+  'SC제일은행',
+  '씨티은행',
+];
+
 export default function AddAccountPage() {
   const navigate = useNavigate();
   const [bankName, setBankName] = useState<string>('국민은행');
@@ -19,15 +32,18 @@ export default function AddAccountPage() {
 
       <div className={styles.field}>
         <label htmlFor="bank-name">은행명</label>
-        <button
+        <select
           id="bank-name"
-          type="button"
           className={styles.select}
-          onClick={() => setBankName(bankName)}
+          value={bankName}
+          onChange={(e) => setBankName(e.target.value)}
         >
-          <span>{bankName}</span>
-          <span aria-hidden>▾</span>
-        </button>
+          {BANKS.map((bank) => (
+            <option key={bank} value={bank}>
+              {bank}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className={styles.field}>
@@ -43,25 +59,13 @@ export default function AddAccountPage() {
 
       <div className={styles.field}>
         <label htmlFor="account-holder">예금주</label>
-        <div className={styles.input}>
-          <input
-            id="account-holder"
-            type="text"
-            value={accountHolder}
-            onChange={(event) => setAccountHolder(event.target.value)}
-            style={{
-              flex: 1,
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-              color: 'inherit',
-              fontSize: 'inherit',
-              fontFamily: 'inherit',
-              padding: 0,
-            }}
-          />
-          <b className={styles.confirm}>확인</b>
-        </div>
+        <input
+          id="account-holder"
+          type="text"
+          className={styles.input}
+          value={accountHolder}
+          onChange={(event) => setAccountHolder(event.target.value)}
+        />
       </div>
 
       <div className={`${styles.card} ${styles.cardWarn}`}>

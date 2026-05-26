@@ -16,17 +16,21 @@ export default function SubscriptionPage() {
           구독 상태: {cancelled ? '미구독' : '프리미엄 구독중'}
         </div>
         <div className={styles.cardText}>
-          월 15,000원 결제 후 문서 분석 서비스를 최대 10문서를 확인할 수 있습니다.
+          {cancelled
+            ? '월 15,000원 구독 시 문서 분석 서비스를 최대 10문서까지 이용할 수 있습니다.'
+            : '문서 분석 서비스를 최대 10문서까지 이용하실 수 있습니다.'}
         </div>
       </div>
 
-      <button
-        type="button"
-        className={styles.primaryBtn}
-        onClick={() => navigate('/doc-analysis/payment')}
-      >
-        구독하기
-      </button>
+      {cancelled && (
+        <button
+          type="button"
+          className={styles.primaryBtn}
+          onClick={() => navigate('/doc-analysis/payment')}
+        >
+          구독하기
+        </button>
+      )}
 
       {!cancelled && (
         <div className={styles.card}>
