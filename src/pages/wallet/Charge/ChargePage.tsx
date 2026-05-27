@@ -14,7 +14,7 @@ const formatKRW = (value: number) => `₩${value.toLocaleString('ko-KR')}`;
 export default function ChargePage() {
   const navigate = useNavigate();
   const [selectedAccountId, setSelectedAccountId] = useState<string>(ACCOUNTS[0].id);
-  const [chargeAmount] = useState<number>(CHARGE_AMOUNT);
+  const [chargeAmount, setChargeAmount] = useState<number>(CHARGE_AMOUNT);
 
   const afterBalance = WALLET_BALANCE + chargeAmount;
 
@@ -60,10 +60,16 @@ export default function ChargePage() {
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="charge-amount">충전할 금액</label>
-        <div id="charge-amount" className={styles.input}>
-          {formatKRW(chargeAmount)}
-        </div>
+        <label htmlFor="charge-amount">충전할 금액 (₩)</label>
+        <input
+          id="charge-amount"
+          type="number"
+          min={0}
+          step={1000}
+          className={styles.input}
+          value={chargeAmount}
+          onChange={(e) => setChargeAmount(Math.max(0, Number(e.target.value)))}
+        />
       </div>
 
       <div className={styles.card}>
