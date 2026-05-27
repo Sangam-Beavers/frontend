@@ -9,7 +9,7 @@ export default function DocAnalysisResultPage() {
   const navigate = useNavigate();
 
   return (
-    <>
+    <div className={styles.pageWrapper}>
       <TopBar title="분석 결과" onBack={() => navigate(-1)} />
 
       <div className={`${styles.card} ${styles.cardWarn}`}>
@@ -18,18 +18,6 @@ export default function DocAnalysisResultPage() {
           AI 분석 결과는 참고용이며 일부만을 위한 게 아닐 수 있습니다. 중요한 판단이나 자세한 상담은
           반드시 전문가와 함께하세요.
         </div>
-      </div>
-
-      <div className={`${styles.card} ${styles.cardPurple}`}>
-        <div className={styles.cardTitle}>전문가 상담</div>
-        <div className={styles.cardText}>노동/체류 관련 전문가 무료 상담 제공</div>
-        <button
-          type="button"
-          className={styles.secondaryBtn}
-          onClick={() => navigate('/community/job')}
-        >
-          바로 알아보기
-        </button>
       </div>
 
       <div className={`${styles.card} ${styles.cardDanger}`}>
@@ -65,6 +53,13 @@ export default function DocAnalysisResultPage() {
           커뮤니티 공유
         </button>
       </div>
-    </>
+
+      <div className={`${styles.card} ${styles.cardPurple} ${styles.expertCard}`}>
+        <div className={styles.cardTitle}>전문가 상담</div>
+        <button type="button" className={styles.secondaryBtn}>
+          바로 알아보기
+        </button>
+      </div>
+    </div>
   );
 }

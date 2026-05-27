@@ -12,7 +12,7 @@ export const RECENT_DOCS_MOCK = {
   isSuccess: true,
   code: '200',
   result: [
-    { title: '거소증명서', meta: '업로드 완료 · 2026.05.13' },
+    { title: '근로계약서', meta: '업로드 완료 · 2026.05.13' },
     { title: '급여명세서', meta: '분석 완료 · 2026.05.10' },
   ] as RecentDoc[],
 };

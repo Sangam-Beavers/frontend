@@ -1,3 +1,25 @@
+/* 전문가 상담 카드를 콘텐츠 최하단으로 밀기 */
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.expertCard {
+  margin-top: auto;
+}
+
+/* flex 컨텍스트에서는 margin이 합산되므로, 위 요소의 margin-bottom만 남기고
+   아래 요소의 margin-top을 제거해 원래 간격을 유지 */
+.pageWrapper .cardDanger,
+.pageWrapper .list {
+  margin-top: 0;
+}
+
+.pageWrapper .btnRow {
+  margin-top: 2px;
+}
+
 /* Cards */
 .card {
   border: 1px solid var(--line);
@@ -110,11 +132,11 @@
 
 .primaryBtn {
   border-radius: 15px;
-  padding: 14px 16px;
+  padding: 12px 16px;
   background: linear-gradient(135deg, #0b66ff, #0348dd);
   color: #fff;
   font-weight: 900;
-  font-size: 15px;
+  font-size: 14px;
   border: none;
   cursor: pointer;
   font-family: inherit;
@@ -134,5 +156,15 @@
   display: block;
   width: 100%;
   text-align: center;
+  margin-top: 0;
+}
+
+/* 카드 내부(전문가 상담 바로 알아보기)는 제목과의 간격 유지 */
+.card .secondaryBtn {
   margin-top: 10px;
+}
+
+/* btnRow 내부 secondaryBtn은 margin 없이 primaryBtn과 동일 높이 정렬 */
+.btnRow .secondaryBtn {
+  margin-top: 0;
 }

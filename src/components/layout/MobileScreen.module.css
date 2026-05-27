@@ -3,6 +3,7 @@
   width: 100%;
   max-width: 430px;
   min-height: 100dvh;
+  height: 100dvh;
   background: #fff;
   overflow: hidden;
   display: flex;
@@ -11,6 +12,7 @@
 
 .content {
   flex: 1;
+  height: 0;
   padding: 18px 18px 96px;
   overflow-y: auto;
   scrollbar-width: none;
