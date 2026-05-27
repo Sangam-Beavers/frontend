@@ -2,29 +2,19 @@
 
 외국인 근로자를 위한 금융 플랫폼 프론트엔드
 
-- 송금 서비스
-- 법률 상담 챗봇
-- 커뮤니티
-
 ## 기술 스택
 
 - React 19 + TypeScript
-- Vite
-- pnpm
-- ESLint + Prettier + Husky + lint-staged + commitlint
+- Vite + pnpm
+- ESLint + Prettier + Husky
 
 ## 폴더 구조
 
-src/
-├── assets/ # 이미지, 폰트, 아이콘
-├── components/ # 공통 재사용 컴포넌트
-├── pages/ # 라우트별 페이지 컴포넌트
-├── hooks/ # 커스텀 훅
-├── services/ # API 호출 함수
-├── stores/ # 전역 상태 관리
-├── types/ # TypeScript 타입/인터페이스
-├── utils/ # 공통 유틸 함수
-└── constants/ # 상수값 (API URL, 코드값 등)
+- src/components: 공통 컴포넌트
+- src/pages: 페이지 컴포넌트
+- src/services: API 호출
+- src/types: 타입 정의
+- src/stores: 전역 상태
 
 ## 코딩 규칙
 
@@ -73,3 +63,28 @@ src/
 - 가운데 정렬, 좌우 여백은 배경색으로 채워줘
 - 태블릿/데스크탑에서도 모바일 앱처럼 보이게 구현
 - App.tsx에 전체 레이아웃 컨테이너 적용
+
+## Claude 행동 지침
+
+### 파괴적인 작업 — 실행 전 반드시 사용자 확인 필요
+
+- `git push --force` / `--force-with-lease`
+- `git reset --hard`
+- `git rebase` (공유 브랜치인 develop, main)
+- 파일 또는 폴더 삭제
+- `pnpm remove` (의존성 제거)
+- `.env` 관련 파일 수정
+- `main`, `develop` 브랜치에 직접 커밋 또는 push
+
+### 커밋 / PR 규칙
+
+- 커밋 전 변경된 파일 목록을 반드시 먼저 보여줄 것
+- `main` 브랜치에는 직접 push 금지
+- PR 없이 `develop`에 직접 push 금지
+- 커밋 메시지는 CLAUDE.md의 커밋 컨벤션을 따를 것
+
+### 코드 작업 규칙
+
+- 여러 파일을 동시에 수정할 경우 계획을 먼저 제시할 것
+- 새 패키지 설치 전 필요성과 대안을 먼저 설명할 것
+- 기존 코드를 대규모로 리팩터링하기 전 범위를 먼저 공유할 것

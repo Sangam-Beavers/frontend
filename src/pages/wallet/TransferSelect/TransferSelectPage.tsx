@@ -24,8 +24,8 @@ export default function TransferSelectPage() {
         </div>
         <div className={styles.item} onClick={() => navigate('/transfer/bank')}>
           <div className={styles.itemMain}>
-            <div className={styles.itemTitle}>타행계좌로 보내기</div>
-            <div className={styles.itemMeta}>은행 계좌번호로 외부 계좌 송금</div>
+            <div className={styles.itemTitle}>내 계좌로 보내기</div>
+            <div className={styles.itemMeta}>미리 등록된 외부은행의 내 계좌번호로 송금</div>
           </div>
           <div className={styles.arrowIcon}>›</div>
         </div>

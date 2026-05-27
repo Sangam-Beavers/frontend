@@ -233,3 +233,20 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+.itemSelected {
+  background: var(--soft2, #eef4ff);
+}
+
+.checkMark {
+  color: var(--blue);
+  font-weight: 900;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #f5f8ff;
+}
