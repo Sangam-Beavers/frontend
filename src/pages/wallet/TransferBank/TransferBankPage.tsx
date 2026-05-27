@@ -1,114 +1,45 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
-import { BANKS } from '@/constants/banks';
-import { RECENT_ACCOUNTS_MOCK, type RecentAccount } from '@/mocks/transferMock';
+import { MY_ACCOUNTS_MOCK, type MyAccount } from '@/mocks/transferMock';
 import styles from './TransferBankPage.module.css';
 
-const FEE = 500;
-const RECENT_ACCOUNTS = RECENT_ACCOUNTS_MOCK.result;
+const MY_ACCOUNTS = MY_ACCOUNTS_MOCK.result;
 
 export default function TransferBankPage() {
   const navigate = useNavigate();
-  const [bank, setBank] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
-  const [holder, setHolder] = useState('');
-  const [holderVerified, setHolderVerified] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<MyAccount | null>(null);
   const [amount, setAmount] = useState('');
 
-  const num = parseInt(amount.replace(/[^0-9]/g, '')) || 0;
-  const total = num > 0 ? num + FEE : 0;
-
-  function handleVerifyHolder() {
-    if (accountNumber.length >= 8) setHolderVerified(true);
-  }
-
-  function handleSelectRecent(acc: RecentAccount) {
-    setBank(acc.bank);
-    setHolder(acc.holder);
-    setHolderVerified(true);
-  }
-
-  const canSubmit = bank !== '' && accountNumber !== '' && holderVerified && num > 0;
+  const num = Number(amount) || 0;
+  const canSubmit = selectedAccount !== null && num > 0;
 
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="타행계좌 송금" onBack={() => navigate('/transfer')} />
+        <TopBar title="내 계좌로 보내기" onBack={() => navigate('/transfer')} />
 
-        <div className={styles.section}>최근 송금 계좌</div>
+        <div className={styles.section}>등록된 내 계좌</div>
 
         <div className={styles.list}>
-          {RECENT_ACCOUNTS.map((acc) => (
-            <div key={acc.masked} className={styles.item}>
-              <div className={styles.itemMain}>
-                <div className={styles.itemTitle}>
-                  {acc.bank} · {acc.holder}
+          {MY_ACCOUNTS.map((acc) => {
+            const isSelected = selectedAccount?.id === acc.id;
+            return (
+              <div
+                key={acc.id}
+                className={`${styles.item} ${isSelected ? styles.itemSelected : ''}`}
+                onClick={() => setSelectedAccount(acc)}
+              >
+                <div className={styles.itemMain}>
+                  <div className={styles.itemTitle}>{acc.bank}</div>
+                  <div className={styles.itemMeta}>
+                    {acc.nickname} · {acc.masked}
+                  </div>
                 </div>
-                <div className={styles.itemMeta}>
-                  {acc.masked} · 최근 {acc.lastAmount}
-                </div>
+                {isSelected && <span className={styles.checkMark}>✓</span>}
               </div>
-              <span className={styles.pill} onClick={() => handleSelectRecent(acc)}>
-                선택
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="bank-select">
-            보낼 은행
-          </label>
-          <select
-            id="bank-select"
-            className={styles.select}
-            value={bank}
-            onChange={(e) => setBank(e.target.value)}
-          >
-            <option value="">은행 선택 ▾</option>
-            {BANKS.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="account-number">
-            계좌번호
-          </label>
-          <input
-            id="account-number"
-            type="text"
-            className={styles.input}
-            placeholder="계좌번호 입력 (- 없이)"
-            value={accountNumber}
-            onChange={(e) => {
-              setAccountNumber(e.target.value);
-              setHolderVerified(false);
-              setHolder('');
-            }}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label}>예금주</label>
-          <div className={styles.inputRow}>
-            <input
-              type="text"
-              placeholder="계좌 확인 후 자동 입력"
-              value={holderVerified ? holder : holder}
-              readOnly={holderVerified}
-              onChange={(e) => setHolder(e.target.value)}
-            />
-            {!holderVerified && (
-              <button type="button" className={styles.inputAction} onClick={handleVerifyHolder}>
-                확인
-              </button>
-            )}
-          </div>
+            );
+          })}
         </div>
 
         <div className={styles.field}>
@@ -117,33 +48,32 @@ export default function TransferBankPage() {
           </label>
           <input
             id="transfer-amount"
-            type="number"
+            type="text"
+            inputMode="numeric"
             className={styles.input}
-            placeholder="₩0"
+            placeholder="0"
+            disabled={selectedAccount === null}
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ''))}
           />
         </div>
-
-        {num > 0 && (
-          <div className={styles.card}>
-            <div className={styles.row}>
-              <span>수수료</span>
-              <b>₩{FEE.toLocaleString()}</b>
-            </div>
-            <div className={styles.row}>
-              <span>최종 차감</span>
-              <b>₩{total.toLocaleString()}</b>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className={styles.fixedBtn}>
         <button
           className={styles.primaryBtn}
           disabled={!canSubmit}
-          onClick={() => navigate('/transfer/confirm')}
+          onClick={() =>
+            navigate('/transfer/confirm', {
+              state: {
+                recipientName: selectedAccount?.bank,
+                recipientInitial: selectedAccount?.bank?.[0] ?? '',
+                currency: 'KRW',
+                amount: num.toLocaleString(),
+                memo: selectedAccount?.masked ?? '',
+              },
+            })
+          }
         >
           다음
         </button>

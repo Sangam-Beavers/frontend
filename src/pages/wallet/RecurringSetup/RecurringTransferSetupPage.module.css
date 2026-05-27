@@ -1,3 +1,7 @@
+.contentPad {
+  padding-bottom: 160px;
+}
+
 .field {
   margin: 12px 0;
 }
@@ -10,7 +14,7 @@
   margin: 0 0 6px 2px;
 }
 
-.input,
+/* Button-style dropdown (송금 대상 선택) */
 .select {
   width: 100%;
   min-height: 44px;
@@ -25,12 +29,132 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
-.select {
+/* Native HTML select */
+.selectNative {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px 36px 12px 14px;
+  color: #34445f;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2370809a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
   cursor: pointer;
 }
 
+.selectNative:focus {
+  border-color: var(--blue);
+}
+
+/* Regular input */
+.input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px 14px;
+  color: #34445f;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--blue);
+}
+
+/* 통화 + 금액 나란히 */
+.amountRow {
+  display: flex;
+  gap: 8px;
+}
+
+.amountRow .selectNative {
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.amountRow .input {
+  flex: 1;
+}
+
+/* 조건부 추가 입력 영역 */
+.subField {
+  margin-top: 8px;
+}
+
+/* 대상 인라인 펼침 목록 */
+.recipientList {
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.recipientItem {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #eef4ff;
+  cursor: pointer;
+}
+
+.recipientItem:last-child {
+  border-bottom: none;
+}
+
+.recipientItem:active {
+  background: #f5f9ff;
+}
+
+/* 아바타 */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 13px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.avatarBest { background: #0b66ff; }
+.avatarGood { background: #22c55e; }
+.avatarMid  { background: #f59e0b; }
+.avatarWarn { background: #f97316; }
+.avatarBad  { background: #ef4444; }
+
+.recipientName {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.recipientMeta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* 안내 카드 */
 .card {
   border: 1px solid var(--line);
   background: #fff;
@@ -56,6 +180,7 @@
   color: var(--muted);
 }
 
+/* 하단 고정 버튼 */
 .primaryFixed {
   position: absolute;
   left: 18px;
@@ -75,4 +200,10 @@
   width: 100%;
   font-family: inherit;
   font-size: 14px;
+  cursor: pointer;
+}
+
+.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
