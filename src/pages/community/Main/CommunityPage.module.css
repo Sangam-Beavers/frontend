@@ -1,29 +1,28 @@
-.searchIcon {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  color: #334155;
-  font-size: 18px;
-  font-family: inherit;
-}
-
 .search {
   height: 42px;
   border: 1px solid var(--line);
   border-radius: 15px;
   background: #fff;
-  display: flex;
-  align-items: center;
   padding: 0 14px;
-  color: #98a6ba;
+  color: #34445f;
   font-size: 12px;
   font-weight: 800;
   margin: 12px 0;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  outline: none;
+}
+
+.search::placeholder {
+  color: #98a6ba;
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 40px 0;
 }
 
 .actions {
