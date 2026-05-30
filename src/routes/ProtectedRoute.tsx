@@ -1,12 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
+import { isLoggedIn } from '@/auth/tokenStore';
 
-// TODO: 실제 인증 상태로 교체 (예: useAuthStore, context, 토큰 검사 등)
-// 개발 중에는 .env.development의 VITE_SKIP_AUTH=true로 가드를 건너뛸 수 있음
-const isAuthenticated = import.meta.env.VITE_SKIP_AUTH === 'true';
-
+// ③ 앱 보호(문지기): 저장된 토큰이 있어야 통과. 없으면 로그인 화면으로 보냄.
+// 개발 중에는 .env.local의 VITE_SKIP_AUTH=true로 가드를 건너뛸 수 있음(로그인 없이 화면 확인용).
 export default function ProtectedRoute() {
-  if (!isAuthenticated) {
+  const authed = import.meta.env.VITE_SKIP_AUTH === 'true' || isLoggedIn();
+  if (!authed) {
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
   return <Outlet />;

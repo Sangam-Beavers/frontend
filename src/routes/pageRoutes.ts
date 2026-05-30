@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import { ROUTES } from '@/constants/routes';
+import Callback from '@/pages/Callback';
 import GoogleSignupInfo from '@/pages/auth/GoogleSignupInfo/GoogleSignupInfo';
 import Login from '@/pages/auth/Login/Login';
 import PasswordRecovery from '@/pages/auth/PasswordRecovery/PasswordRecovery';
@@ -62,6 +63,7 @@ export const authRoutes: PageRoute[] = [
   { path: ROUTES.PASSWORD_RECOVERY, Component: PasswordRecovery },
   { path: ROUTES.SIGNUP, Component: Signup },
   { path: ROUTES.GOOGLE_SIGNUP_INFO, Component: GoogleSignupInfo },
+  { path: ROUTES.AUTH_CALLBACK, Component: Callback }, // ② 토큰 받는 화면
 ];
 
 // 하단탭 진입 가능 영역: 홈/전체메뉴/커뮤니티/마이페이지
