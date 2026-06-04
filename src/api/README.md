@@ -187,8 +187,10 @@ try {
 
 ### 인증 토큰
 
-- `src/api/client.ts`의 request interceptor가 자동 부착 (팀원 PKCE 작업 후 활성화).
+- `src/api/client.ts`의 request interceptor가 매 요청마다 `sessionStorage`의 access_token을 `Authorization: Bearer` 헤더로 자동 부착.
 - hook이나 페이지에서 직접 헤더 조작 금지.
+- 401 응답 시 자동으로 `clearLocalTokens()` + `/login`으로 리다이렉트 (interceptor가 처리).
+- 인증 흐름 상세는 [§6 인증 통합](#6-인증-통합-pkce--apiclient) 참고.
 
 ---
 
@@ -236,6 +238,75 @@ src/
 
 ## 5. 다음 단계
 
-- **인증 도입**: 팀원이 OIDC PKCE 작업 → `client.ts` request interceptor의 토큰 부착 TODO 활성화
 - **mock 정리**: 별도 사이클에서 mocks/\* 응답을 백엔드 envelope으로 통일 + 페이지 `.result` → `.data` 일괄 수정
 - **에러 메시지 사전**: `src/api/errorMessages.ts`로 `{ code: 사용자메시지 }` 매핑 (반복되면 hook으로 추출)
+- **refresh token + silent renew**: 현재 401이면 즉시 로그인 페이지로 보냄. 향후 refresh_token으로 renew 시도 후 실패 시에만 이동
+
+---
+
+## 6. 인증 통합 (PKCE + apiClient)
+
+### 6-1. 흐름 전체
+
+```
+[로그인 버튼] → startLogin()         (auth/login.ts)
+                ├ verifier/state 생성 (PKCE)
+                ├ sessionStorage 보관
+                └ window.location → Authentik authorize endpoint
+
+[Authentik 로그인 화면] (사용자가 직접 입력)
+                ↓ 성공
+[Callback 화면] /auth/callback?code=...&state=...
+                ├ state 대조 (CSRF 방어)
+                ├ code + verifier → token endpoint POST
+                ├ saveTokens() → sessionStorage
+                └ navigate('/')
+
+[모든 API 호출] apiClient.get/post/...
+                ├ request interceptor: getAccessToken() → Bearer 부착
+                ├ 200 → envelope 풀어 data 반환
+                └ 401 → clearLocalTokens + /login redirect
+```
+
+### 6-2. 폴더 분담
+
+| 폴더                            | 책임                                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `src/auth/`                     | OIDC 메커니즘 (config / pkce / login / tokenStore) — 인증만 알고 백엔드 도메인 모름              |
+| `src/api/client.ts`             | axios 인스턴스 + interceptor. 토큰을 **읽기 전용**으로 의존(`getAccessToken`/`clearLocalTokens`) |
+| `src/pages/auth/Callback/`      | OIDC 콜백 화면 (code → 토큰 교환)                                                                |
+| `src/routes/ProtectedRoute.tsx` | 라우트 가드 (`isLoggedIn()` + `VITE_SKIP_AUTH` 우회)                                             |
+
+### 6-3. 새 인증 필요 API 추가 시
+
+추가 작업 0. interceptor가 자동 부착하므로 도메인 API 함수는 평소처럼 작성:
+
+```typescript
+// src/api/wallet.ts — 인증 필요 API도 비인증 API와 동일하게 작성
+getBalance: () => apiClient.get<unknown, BalanceResponse>('/wallets/me/balances'),
+```
+
+### 6-4. 환경변수 (.env.development / .env.example)
+
+```
+VITE_OIDC_CLIENT_ID=               # Authentik client id (인프라 팀 발급)
+VITE_OIDC_AUTHORIZE_ENDPOINT=      # https://sso.sb.fisa/application/o/authorize/
+VITE_OIDC_TOKEN_ENDPOINT=          # https://sso.sb.fisa/application/o/token/
+VITE_OIDC_REDIRECT_URI=            # http://localhost:5173/auth/callback (IdP에 등록한 값과 일치)
+VITE_OIDC_SCOPE=openid profile email
+VITE_SKIP_AUTH=true                # 개발 초기 우회용 (PKCE 동작 확인 후 false 또는 제거)
+```
+
+운영기는 IdP만 Cognito로 바뀌고 변수 구조는 동일 — endpoint/client_id/redirect_uri만 갈아끼움.
+
+### 6-5. 토큰 저장소 — sessionStorage
+
+현재 `auth/tokenStore.ts`가 `sessionStorage` 사용 (탭 닫으면 사라짐).
+
+| 항목          | 현재 (sessionStorage) | 권장 운영 (TODO)           |
+| ------------- | --------------------- | -------------------------- |
+| XSS 노출      | ⚠️ JS 접근 가능       | httpOnly cookie (BFF 패턴) |
+| 탭 분리       | ✅ 탭마다 격리        | 동일                       |
+| refresh token | ❌ 미사용             | silent renew 도입          |
+
+운영 배포 전 보안 강화 필요 (`tokenStore.ts` 상단 TODO 참고).

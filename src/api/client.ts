@@ -1,4 +1,6 @@
 import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import { getAccessToken, clearLocalTokens } from '@/auth/tokenStore';
+import { ROUTES } from '@/constants/routes';
 
 /**
  * 백엔드 ApiResponse / ErrorResponse 형식 (gb-backend common-response 모듈 SSOT).
@@ -57,12 +59,20 @@ export const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// ---------- Request interceptor — JWT 자동 부착 (인증 도입 후 활성화) ----------
+// ---------- Request interceptor — JWT 자동 부착 ----------
 
+/**
+ * 매 요청마다 sessionStorage의 access_token을 Authorization: Bearer 헤더에 부착.
+ *
+ * 토큰 발급/저장은 auth 도메인(login.ts → Callback.tsx → tokenStore.ts) 담당.
+ * apiClient는 그 결과를 읽기만 한다(읽기 전용 의존). 호출 측 컴포넌트/hook이
+ * 헤더를 직접 만질 필요 없음(가이드 §2 "인증 토큰" 참고).
+ */
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  // TODO: 팀원의 PKCE 인증 도입 후 활성화 — useAuthStore에서 토큰을 꺼내 Authorization 헤더에 부착.
-  //   const token = useAuthStore.getState().accessToken;
-  //   if (token) config.headers.Authorization = `Bearer ${token}`;
+  const token = getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
@@ -85,11 +95,19 @@ apiClient.interceptors.response.use(
     const status = err.response?.status ?? 0;
     const body = err.response?.data;
 
-    // 401 — 인증 만료/누락 (AUTH4011). 팀원이 PKCE 도입 후 refresh 로직 추가 예정.
+    // 401 — 인증 만료/누락(AUTH4011). 로컬 토큰 정리 후 로그인 페이지로 강제 이동.
+    //
+    // 단순 redirect를 쓰는 이유: React Router 안에서 호출됐든(컴포넌트)·바깥에서 호출됐든
+    // (서비스 함수) 모두 동작해야 하므로 window.location.href가 가장 견고하다(SPA 상태 초기화 효과도).
+    // 이미 로그인 페이지에 있으면 무한 이동 방지로 skip.
+    //
+    // TODO: refresh_token으로 silent renew 시도 후 실패 시에만 이동하도록 개선.
+    //   현재는 tokenStore가 refresh_token 사용 안 함(sessionStorage 단순 저장).
     if (status === 401) {
-      // TODO: refresh token으로 갱신 시도 → 실패 시 로그인 페이지로 redirect.
-      //   useAuthStore.getState().clear();
-      //   window.location.href = '/login';
+      clearLocalTokens();
+      if (window.location.pathname !== ROUTES.LOGIN) {
+        window.location.href = ROUTES.LOGIN;
+      }
     }
 
     // envelope 형태로 응답이 온 경우(대부분의 경우) code/message 추출.
