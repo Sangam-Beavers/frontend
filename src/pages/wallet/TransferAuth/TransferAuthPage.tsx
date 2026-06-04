@@ -12,8 +12,8 @@
 
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ApiException, walletApi } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
-import { apiFetch } from '@/auth/api';
 import { ROUTES } from '@/constants/routes';
 import styles from './TransferAuthPage.module.css';
 
@@ -44,43 +44,39 @@ export default function TransferAuthPage() {
     setError(null);
     setVerifying(true);
     try {
-      const res = await apiFetch('/api/v1/transfers/pin-verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin }),
+      // 성공(200)이면 그냥 통과 — interceptor가 envelope을 풀고, 실패는 전부 ApiException throw.
+      await walletApi.verifyTransferPin({ pin });
+
+      // PIN 통과 → 송금 진행.
+      // TODO: 송금 생성 API(다른 담당) 연동 후, 그 성공 응답을 받아 완료 화면으로 이동하게 교체.
+      navigate(ROUTES.TRANSFER_COMPLETE, {
+        state: {
+          recipientName: state.recipientName,
+          currency: state.currency,
+          amount: state.amount,
+        },
       });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        // PIN 통과 → 송금 진행.
-        // TODO: 송금 생성 API(다른 담당) 연동 후, 그 성공 응답을 받아 완료 화면으로 이동하게 교체.
-        navigate(ROUTES.TRANSFER_COMPLETE, {
-          state: {
-            recipientName: state.recipientName,
-            currency: state.currency,
-            amount: state.amount,
-          },
-        });
-        return;
-      }
-
-      if (data.code === 'TRANSFER4009') {
-        // PIN 미설정 → 설정 화면으로 (송금 정보를 들고 가서 등록 후 다시 돌아온다)
-        navigate(ROUTES.TRANSFER_PIN_SETUP, { state });
-        return;
-      }
-
-      if (data.code === 'TRANSFER4007') {
-        // 불일치 — 백엔드 메시지에 남은 횟수 안내가 있으면 그대로 보여준다
-        setError(data.message ?? 'PIN이 일치하지 않습니다. 다시 입력해주세요.');
-        setPin('');
-      } else if (data.code === 'TRANSFER4008') {
-        setError(data.message ?? 'PIN을 5회 잘못 입력했습니다. 10분 후 다시 시도해주세요.');
+    } catch (e) {
+      if (e instanceof ApiException) {
+        if (e.code === 'TRANSFER4009') {
+          // PIN 미설정 → 설정 화면으로 (송금 정보를 들고 가서 등록 후 다시 돌아온다)
+          navigate(ROUTES.TRANSFER_PIN_SETUP, { state });
+          return;
+        }
+        if (e.code === 'TRANSFER4007') {
+          // 불일치 — 백엔드 메시지에 남은 횟수 안내가 있으면 그대로 보여준다
+          setError(e.message || 'PIN이 일치하지 않습니다. 다시 입력해주세요.');
+          setPin('');
+        } else if (e.code === 'TRANSFER4008') {
+          setError(e.message || 'PIN을 5회 잘못 입력했습니다. 10분 후 다시 시도해주세요.');
+        } else if (e.code === 'NETWORK_ERROR') {
+          setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        } else {
+          setError(e.message || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        }
       } else {
-        setError(data.message ?? '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        setError('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
       }
-    } catch {
-      setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setVerifying(false);
     }

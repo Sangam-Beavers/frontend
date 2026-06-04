@@ -14,8 +14,8 @@
 
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ApiException, walletApi } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
-import { apiFetch } from '@/auth/api';
 import { ROUTES } from '@/constants/routes';
 import styles from './TransferPinSetupPage.module.css';
 
@@ -65,22 +65,21 @@ export default function TransferPinSetupPage() {
 
     setSubmitting(true);
     try {
-      const res = await apiFetch('/api/v1/transfers/pin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin }),
-      });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setDone(true); // 201 — 등록 완료
-      } else if (data.code === 'COMMON4091') {
-        setAlreadySet(true); // 이미 PIN이 있음 → 입력 화면으로 보내기
+      // 성공(201)이면 그냥 통과 — interceptor가 envelope을 풀고, 실패는 전부 ApiException throw.
+      await walletApi.setTransferPin({ pin });
+      setDone(true); // 등록 완료
+    } catch (e) {
+      if (e instanceof ApiException) {
+        if (e.code === 'COMMON4091') {
+          setAlreadySet(true); // 이미 PIN이 있음 → 입력 화면으로 보내기
+        } else if (e.code === 'NETWORK_ERROR') {
+          setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        } else {
+          setError(e.message || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        }
       } else {
-        setError(data.message ?? '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        setError('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
       }
-    } catch {
-      setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setSubmitting(false);
     }
