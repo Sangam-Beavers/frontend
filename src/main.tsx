@@ -39,8 +39,9 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <App />
       </BrowserRouter>
-      {/* dev 환경에서만 자동 표시. 빌드 산출물에 포함되지 않음. */}
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* dev 모드에서만 렌더 — prod 빌드(import.meta.env.DEV === false)에서는 트리에 포함 X.
+          Vite의 dead code elimination이 false 분기를 빌드 산출물에서 자동 제거한다. */}
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   </StrictMode>
 );

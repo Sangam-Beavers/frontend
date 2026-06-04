@@ -81,13 +81,20 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 apiClient.interceptors.response.use(
   // 성공 응답: { success: true, data, message } → data만 추출해 반환.
   // 호출 측은 res.data가 곧 ApiResponse의 data 필드(실제 도메인 객체)다.
+  //
+  // envelope을 따르지 않는 2xx 응답(잘못된 업스트림·프록시 에러 페이지 등)은
+  // ApiException으로 throw — React Query 입장에서 "성공"으로 오인되어 페이지 코드가
+  // 도메인 필드 접근 중에 늦게 터지는 것을 막는다(SSOT 강제). CodeRabbit 리뷰 반영.
   (res) => {
     const body = res.data as ApiSuccess<unknown>;
-    // 백엔드가 envelope을 따르지 않는 경우(예: 외부 프록시 에러 페이지)는 body 자체를 반환.
     if (body && typeof body === 'object' && 'success' in body && body.success === true) {
       return body.data;
     }
-    return body;
+    throw new ApiException(
+      'INVALID_ENVELOPE',
+      res.status,
+      '백엔드 응답이 표준 envelope을 따르지 않습니다.'
+    );
   },
   // 실패 응답: ApiException으로 변환해 일관된 형태로 throw.
   // 호출 측은 try/catch + e.code로 비즈니스 에러 분기 가능.

@@ -8,7 +8,7 @@
 
 ## 0. 큰 그림
 
-```
+```text
 백엔드 ApiResponse                axios interceptor                  컴포넌트
 { success, data, message }   →   .data만 추출해서 반환        →    const { data, isLoading } = useXxx()
 { success: false, code, ... } →  ApiException(code, status, msg) →  catch (e instanceof ApiException)
@@ -179,11 +179,18 @@ try {
 - 송금·결제·계좌 등록 같은 mutation은 중복 실행 위험. 자동 재시도 X.
 - 명시적으로 사용자가 다시 누를 때만 실행.
 
-### snake_case ↔ camelCase
+### snake_case ↔ camelCase — ⚠️ 현재 불일치 상태
 
-- 백엔드는 snake_case 응답 (`public_id`, `comment_count`).
-- 프론트는 그대로 받아 사용. 변환 X — 추가 매핑 코드가 오히려 버그.
-- 타입 자동 생성도 snake_case 그대로 (OpenAPI 스펙 따름).
+**실제 응답** (Jackson SNAKE_CASE 전역 설정): `public_id`, `comment_count`, `created_at` (snake_case).
+**자동 생성 타입** (SpringDoc 기본): `publicId`, `commentCount`, `createdAt` (camelCase) — Java 필드명 기준이라 Jackson 설정 미반영.
+
+이 불일치는 알려진 문제. 처리 방침:
+
+- **도메인 타입은 인라인으로 snake_case 명시** — `src/api/{서비스}.ts` 안에서 백엔드 실제 응답에 맞춰 작성. 레퍼런스: `src/api/community.ts`의 `QnaPostItem`.
+- 자동 생성 타입(`src/types/api/*.ts`)은 **참조용**으로만 사용 (필드 목록 확인 등).
+- 직접 변환 코드 작성 X — 추가 매핑은 오히려 버그.
+
+**TODO** (별도 사이클): 백엔드 SpringDoc에 Jackson SNAKE_CASE 설정 반영 → 자동 생성 타입도 snake_case로 일치시키기.
 
 ### 인증 토큰
 
@@ -299,7 +306,23 @@ VITE_SKIP_AUTH=true                # 개발 초기 우회용 (PKCE 동작 확인
 
 운영기는 IdP만 Cognito로 바뀌고 변수 구조는 동일 — endpoint/client_id/redirect_uri만 갈아끼움.
 
-### 6-5. 토큰 저장소 — sessionStorage
+### 6-5. ⚠️ document-service 헤더 임시 처리 (백엔드 TODO)
+
+`src/types/api/document.ts`에는 보호된 엔드포인트마다 `X-User-Public-Id` 필수 헤더가 선언되어 있다. 이는 백엔드 `document-service`만 아직 OAuth2 Resource Server 미적용 상태(CLAUDE.md §9 명시)라 임시로 헤더에서 식별자를 받는 구조 때문이다.
+
+**현재 정책**:
+
+- 프론트 `apiClient`는 `Authorization: Bearer` 만 부착 (다른 3개 서비스와 일관).
+- 따라서 **document API 호출은 현재 작동하지 않음** (400 또는 401 응답 예상).
+- 사용 시점에 다음 둘 중 하나 필요:
+  1. **백엔드 정리 (정공법, 추천)** — `document-service`에 OAuth2 Resource Server 적용. JWT `public_id` claim에서 식별 → 헤더 제거. 다른 3개 서비스와 동일 패턴.
+  2. (임시 우회) Callback에서 `id_token` 디코드해 `public_id`를 sessionStorage에 저장 + interceptor에서 `X-User-Public-Id` 자동 부착.
+
+**처리 방침**: #1 (백엔드 OAuth2 적용)을 별도 사이클·별도 이슈로 진행한다. 그 전까지 document API 화면 연동은 보류.
+
+---
+
+### 6-6. 토큰 저장소 — sessionStorage
 
 현재 `auth/tokenStore.ts`가 `sessionStorage` 사용 (탭 닫으면 사라짐).
 
