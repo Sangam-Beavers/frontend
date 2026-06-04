@@ -15,6 +15,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException, walletApi } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { ROUTES } from '@/constants/routes';
+import { sanitizePinInput } from '@/utils/input';
 import styles from './TransferAuthPage.module.css';
 
 interface AuthState {
@@ -28,9 +29,6 @@ const FALLBACK: AuthState = {
   currency: 'VND',
   amount: '₫1,200,000',
 };
-
-// 숫자만 남기고 6자리까지 자른다 (PIN 입력 공통)
-const onlyDigits = (value: string) => value.replace(/\D/g, '').slice(0, 6);
 
 export default function TransferAuthPage() {
   const navigate = useNavigate();
@@ -105,7 +103,7 @@ export default function TransferAuthPage() {
             className={styles.input}
             placeholder="6자리 숫자"
             value={pin}
-            onChange={(e) => setPin(onlyDigits(e.target.value))}
+            onChange={(e) => setPin(sanitizePinInput(e.target.value))}
           />
         </div>
 
