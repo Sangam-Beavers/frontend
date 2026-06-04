@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// pages/Callback.tsx  —  ② 팔찌(토큰) 받는 화면
+// pages/auth/Callback/Callback.tsx  —  ② 팔찌(토큰) 받는 화면
 // Authentik이 로그인 끝내고 우리를 /auth/callback 으로 돌려보낼 때 뜬다.
 // 버튼·입력칸이 없는 "처리 중" 대기 화면이고, 끝나면 홈으로 넘어간다.
 //
@@ -8,6 +8,9 @@
 //   2) state 가 보냈던 값과 같은지 확인한다(위조 방지).
 //   3) code 를 Authentik 토큰 주소로 보내 "토큰"으로 바꾼다(fetch).
 //   4) 토큰을 저장하고 홈으로 이동.
+//
+// 폴더 위치: 다른 auth 페이지(Login/Signup/PasswordRecovery)와 같은 컨벤션 통일
+// (pages/auth/{PageName}/{PageName}.tsx).
 // ─────────────────────────────────────────────────────────────
 
 import { useEffect, useRef, useState } from 'react';

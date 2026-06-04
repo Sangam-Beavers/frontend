@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '@/pages/auth/auth.css';
-import { apiFetch } from '@/auth/api';
+import { ApiException, memberApi } from '@/api';
 import { ROUTES } from '@/constants/routes';
 
 function PasswordRecovery() {
@@ -34,22 +34,17 @@ function PasswordRecovery() {
 
     setSending(true);
     try {
-      const res = await apiFetch('/api/v1/auth/password/reset-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: trimmedEmail }),
-      });
-
-      if (res.ok) {
-        // 가입 여부와 무관하게 200 — 안내만 표시(보안: 가입여부 비노출).
-        setSent(true);
-      } else {
-        const data = await res.json().catch(() => null);
+      // 가입 여부와 무관하게 200 — interceptor가 envelope을 풀어 void 반환(보안: 가입여부 비노출).
+      // 형식 오류(COMMON4001)는 ApiException으로 throw됨.
+      await memberApi.requestPasswordReset({ email: trimmedEmail });
+      setSent(true);
+    } catch (e) {
+      if (e instanceof ApiException) {
         // COMMON4001 = 이메일 형식 오류 등
-        setError(data?.message ?? '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        setError(e.message);
+      } else {
+        setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       }
-    } catch {
-      setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setSending(false);
     }
