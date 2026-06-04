@@ -25,7 +25,9 @@ function PasswordRecovery() {
     e.preventDefault();
     setError(null);
 
-    if (!email.trim()) {
+    // 앞뒤 공백 제거한 값을 검증·전송에 모두 사용한다(공백 포함 원본을 보내면 서버 @Email 검증에 걸림).
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       setError('이메일을 입력해주세요.');
       return;
     }
@@ -35,7 +37,7 @@ function PasswordRecovery() {
       const res = await apiFetch('/api/v1/auth/password/reset-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: trimmedEmail }),
       });
 
       if (res.ok) {
