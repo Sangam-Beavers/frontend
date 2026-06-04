@@ -51,6 +51,7 @@ import TransferCompletePage from '@/pages/wallet/TransferComplete/TransferComple
 import TransferReceiptPage from '@/pages/wallet/TransferReceipt/TransferReceiptPage';
 import ExchangeRateFullPage from '@/pages/wallet/ExchangeRateFull/ExchangeRateFullPage';
 import TransferConfirmPage from '@/pages/wallet/TransferConfirm/TransferConfirmPage';
+import TransferPinSetupPage from '@/pages/wallet/TransferPinSetup/TransferPinSetupPage';
 import TransferSelectPage from '@/pages/wallet/TransferSelect/TransferSelectPage';
 
 export interface PageRoute {
@@ -118,6 +119,7 @@ export const serviceRoutes: PageRoute[] = [
   { path: ROUTES.TRANSFER_BANK, Component: TransferBankPage },
   { path: ROUTES.TRANSFER_CONFIRM, Component: TransferConfirmPage },
   { path: ROUTES.TRANSFER_AUTH, Component: TransferAuthPage },
+  { path: ROUTES.TRANSFER_PIN_SETUP, Component: TransferPinSetupPage },
   { path: ROUTES.TRANSFER_COMPLETE, Component: TransferCompletePage },
   { path: ROUTES.TRANSFER_RECEIPT, Component: TransferReceiptPage },
 

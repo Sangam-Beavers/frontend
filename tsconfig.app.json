@@ -21,10 +21,10 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
 
-    /* Path alias */
-    "baseUrl": ".",
+    /* Path alias — baseUrl은 TS 6에서 deprecated(TS5101)라 제거.
+       TS 5+는 baseUrl 없이 paths만으로 동작(타깃은 tsconfig 위치 기준 상대경로). */
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]

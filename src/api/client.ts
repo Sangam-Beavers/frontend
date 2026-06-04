@@ -33,13 +33,16 @@ export interface ApiError {
  *   }
  */
 export class ApiException extends Error {
-  constructor(
-    public readonly code: string,
-    public readonly httpStatus: number,
-    message: string
-  ) {
+  // 생성자 파라미터 프로퍼티(public readonly ...)는 tsconfig의 erasableSyntaxOnly에서
+  // 금지(TS1294)라, 필드 선언 + 생성자 대입으로 풀어서 작성한다. 동작은 동일.
+  readonly code: string;
+  readonly httpStatus: number;
+
+  constructor(code: string, httpStatus: number, message: string) {
     super(message);
     this.name = 'ApiException';
+    this.code = code;
+    this.httpStatus = httpStatus;
   }
 }
 
@@ -85,10 +88,13 @@ apiClient.interceptors.response.use(
   // envelope을 따르지 않는 2xx 응답(잘못된 업스트림·프록시 에러 페이지 등)은
   // ApiException으로 throw — React Query 입장에서 "성공"으로 오인되어 페이지 코드가
   // 도메인 필드 접근 중에 늦게 터지는 것을 막는다(SSOT 강제). CodeRabbit 리뷰 반영.
+  // 타입 단언 주의: axios 타입은 "AxiosResponse를 반환"을 기대하지만, 우리는 의도적으로
+  // envelope을 풀어 data만 반환한다(팀 표준). 호출부 타입은 apiClient.get<unknown, T>의
+  // 두 번째 제네릭이 결정하므로, 여기서는 단언으로 타입 경고만 잠재운다(런타임 동작 동일).
   (res) => {
     const body = res.data as ApiSuccess<unknown>;
     if (body && typeof body === 'object' && 'success' in body && body.success === true) {
-      return body.data;
+      return body.data as unknown as typeof res;
     }
     throw new ApiException(
       'INVALID_ENVELOPE',
