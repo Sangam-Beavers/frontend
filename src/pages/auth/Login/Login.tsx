@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '@/pages/auth/auth.css';
+import { startLogin } from '@/auth/login'; // ① 로그인 버튼이 부를 함수
 
 const LANG_OPTIONS = [
   { value: 'KO', label: '🌐 KO' },
@@ -12,13 +13,10 @@ const LANG_OPTIONS = [
 
 function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [lang, setLang] = useState('KO');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-  };
+  // 이메일/비번 입력칸은 제거했다.
+  // 실제 아이디·비번 입력은 로그인 버튼을 누르면 넘어가는 인증 페이지에서 처리하기 때문에,
+  // 이 화면에 입력칸을 두면 "입력해도 무시되는" 가짜 칸이라 사용자가 헷갈린다.
 
   return (
     <div className="auth-page">
@@ -55,43 +53,10 @@ function Login() {
             <p>송금·환전·문서 분석·생활 정보를 한 곳에서 관리하세요.</p>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="auth-field">
-              <label htmlFor="login-email">이메일</label>
-              <input
-                id="login-email"
-                type="email"
-                className="auth-input"
-                placeholder="email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            <div className="auth-field">
-              <label htmlFor="login-password">비밀번호</label>
-              <input
-                id="login-password"
-                type="password"
-                className="auth-input"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <button
-              type="button"
-              className="auth-forgot-link"
-              onClick={() => navigate('/password-recovery')}
-            >
-              비밀번호 찾기
-            </button>
-
-            <button type="submit" className="auth-primary" onClick={() => navigate('/')}>
-              이메일로 로그인
-            </button>
-          </form>
+          {/* ① 로그인 버튼: 누르면 인증 페이지로 이동해 로그인 진행 */}
+          <button type="button" className="auth-primary" onClick={() => startLogin()}>
+            이메일로 로그인
+          </button>
 
           <div className="auth-divider">
             <span />
