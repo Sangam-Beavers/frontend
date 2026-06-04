@@ -17,6 +17,11 @@
   box-shadow: none;
 }
 
+.cardOk {
+  background: #eefbf2;
+  box-shadow: none;
+}
+
 .cardError {
   background: #fdeeee;
   box-shadow: none;
@@ -37,29 +42,6 @@
   font-size: 13px;
   line-height: 1.5;
   color: var(--muted);
-}
-
-/* Summary rows */
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #eef4ff;
-  font-size: 13px;
-}
-
-.row:last-child {
-  border-bottom: none;
-}
-
-.row span {
-  color: var(--muted);
-}
-
-.row b {
-  color: var(--ink);
-  font-weight: 900;
 }
 
 /* Field */

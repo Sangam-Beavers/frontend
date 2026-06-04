@@ -13,7 +13,7 @@ export default function CommunityPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredPosts = searchQuery.trim()
-    ? POSTS.filter((p) => p.title.includes(searchQuery) || (p.preview ?? '').includes(searchQuery))
+    ? POSTS.filter((p) => p.title.includes(searchQuery) || p.body.includes(searchQuery))
     : POSTS;
 
   return (
