@@ -248,6 +248,37 @@ src/
 - **mock 정리**: 별도 사이클에서 mocks/\* 응답을 백엔드 envelope으로 통일 + 페이지 `.result` → `.data` 일괄 수정
 - **에러 메시지 사전**: `src/api/errorMessages.ts`로 `{ code: 사용자메시지 }` 매핑 (반복되면 hook으로 추출)
 - **refresh token + silent renew**: 현재 401이면 즉시 로그인 페이지로 보냄. 향후 refresh_token으로 renew 시도 후 실패 시에만 이동
+- **mock 정리**·**에러 메시지 사전**·**refresh token + silent renew**는 위 두 항목 + 다음 사이클에서 진행
+
+---
+
+## 7. HTTP 클라이언트 — 단일 통합 (apiClient)
+
+모든 백엔드 API 호출은 **`apiClient`(axios) 하나로 통일**한다. 다른 진입점(`fetch`, 별도 wrapper) 신규 도입 금지.
+
+| 도구                    | 위치             | 용도                                                                          |
+| ----------------------- | ---------------- | ----------------------------------------------------------------------------- |
+| **`apiClient`** (axios) | `@/api`          | 모든 백엔드 API 호출 — envelope 자동 파싱, ApiException, 토큰 자동 부착       |
+| ~~`apiFetch`~~          | ~~`@/auth/api`~~ | **제거됨** (PasswordRecovery·ResetPassword를 `memberApi`로 마이그레이션 완료) |
+
+### 인증 전 호출도 같은 패턴
+
+비밀번호 재설정처럼 토큰 없이 호출하는 API도 동일하게 `apiClient` 사용:
+
+- request interceptor가 `getAccessToken()` null이면 헤더 부착 안 함 (안전)
+- 백엔드는 해당 endpoint를 `permitAll` 또는 토큰 검증 우회로 받음
+
+```typescript
+// 예: 비밀번호 재설정 요청
+try {
+  await memberApi.requestPasswordReset({ email });
+  setSent(true);
+} catch (e) {
+  if (e instanceof ApiException) setError(e.message);
+}
+```
+
+레퍼런스: `src/pages/auth/PasswordRecovery/PasswordRecovery.tsx`, `ResetPassword/ResetPassword.tsx`.
 
 ---
 

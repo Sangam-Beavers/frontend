@@ -4,6 +4,7 @@ import Callback from '@/pages/auth/Callback/Callback';
 import GoogleSignupInfo from '@/pages/auth/GoogleSignupInfo/GoogleSignupInfo';
 import Login from '@/pages/auth/Login/Login';
 import PasswordRecovery from '@/pages/auth/PasswordRecovery/PasswordRecovery';
+import ResetPassword from '@/pages/auth/ResetPassword/ResetPassword';
 import Signup from '@/pages/auth/Signup/Signup';
 import CommunityFreePage from '@/pages/community/Free/CommunityFreePage';
 import CommunityJobPage from '@/pages/community/Job/CommunityJobPage';
@@ -61,6 +62,7 @@ export interface PageRoute {
 export const authRoutes: PageRoute[] = [
   { path: ROUTES.LOGIN, Component: Login },
   { path: ROUTES.PASSWORD_RECOVERY, Component: PasswordRecovery },
+  { path: ROUTES.RESET_PASSWORD, Component: ResetPassword }, // 메일 링크 → 새 비밀번호 입력
   { path: ROUTES.SIGNUP, Component: Signup },
   { path: ROUTES.GOOGLE_SIGNUP_INFO, Component: GoogleSignupInfo },
   { path: ROUTES.AUTH_CALLBACK, Component: Callback }, // ② 토큰 받는 화면

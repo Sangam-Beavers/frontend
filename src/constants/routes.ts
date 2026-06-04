@@ -2,6 +2,9 @@ export const ROUTES = {
   // ===== Auth =====
   LOGIN: '/login',
   PASSWORD_RECOVERY: '/password-recovery',
+  // 비밀번호 재설정 — 메일 링크가 가리키는 화면(?token=... 쿼리로 토큰 수신).
+  // 백엔드 app.password-reset.base-url(기본 http://localhost:5173/reset-password)과 경로가 일치해야 한다.
+  RESET_PASSWORD: '/reset-password',
   SIGNUP: '/signup',
   GOOGLE_SIGNUP_INFO: '/google-signup-info',
   AUTH_CALLBACK: '/auth/callback', // Authentik 로그인 후 돌아오는 주소(②)

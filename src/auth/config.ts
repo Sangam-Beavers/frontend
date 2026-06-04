@@ -12,4 +12,5 @@ export const authConfig = {
   scope: import.meta.env.VITE_OIDC_SCOPE,
 };
 
-export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+// 비어 있으면 상대경로(/api/...) → Vite 프록시(vite.config.ts)가 서비스별로 전달(개발). 운영은 게이트웨이 주소.
+export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
