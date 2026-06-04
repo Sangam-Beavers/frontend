@@ -4,6 +4,7 @@ export const ROUTES = {
   PASSWORD_RECOVERY: '/password-recovery',
   SIGNUP: '/signup',
   GOOGLE_SIGNUP_INFO: '/google-signup-info',
+  AUTH_CALLBACK: '/auth/callback', // Authentik 로그인 후 돌아오는 주소(②)
 
   // ===== Main: bottom-tab destinations =====
   HOME: '/',
