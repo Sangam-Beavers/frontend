@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import '@/pages/auth/auth.css';
-import { apiFetch } from '@/auth/api';
+import { ApiException, memberApi } from '@/api';
 import { ROUTES } from '@/constants/routes';
 
 function ResetPassword() {
@@ -43,24 +43,21 @@ function ResetPassword() {
 
     setSubmitting(true);
     try {
-      // body는 snake_case(new_password) — 백엔드 전역 규칙.
-      const res = await apiFetch('/api/v1/auth/password/reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, new_password: password }),
-      });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setDone(true); // 변경 완료 — 아래에서 완료 카드 + 로그인 버튼 표시
-      } else if (data.code === 'MEMBER4004') {
-        // 토큰 만료(30분)·위조·재사용 — 다시 요청하도록 안내
-        setError('링크가 만료되었거나 올바르지 않습니다. 비밀번호 찾기에서 다시 요청해주세요.');
+      // body는 snake_case(new_password) — 백엔드 전역 규칙(memberApi.ResetPasswordBody 타입 참고).
+      // 성공 시 interceptor가 envelope을 풀어 void 반환. 실패는 ApiException으로 throw.
+      await memberApi.resetPassword({ token, new_password: password });
+      setDone(true); // 변경 완료 — 아래에서 완료 카드 + 로그인 버튼 표시
+    } catch (e) {
+      if (e instanceof ApiException) {
+        if (e.code === 'MEMBER4004') {
+          // 토큰 만료(30분)·위조·재사용 — 다시 요청하도록 안내
+          setError('링크가 만료되었거나 올바르지 않습니다. 비밀번호 찾기에서 다시 요청해주세요.');
+        } else {
+          setError(e.message);
+        }
       } else {
-        setError(data.message ?? '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       }
-    } catch {
-      setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setSubmitting(false);
     }

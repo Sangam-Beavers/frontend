@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 import { ROUTES } from '@/constants/routes';
-import Callback from '@/pages/Callback';
+import Callback from '@/pages/auth/Callback/Callback';
 import GoogleSignupInfo from '@/pages/auth/GoogleSignupInfo/GoogleSignupInfo';
 import Login from '@/pages/auth/Login/Login';
 import PasswordRecovery from '@/pages/auth/PasswordRecovery/PasswordRecovery';
