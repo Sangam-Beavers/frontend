@@ -314,6 +314,21 @@
   color: var(--muted);
 }
 
+/* 입력칸 아래 작은 안내 문구 (중복확인 결과 등) */
+.auth-hint {
+  font-size: 12px;
+  margin: 4px 2px 0;
+  color: var(--muted);
+}
+
+.auth-hint.ok {
+  color: #1c8a4b;
+}
+
+.auth-hint.error {
+  color: #b3261e;
+}
+
 /* 2-column grid (국적 + 주 사용 언어) */
 .auth-grid2 {
   display: grid;
