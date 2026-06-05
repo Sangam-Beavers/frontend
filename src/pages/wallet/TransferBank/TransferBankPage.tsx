@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
-import { MY_ACCOUNTS_MOCK, type MyAccount } from '@/mocks/transferMock';
+import { useMyAccounts } from '@/hooks/useMyAccounts';
+import type { AccountItem } from '@/api/wallet';
 import styles from './TransferBankPage.module.css';
-
-const MY_ACCOUNTS = MY_ACCOUNTS_MOCK.result;
 
 export default function TransferBankPage() {
   const navigate = useNavigate();
-  const [selectedAccount, setSelectedAccount] = useState<MyAccount | null>(null);
+  const { data, isLoading, error } = useMyAccounts();
+  const accounts = data?.accounts ?? [];
+
+  // 사용자가 직접 고르기 전엔 주 계좌를 기본 선택(없으면 첫 계좌). 백엔드가 주 계좌 우선 정렬.
+  const [picked, setPicked] = useState<AccountItem | null>(null);
+  const selectedAccount = picked ?? accounts.find((a) => a.is_primary) ?? accounts[0] ?? null;
   const [amount, setAmount] = useState('');
 
   const num = Number(amount) || 0;
@@ -22,24 +26,64 @@ export default function TransferBankPage() {
         <div className={styles.section}>등록된 내 계좌</div>
 
         <div className={styles.list}>
-          {MY_ACCOUNTS.map((acc) => {
-            const isSelected = selectedAccount?.id === acc.id;
+          {isLoading && (
+            <div className={styles.item}>
+              <div className={styles.itemMain}>
+                <div className={styles.itemMeta}>계좌를 불러오는 중…</div>
+              </div>
+            </div>
+          )}
+          {error && (
+            <div className={styles.item}>
+              <div className={styles.itemMain}>
+                <div className={styles.itemMeta}>계좌를 불러오지 못했어요.</div>
+              </div>
+            </div>
+          )}
+          {!isLoading && !error && accounts.length === 0 && (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyText}>등록된 계좌가 없어요.</div>
+              <button
+                type="button"
+                className={styles.registerBtn}
+                onClick={() => navigate('/charge/add-account')}
+              >
+                계좌 등록하기
+              </button>
+            </div>
+          )}
+          {accounts.map((acc) => {
+            const isSelected = selectedAccount?.account_public_id === acc.account_public_id;
             return (
               <div
-                key={acc.id}
+                key={acc.account_public_id}
                 className={`${styles.item} ${isSelected ? styles.itemSelected : ''}`}
-                onClick={() => setSelectedAccount(acc)}
+                onClick={() => setPicked(acc)}
               >
                 <div className={styles.itemMain}>
-                  <div className={styles.itemTitle}>{acc.bank}</div>
+                  <div className={styles.itemTitle}>{acc.bank_name}</div>
                   <div className={styles.itemMeta}>
-                    {acc.nickname} · {acc.masked}
+                    {acc.account_number_masked}
+                    {acc.is_primary ? ' · 주 계좌' : ''}
                   </div>
                 </div>
                 {isSelected && <span className={styles.checkMark}>✓</span>}
               </div>
             );
           })}
+          {accounts.length > 0 && (
+            <button
+              type="button"
+              className={styles.addItem}
+              onClick={() => navigate('/charge/add-account')}
+            >
+              <div className={styles.itemMain}>
+                <div className={styles.itemTitle}>계좌 추가</div>
+                <div className={styles.itemMeta}>내 계좌를 새로 등록합니다</div>
+              </div>
+              <span className={styles.addIcon}>＋</span>
+            </button>
+          )}
         </div>
 
         <div className={styles.field}>
@@ -66,11 +110,15 @@ export default function TransferBankPage() {
           onClick={() =>
             navigate('/transfer/confirm', {
               state: {
-                recipientName: selectedAccount?.bank,
-                recipientInitial: selectedAccount?.bank?.[0] ?? '',
+                // 받는 대상은 본인 계좌 → 이름 칸은 "내 계좌", 상세 칸은 은행 + 마스킹 번호.
+                recipientName: '내 계좌',
+                recipientInitial: selectedAccount?.bank_name?.[0] ?? '',
+                recipientMeta: selectedAccount
+                  ? `${selectedAccount.bank_name} ${selectedAccount.account_number_masked}`
+                  : '',
+                recipientKind: 'account',
                 currency: 'KRW',
                 amount: num.toLocaleString(),
-                memo: selectedAccount?.masked ?? '',
               },
             })
           }

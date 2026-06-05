@@ -20,9 +20,12 @@ export const ROUTES = {
   COMMUNITY_RESIDENCE: '/community/residence',
   COMMUNITY_LIFE: '/community/life',
   COMMUNITY_JOB: '/community/job',
+  COMMUNITY_VISA: '/community/visa',
+  COMMUNITY_COUNTRY: '/community/country',
   COMMUNITY_FREE: '/community/free',
   COMMUNITY_WRITE: '/community/write',
   COMMUNITY_POST_DETAIL: '/community/posts/:postId',
+  COMMUNITY_POST_EDIT: '/community/posts/:postId/edit',
 
   // ===== Main: MyPage =====
   MYPAGE: '/mypage',
@@ -76,3 +79,6 @@ export const ROUTES = {
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 
 export const buildCommunityPostPath = (postId: string): string => `/community/posts/${postId}`;
+
+export const buildCommunityPostEditPath = (postId: string): string =>
+  `/community/posts/${postId}/edit`;

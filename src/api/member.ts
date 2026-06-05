@@ -87,20 +87,33 @@ export interface VerificationStatusResult {
   created_at: string;
 }
 
-// ---------- 내 프로필 (이슈 #108 — is_verified 출처 SSOT) ----------
+// ---------- 내 프로필 (이슈 #108 가드 SSOT + #91 마이페이지) ----------
 
-/** GET /api/v1/members/me 응답 data. 자동생성 타입과 달리 snake_case (실제 응답 형식). */
-export interface MyProfileResult {
+/**
+ * GET /api/v1/members/me 응답 (docs/auth/api-spec.md §8 + ProfileResponse DTO).
+ *
+ * 자동 생성 타입(@/types/api/member)이 camelCase로 떨어져 실제 응답과 안 맞아
+ * 인라인으로 snake_case 명시 (README §2 참고).
+ *
+ * 이슈 #108 — VerifiedRoute/HomePage 잠금 가드가 본 응답의 {@code is_verified}를 SSOT로 사용한다.
+ */
+export interface ProfileResponse {
   public_id: string;
   email: string;
   nickname: string;
+  /** ISO 3166-1 alpha-2 (예: "VN"). */
   nationality: string;
+  /** BCP 47 (예: "ko", "vi"). */
   language: string;
+  /** 자기소개. 미입력 시 null. */
   bio: string | null;
-  /** 신분증 인증 배지 여부. true면 금융 기능 사용 가능(이슈 #108 가드 기준). */
+  /** 신분증 인증 배지 여부. user_verifications APPROVED 시 true. */
   is_verified: boolean;
+  /** 매너온도 등급 RED/YELLOW/GREEN/PURPLE/BLUE. 현재 "GREEN" 고정(커뮤니티 도메인 미구현). */
   temperature_grade: string;
+  /** 프로필 사진 URL. 이미지 도메인 미구현으로 현재 항상 null. */
   profile_image_url: string | null;
+  /** 가입 일시 (ISO 8601 UTC Z). */
   created_at: string;
 }
 
@@ -128,6 +141,15 @@ export const memberApi = {
     }),
 
   /**
+   * 내 프로필 조회 — 마이페이지 표시용(#91) + 이슈 #108 is_verified 가드 SSOT.
+   *
+   * <p>인증 필요. JWT public_id claim으로 본인 식별.
+   * 미인증(`is_verified=false`)이면 프론트가 금융 기능 진입을 차단한다(VerifiedRoute / HomePage).
+   * 에러: 401 AUTH4011 / 404 MEMBER4001 — 호출 측에서 ApiException으로 처리.
+   */
+  getMyProfile: () => apiClient.get<unknown, ProfileResponse>('/members/me'),
+
+  /**
    * 비밀번호 재설정 메일 요청 (가입 이메일로 토큰 링크 발송).
    *
    * <p>응답은 가입 여부와 무관하게 항상 200 (보안: 가입 여부 비노출).
@@ -145,16 +167,7 @@ export const memberApi = {
   resetPassword: (body: ResetPasswordBody) =>
     apiClient.post<unknown, void>('/auth/password/reset', body),
 
-  /**
-   * 내 프로필 조회 (200) — 이슈 #108에서 is_verified 가드 기준으로 사용.
-   *
-   * <p>미인증(`is_verified=false`)이면 프론트가 금융 기능 진입을 차단한다(VerifiedRoute / HomePage).
-   * 404 MEMBER4001은 회원 미존재(탈퇴 등) — 호출 측에서 ApiException으로 처리.
-   */
-  getMyProfile: () => apiClient.get<unknown, MyProfileResult>('/members/me'),
-
-  // TODO: 다음 사이클
-  //   signup, withdraw, updateLanguage 등
+  // TODO: 다음 사이클 — withdraw, updateLanguage 등
 };
 
 /**

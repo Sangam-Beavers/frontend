@@ -1,0 +1,40 @@
+.searchIcon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #334155;
+  font-size: 18px;
+  font-family: inherit;
+}
+
+.banner {
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.banner b {
+  font-size: 18px;
+}
+
+.banner span {
+  font-size: 12px;
+  opacity: 0.92;
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 40px 0;
+}

@@ -210,7 +210,6 @@ export default function AdditionalCertPage() {
         await walletApi.createWallet();
       } catch (walletErr) {
         // 인증은 이미 commit됐으니 막지 않는다 — 다음 흐름(PIN 설정 등)에서 보정.
-        // eslint-disable-next-line no-console
         console.warn('[verification] 지갑 자동 개설 안전망 호출 실패', walletErr);
       }
 

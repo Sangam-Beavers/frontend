@@ -1,20 +1,18 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
 import TopBar from '@/components/navigation/TopBar';
-import { COMMUNITY_POSTS_ALL_MOCK } from '@/mocks/communityMock';
+import { useDebouncedKeyword } from '@/hooks/useDebouncedKeyword';
+import { usePosts } from '@/hooks/usePosts';
+import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityPage.module.css';
-
-const POSTS = COMMUNITY_POSTS_ALL_MOCK.result;
 
 export default function CommunityPage() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredPosts = searchQuery.trim()
-    ? POSTS.filter((p) => p.title.includes(searchQuery) || p.body.includes(searchQuery))
-    : POSTS;
+  // 전체 탭 → category 미지정. 검색은 서버(keyword)로. (디바운스 300ms는 useDebouncedKeyword)
+  const { searchQuery, setSearchQuery, keyword } = useDebouncedKeyword();
+  const { data, isLoading, error } = usePosts({ keyword: keyword || undefined });
+  const posts = data?.posts ?? [];
 
   return (
     <>
@@ -44,10 +42,16 @@ export default function CommunityPage() {
 
       <div className={styles.section}>전체 게시글</div>
 
-      {filteredPosts.length > 0 ? (
-        filteredPosts.map((post) => <FeedPost key={post.id} post={post} />)
+      {isLoading ? (
+        <div className={styles.empty}>게시글을 불러오는 중…</div>
+      ) : error ? (
+        <div className={styles.empty}>게시글을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>
+      ) : posts.length > 0 ? (
+        posts.map((item) => <FeedPost key={item.public_id} post={toFeedPostItem(item)} />)
       ) : (
-        <div className={styles.empty}>검색 결과가 없습니다</div>
+        <div className={styles.empty}>
+          {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
+        </div>
       )}
     </>
   );

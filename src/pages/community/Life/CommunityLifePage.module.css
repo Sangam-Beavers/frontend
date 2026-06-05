@@ -50,3 +50,10 @@
   text-align: left;
   cursor: pointer;
 }
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 40px 0;
+}

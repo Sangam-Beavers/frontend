@@ -1,0 +1,19 @@
+.search {
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #fff;
+  padding: 0 14px;
+  color: #34445f;
+  font-size: 12px;
+  font-weight: 800;
+  margin: 12px 0;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  outline: none;
+}
+
+.search::placeholder {
+  color: #98a6ba;
+}
