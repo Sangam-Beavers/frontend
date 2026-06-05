@@ -35,9 +35,16 @@ export default function CommunityPostDetailPage() {
   const deleteComment = useDeleteComment(postId);
 
   const handleSubmitComment = () => {
-    const content = draft.trim();
+    const submitted = draft;
+    const content = submitted.trim();
     if (content === '' || createComment.isPending) return;
-    createComment.mutate({ content }, { onSuccess: () => setDraft('') });
+    createComment.mutate(
+      { content },
+      {
+        // 전송 후 사용자가 새로 입력한 내용은 보존 — 전송 시점 입력 그대로일 때만 비운다.
+        onSuccess: () => setDraft((current) => (current === submitted ? '' : current)),
+      }
+    );
   };
 
   const handleDeleteComment = (commentId: string) => {
