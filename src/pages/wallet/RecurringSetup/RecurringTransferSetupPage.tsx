@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { RECENT_USERS_MOCK, type RecentUser } from '@/mocks/transferMock';
-import { TRANSFER_CURRENCIES } from '@/constants/currencies';
+import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
 import styles from './RecurringTransferSetupPage.module.css';
 
 const RECENT_USERS = RECENT_USERS_MOCK.result;
@@ -19,6 +19,8 @@ const TONE_CLASS: Record<string, string> = {
 
 export default function RecurringTransferSetupPage() {
   const navigate = useNavigate();
+  const { data: currenciesData, isLoading: currenciesLoading } = useTransferSupportedCurrencies();
+  const currencies = currenciesData?.currencies ?? [];
 
   const [recipientOpen, setRecipientOpen] = useState(false);
   const [recipient, setRecipient] = useState<RecentUser | null>(null);
@@ -89,11 +91,15 @@ export default function RecurringTransferSetupPage() {
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
           >
-            {TRANSFER_CURRENCIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.code} · {c.label}
-              </option>
-            ))}
+            {currenciesLoading ? (
+              <option value="">불러오는 중...</option>
+            ) : (
+              currencies.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.code} · {c.name}
+                </option>
+              ))
+            )}
           </select>
           <input
             type="text"
