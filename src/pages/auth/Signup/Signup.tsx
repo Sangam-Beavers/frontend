@@ -2,7 +2,7 @@
 // pages/auth/Signup/Signup.tsx — 회원가입 화면 (프론트 #82)
 //
 // 흐름:
-//   1) 닉네임 중복확인(선택) → GET /members/check-nickname → available 안내
+//   1) 이메일/닉네임 중복확인(선택) → GET /members/check-email · /check-nickname → available 안내
 //   2) 제출 → POST /api/v1/auth/register (snake_case body)
 //      성공(201) → 완료 카드 + "로그인하러 가기"
 //      MEMBER4002(이메일 중복) / MEMBER4003(닉네임 중복) / COMMON4001(형식) → 에러 표시
@@ -35,8 +35,8 @@ function CheckboxRow({ label, checked, onChange }: CheckboxRowProps) {
   );
 }
 
-// 닉네임 중복확인 상태: 안 함 / 확인 중 / 사용 가능 / 이미 사용 중
-type NicknameCheck = 'idle' | 'checking' | 'available' | 'taken';
+// 중복확인 상태(이메일·닉네임 공용): 안 함 / 확인 중 / 사용 가능 / 이미 사용 중
+type DupCheck = 'idle' | 'checking' | 'available' | 'taken';
 
 function Signup() {
   const navigate = useNavigate();
@@ -51,7 +51,8 @@ function Signup() {
     agreeTerms: false,
     agreePrivacy: false,
   });
-  const [nicknameCheck, setNicknameCheck] = useState<NicknameCheck>('idle');
+  const [emailCheck, setEmailCheck] = useState<DupCheck>('idle');
+  const [nicknameCheck, setNicknameCheck] = useState<DupCheck>('idle');
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false); // 가입 완료
   const [error, setError] = useState<string | null>(null);
@@ -59,12 +60,36 @@ function Signup() {
   const set =
     (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
-      // 닉네임을 바꾸면 이전 중복확인 결과는 무효
+      // 값을 바꾸면 이전 중복확인 결과는 무효
+      if (key === 'email') setEmailCheck('idle');
       if (key === 'nickname') setNicknameCheck('idle');
     };
 
   const toggle = (key: 'agreeTerms' | 'agreePrivacy') =>
     setForm((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  // 이메일 중복확인 버튼
+  const handleCheckEmail = async () => {
+    const email = form.email.trim();
+    if (!email) {
+      setError('이메일을 먼저 입력해주세요.');
+      return;
+    }
+    setError(null);
+    setEmailCheck('checking');
+    try {
+      const result = await memberApi.checkEmail(email);
+      setEmailCheck(result.available ? 'available' : 'taken');
+    } catch (e) {
+      setEmailCheck('idle');
+      // COMMON4001 = 이메일 형식 오류 등 — 백엔드 메시지 표시
+      setError(
+        e instanceof ApiException && e.code !== 'NETWORK_ERROR'
+          ? e.message
+          : '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+      );
+    }
+  };
 
   // 닉네임 중복확인 버튼
   const handleCheckNickname = async () => {
@@ -125,6 +150,7 @@ function Signup() {
       if (err instanceof ApiException) {
         if (err.code === 'MEMBER4002') {
           setError('이미 사용 중인 이메일입니다.');
+          setEmailCheck('taken');
         } else if (err.code === 'MEMBER4003') {
           setError('이미 사용 중인 닉네임입니다.');
           setNicknameCheck('taken');
@@ -190,14 +216,29 @@ function Signup() {
           <form onSubmit={handleSubmit}>
             <div className="auth-field">
               <label htmlFor="signup-email">이메일</label>
-              <input
-                id="signup-email"
-                type="email"
-                className="auth-input"
-                placeholder="email@example.com"
-                value={form.email}
-                onChange={set('email')}
-              />
+              <div className="auth-input-row">
+                <input
+                  id="signup-email"
+                  type="email"
+                  placeholder="email@example.com"
+                  value={form.email}
+                  onChange={set('email')}
+                />
+                <button
+                  type="button"
+                  className="auth-duplicate-btn"
+                  onClick={handleCheckEmail}
+                  disabled={emailCheck === 'checking'}
+                >
+                  {emailCheck === 'checking' ? '확인 중...' : '중복확인'}
+                </button>
+              </div>
+              {emailCheck === 'available' && (
+                <div className="auth-hint ok">사용할 수 있는 이메일입니다.</div>
+              )}
+              {emailCheck === 'taken' && (
+                <div className="auth-hint error">이미 사용 중인 이메일입니다.</div>
+              )}
             </div>
 
             <div className="auth-field">
