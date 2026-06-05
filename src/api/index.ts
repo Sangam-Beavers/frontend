@@ -40,15 +40,18 @@ export type {
 } from './wallet';
 export { documentApi } from './document';
 export type {
-  AnalysisDocumentType,
-  DocumentStatus,
-  ProcessingStatus,
-  RiskLevel,
-  SubmitRequest,
+  DocumentStatusCode,
+  ProcessingStatusCode,
+  RiskLevelCode,
+  SubmitDocumentRequest,
   SubmissionResponse,
   DocumentStatusResponse,
-  DeductionDto,
-  WageSummaryDto,
-  RiskItemDto,
+  DeductionItem,
+  WageSummary,
+  RiskItem,
   DocumentResultResponse,
+  DocumentSummaryItem,
+  DocumentListResponse,
 } from './document';
+// AnalysisDocumentType은 화면 라벨 매핑과 함께 constants/docTypes.ts가 SSOT.
+export type { AnalysisDocumentType } from '@/constants/docTypes';
