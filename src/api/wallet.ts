@@ -168,6 +168,28 @@ export interface RegisterAccountRequest {
   holder_name: string;
 }
 
+/** 충전 요청 body. amount는 KRW 십진수 string("300000"). 0 초과. */
+export interface ChargeRequest {
+  amount: string;
+}
+
+/** 충전 실행 응답 (POST /accounts/{id}/charge). 실제 응답은 snake_case. */
+export interface ChargeResponse {
+  /** 충전 거래 식별자(UUID). */
+  public_id: string;
+  /** 출금 계좌 식별자(UUID). */
+  account_public_id: string;
+  /** 충전 금액 — string 소수 4자리. */
+  amount: string;
+  /** 통화 코드(KRW 고정). */
+  currency_code: string;
+  /** 충전 후 지갑 잔액 — string 소수 4자리. */
+  wallet_balance: string;
+  /** 거래 상태(예: "COMPLETED"). */
+  status: string;
+  created_at: string;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -306,11 +328,25 @@ export const walletApi = {
   registerAccount: (body: RegisterAccountRequest) =>
     apiClient.post<unknown, AccountItem>('/accounts', body),
 
+  /**
+   * 충전 금액 검증·실행 (201) — 연결된 계좌(accountId)에서 전자지갑으로 KRW를 충전한다.
+   *
+   * <p>Idempotency-Key 헤더 필수: 동일 키 재요청 시 백엔드가 첫 결과를 그대로 재반환(멱등).
+   * 호출 측은 (계좌, 금액) 단위로 키를 한 번 생성해 네트워크 재시도 시 같은 키를 보낸다.
+   *
+   * <p>응답에 충전 후 잔액(wallet_balance)이 포함된다. 연동 계좌 잔액 부족 ACCOUNT4003(400),
+   * 미인증 계좌 ACCOUNT4006(403), 한도 초과 ACCOUNT4007(422), 지갑 없음 WALLET4001(404)
+   * → 모두 ApiException으로 throw.
+   */
+  chargeAccount: (accountId: string, body: ChargeRequest, idempotencyKey: string) =>
+    apiClient.post<unknown, ChargeResponse>(`/accounts/${accountId}/charge`, body, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    }),
+
   // TODO: 다음 사이클에서 추가
   //   원화 환산 총액: getWalletMe (GET /wallets/me, Kyubo)
   //   환율 위젯: getExchangeRates (GET /wallets/exchange-rates, Kyubo)
   //   계좌: deleteAccount (DELETE /accounts/{id}), setPrimary (PATCH /accounts/{id}/primary)
-  //   충전: charge
   //   송금: validateMember, validateBank, execute, getReceipt, getRecentRecipients
   //   정기송금: validateScheduled, createScheduled, listScheduled, getHistory
 };

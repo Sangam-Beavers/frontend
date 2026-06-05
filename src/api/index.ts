@@ -31,5 +31,7 @@ export type {
   VerifyAccountRequest,
   VerifyAccountResponse,
   RegisterAccountRequest,
+  ChargeRequest,
+  ChargeResponse,
 } from './wallet';
 export { documentApi } from './document';

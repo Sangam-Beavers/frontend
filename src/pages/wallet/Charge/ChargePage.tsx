@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { useMyAccounts } from '@/hooks/useMyAccounts';
-import { HOME_WALLET_BALANCE_MOCK } from '@/mocks/homeMock';
+import { useBalances, balanceOf } from '@/hooks/useBalances';
+import { useChargeAccount } from '@/hooks/useChargeAccount';
+import { accountErrorMessage } from '@/utils/accountErrorMessage';
 import styles from './ChargePage.module.css';
-
-const WALLET_BALANCE = HOME_WALLET_BALANCE_MOCK.result;
-const CHARGE_AMOUNT = 300_000;
 
 const formatKRW = (value: number) => `₩${value.toLocaleString('ko-KR')}`;
 
@@ -15,12 +14,51 @@ export default function ChargePage() {
   const { data, isLoading, error } = useMyAccounts();
   const accounts = data?.accounts ?? [];
 
-  // 기본 선택: 사용자가 고르기 전엔 첫 계좌(백엔드가 주 계좌 우선으로 정렬해 내려줌).
+  // 기본 선택: 사용자가 고르기 전엔 주 계좌(없으면 첫 계좌). 백엔드가 주 계좌 우선 정렬.
   const [picked, setPicked] = useState<string | null>(null);
-  const selectedAccountId = picked ?? accounts[0]?.account_public_id ?? null;
+  const selectedAccountId =
+    picked ??
+    accounts.find((a) => a.is_primary)?.account_public_id ??
+    accounts[0]?.account_public_id ??
+    null;
 
-  const [chargeAmount, setChargeAmount] = useState<number>(CHARGE_AMOUNT);
-  const afterBalance = WALLET_BALANCE + chargeAmount;
+  // 잔액은 실제 API(KRW). 충전 성공 시 useChargeAccount가 invalidate → 자동 갱신.
+  const { data: balanceData } = useBalances();
+  const currentBalance = Number(balanceOf(balanceData, 'KRW'));
+
+  const [chargeAmount, setChargeAmount] = useState<number>(0);
+  const afterBalance = currentBalance + chargeAmount;
+
+  const charge = useChargeAccount();
+  const canCharge = selectedAccountId !== null && chargeAmount > 0 && !charge.isPending;
+
+  // 멱등키: (계좌, 금액)이 같으면 같은 키 재사용(네트워크 재시도 시 중복 충전 방지),
+  // 바뀌면 새 키. 성공하면 비워서 다음 충전은 새 거래로 처리한다.
+  const lastCharge = useRef<{ key: string; account: string; amount: number } | null>(null);
+
+  const handleCharge = () => {
+    if (!selectedAccountId || chargeAmount <= 0 || charge.isPending) return;
+    const prev = lastCharge.current;
+    // 같은 (계좌, 금액) 재시도면 같은 키 재사용(멱등), 바뀌면 새 키.
+    const entry =
+      prev && prev.account === selectedAccountId && prev.amount === chargeAmount
+        ? prev
+        : { key: crypto.randomUUID(), account: selectedAccountId, amount: chargeAmount };
+    lastCharge.current = entry;
+    charge.mutate(
+      {
+        accountId: selectedAccountId,
+        amount: String(chargeAmount),
+        idempotencyKey: entry.key,
+      },
+      {
+        onSuccess: () => {
+          lastCharge.current = null;
+          navigate('/mypage/wallet-history');
+        },
+      }
+    );
+  };
 
   return (
     <>
@@ -28,7 +66,7 @@ export default function ChargePage() {
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>현재 전자지갑 잔액</div>
-        <div className={styles.cardBalance}>{formatKRW(WALLET_BALANCE)}</div>
+        <div className={styles.cardBalance}>{formatKRW(currentBalance)}</div>
       </div>
 
       <div className={styles.section}>등록된 내 계좌</div>
@@ -87,7 +125,8 @@ export default function ChargePage() {
           min={0}
           step={1000}
           className={styles.input}
-          value={chargeAmount}
+          placeholder="충전할 금액을 입력하세요"
+          value={chargeAmount || ''}
           onChange={(e) => setChargeAmount(Math.max(0, Number(e.target.value)))}
         />
       </div>
@@ -99,13 +138,16 @@ export default function ChargePage() {
         </div>
       </div>
 
+      {charge.error && <div className={styles.errorText}>{accountErrorMessage(charge.error)}</div>}
+
       <div className={styles.primaryFixed}>
         <button
           type="button"
           className={styles.primary}
-          onClick={() => navigate('/mypage/wallet-history')}
+          disabled={!canCharge}
+          onClick={handleCharge}
         >
-          충전하기
+          {charge.isPending ? '충전 중…' : '충전하기'}
         </button>
       </div>
     </>

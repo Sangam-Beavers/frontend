@@ -13,10 +13,18 @@ export function accountErrorMessage(err: unknown): string {
         return '존재하지 않는 계좌예요. 계좌번호를 확인해 주세요.';
       case 'ACCOUNT4002':
         return '계좌 인증에 실패했어요. 은행·계좌번호·예금주를 다시 확인해 주세요.';
+      case 'ACCOUNT4003':
+        return '연동 계좌의 잔액이 부족해요.';
       case 'ACCOUNT4004':
         return '이미 등록된 계좌예요.';
       case 'ACCOUNT4005':
         return '인증 요청 횟수를 초과했어요. 잠시 후 다시 시도해 주세요.';
+      case 'ACCOUNT4006':
+        return '인증되지 않은 계좌예요. 계좌를 다시 등록해 주세요.';
+      case 'ACCOUNT4007':
+        return '충전 한도를 초과했어요.';
+      case 'WALLET4001':
+        return '전자지갑이 없어요. 잠시 후 다시 시도해 주세요.';
       case 'COMMON4291':
         return '요청 횟수를 초과했어요. 잠시 후 다시 시도해 주세요.';
       case 'COMMON5031':
