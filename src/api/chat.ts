@@ -132,8 +132,12 @@ function handleFrame(frame: string, cb: ChatStreamCallbacks): void {
     if (line.startsWith('event:')) {
       eventName = line.slice('event:'.length).trim();
     } else if (line.startsWith('data:')) {
-      // data: 뒤에 첫 공백 한 칸은 표준상 무시. 나머지는 보존.
-      dataLines.push(line.slice('data:'.length).replace(/^ /, ''));
+      // SSE 표준은 "data:" 뒤 첫 공백 1개를 스페이서로 보고 strip 하지만,
+      // 우리 챗봇 Lambda는 한 글자씩(yield char) 보내므로 공백 토큰이
+      // `data: ` 한 줄로 나간다. 표준대로 strip 하면 공백 한 글자가 통째로
+      // 사라져 "분석된계약서결과를..." 처럼 단어 사이 공백이 다 없어진다.
+      // 챗봇 전용 클라이언트라 표준 strip을 끄고 raw로 보존.
+      dataLines.push(line.slice('data:'.length));
     }
     // 주석(콜론으로 시작) 등은 무시.
   }
@@ -141,7 +145,10 @@ function handleFrame(frame: string, cb: ChatStreamCallbacks): void {
   const data = dataLines.join('\n');
 
   if (eventName === 'token') {
-    cb.onToken(data);
+    // 백엔드/Lambda 중계 단계에서 줄바꿈/탭이 literal escape("\n", "\t")로 들어오는 케이스 복원.
+    // 표준 SSE 다중 data: 라인은 위 join('\n')으로 이미 처리됐고, 여기는 한 라인 안에 literal로
+    // 박혀 들어온 escape를 푼다.
+    cb.onToken(unescapeLiteralEscapes(data));
   } else if (eventName === 'done') {
     let sessionId = '';
     try {
@@ -153,4 +160,23 @@ function handleFrame(frame: string, cb: ChatStreamCallbacks): void {
     cb.onDone(sessionId);
   }
   // 그 외 이벤트 이름은 무시(미래 확장 대비).
+}
+
+/**
+ * SSE 토큰에 literal로 박혀 있는 escape 시퀀스를 실제 제어문자로 복원.
+ *
+ * <p>케이스: 백엔드/Lambda 중계가 어떤 이유로(JSON 직렬화 흔적 등) newline을 `\n` 두 글자로
+ * 흘려보낼 때, 마크다운 파서는 `\n## 헤더`를 한 줄로 보고 헤더로 인식하지 못한다.
+ * 이 함수가 그 escape를 풀어주면 마크다운이 정상 렌더된다.
+ *
+ * <p>현재 도메인(법령/환율/노동 Q&A)의 챗봇 답변에 진짜 backslash(`\`)가 들어올 일이 사실상
+ * 없으므로 backslash 자체 escape는 처리하지 않는다(단순화). 만약 그럴 케이스가 생기면
+ * NUL(U+0000)을 임시 마커로 두는 방식으로 확장한다.
+ */
+function unescapeLiteralEscapes(text: string): string {
+  return text
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\r')
+    .replace(/\\t/g, '\t')
+    .replace(/\\"/g, '"');
 }
