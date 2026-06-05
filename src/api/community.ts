@@ -79,6 +79,8 @@ export interface PostDetailResponse {
   author_nickname: string;
   /** 작성자 인증 배지 여부. */
   author_is_verified: boolean;
+  /** 요청자가 작성자인지 — 수정·삭제 노출 판단. 비로그인/타인은 false. */
+  is_author: boolean;
   like_count: number;
   comment_count: number;
   created_at: string;
@@ -94,6 +96,8 @@ export interface CommentItem {
   content: string;
   author_nickname: string;
   author_is_verified: boolean;
+  /** 요청자가 작성자인지 — 댓글 삭제 노출 판단. 비로그인/타인은 false. */
+  is_author: boolean;
   created_at: string;
 }
 

@@ -126,19 +126,21 @@ export default function CommunityPostDetailPage() {
         </button>
       </div>
 
-      {/* 작성자만 가능 — 권한은 백엔드가 검증(403). */}
-      <div className={styles.authorActions}>
-        <button
-          type="button"
-          className={styles.editBtn}
-          onClick={() => navigate(buildCommunityPostEditPath(postId))}
-        >
-          수정
-        </button>
-        <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>
-          삭제
-        </button>
-      </div>
+      {/* 작성자에게만 노출 — is_author 기준(백엔드도 403으로 재검증). */}
+      {post.is_author && (
+        <div className={styles.authorActions}>
+          <button
+            type="button"
+            className={styles.editBtn}
+            onClick={() => navigate(buildCommunityPostEditPath(postId))}
+          >
+            수정
+          </button>
+          <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>
+            삭제
+          </button>
+        </div>
+      )}
 
       {confirmDelete && (
         <ConfirmDialog
@@ -176,13 +178,15 @@ export default function CommunityPostDetailPage() {
               <div className={styles.commentText}>{comment.content}</div>
               <div className={styles.commentMeta}>
                 <span>{formatCommunityDate(comment.created_at)}</span>
-                <button
-                  type="button"
-                  className={styles.commentDelete}
-                  onClick={() => setConfirmCommentId(comment.public_id)}
-                >
-                  삭제
-                </button>
+                {comment.is_author && (
+                  <button
+                    type="button"
+                    className={styles.commentDelete}
+                    onClick={() => setConfirmCommentId(comment.public_id)}
+                  >
+                    삭제
+                  </button>
+                )}
               </div>
             </div>
           </div>
