@@ -20,6 +20,8 @@ import styles from './TransferAuthPage.module.css';
 
 interface AuthState {
   recipientName: string;
+  /** 받는 대상 보조 정보(내 계좌: "내 계좌 · 123****90"). */
+  recipientMeta?: string;
   currency: string;
   amount: string;
 }
@@ -118,6 +120,12 @@ export default function TransferAuthPage() {
             <span>받는 사람</span>
             <b>{state.recipientName}</b>
           </div>
+          {state.recipientMeta && (
+            <div className={styles.row}>
+              <span>받는 계좌</span>
+              <b>{state.recipientMeta}</b>
+            </div>
+          )}
           <div className={styles.row}>
             <span>송금 금액</span>
             <b>

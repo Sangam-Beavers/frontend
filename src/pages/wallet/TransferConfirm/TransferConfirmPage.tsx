@@ -6,9 +6,12 @@ import styles from './TransferConfirmPage.module.css';
 interface TransferState {
   recipientName: string;
   recipientInitial: string;
+  /** 이름 아래 보조 설명(흐름별). 내 계좌: "신한은행 123****90", 앱 사용자: undefined → 기본 문구. */
+  recipientMeta?: string;
+  /** 받는 대상 종류 — 'account'면 아바타를 계좌(카드) 아이콘으로. 미지정(앱 사용자)은 이니셜. */
+  recipientKind?: 'account' | 'user';
   currency: string;
   amount: string;
-  memo?: string;
 }
 
 const FALLBACK: TransferState = {
@@ -30,13 +33,33 @@ export default function TransferConfirmPage() {
 
       <div className={styles.card}>
         <div className={styles.recipientRow}>
-          <div className={styles.avatar}>{state.recipientInitial}</div>
+          <div className={styles.avatar}>
+            {state.recipientKind === 'account' ? (
+              <svg
+                className={styles.avatarIcon}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="5" width="18" height="14" rx="2.5" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            ) : (
+              state.recipientInitial
+            )}
+          </div>
           <div className={styles.recipientInfo}>
             <div className={styles.recipientName}>
               {state.recipientName}
               <span className={styles.pill}>인증</span>
             </div>
-            <div className={styles.recipientMeta}>앱 사용자에게 보내기</div>
+            <div className={styles.recipientMeta}>
+              {state.recipientMeta ?? '앱 사용자에게 보내기'}
+            </div>
           </div>
         </div>
       </div>
@@ -85,6 +108,7 @@ export default function TransferConfirmPage() {
               state: {
                 recipientName: state.recipientName,
                 recipientInitial: state.recipientInitial,
+                recipientMeta: state.recipientMeta,
                 currency: state.currency,
                 amount: state.amount,
               },

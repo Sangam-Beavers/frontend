@@ -32,19 +32,3 @@ export const RECENT_ACCOUNTS_MOCK = {
     { bank: '국민은행', holder: '김민수', masked: '123-****-1111', lastAmount: '₩200,000' },
   ] as RecentAccount[],
 };
-
-export interface MyAccount {
-  id: string;
-  bank: string;
-  masked: string;
-  nickname: string;
-}
-
-export const MY_ACCOUNTS_MOCK = {
-  isSuccess: true,
-  code: '200',
-  result: [
-    { id: 'acc-1', bank: '국민은행', masked: '123-****-1111', nickname: '주거래 계좌' },
-    { id: 'acc-2', bank: '카카오뱅크', masked: '456-****-2222', nickname: '생활비 계좌' },
-  ] as MyAccount[],
-};

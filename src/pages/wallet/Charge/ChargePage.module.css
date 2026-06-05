@@ -138,6 +138,13 @@
   bottom: 80px;
 }
 
+.errorText {
+  margin: 4px 2px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e11d48;
+}
+
 .primary {
   border-radius: 15px;
   padding: 14px 16px;
@@ -150,4 +157,10 @@
   width: 100%;
   font-family: inherit;
   font-size: 14px;
+  cursor: pointer;
+}
+
+.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
