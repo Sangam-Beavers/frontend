@@ -1,29 +1,68 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
+import { ApiException } from '@/api';
+import { useSupportedBanks } from '@/hooks/useSupportedBanks';
+import { useAccountHolder } from '@/hooks/useAccountHolder';
+import type { AccountRegisterDraft } from '@/types/charge';
 import styles from './AddAccountPage.module.css';
 
-const BANKS = [
-  '국민은행',
-  '신한은행',
-  '하나은행',
-  '우리은행',
-  '농협은행',
-  '카카오뱅크',
-  '기업은행',
-  '케이뱅크',
-  'SC제일은행',
-  '씨티은행',
-];
+/** 예금주 조회 실패 시 백엔드 에러 코드를 사용자용 메시지로 매핑. */
+function holderErrorMessage(err: unknown): string {
+  if (err instanceof ApiException) {
+    switch (err.code) {
+      case 'ACCOUNT4001':
+        return '존재하지 않는 계좌예요. 계좌번호를 확인해 주세요.';
+      case 'COMMON4291':
+        return '조회 횟수를 초과했어요. 잠시 후 다시 시도해 주세요.';
+      case 'COMMON5031':
+        return '은행 통신이 일시적으로 불안정해요. 잠시 후 다시 시도해 주세요.';
+      case 'COMMON4001':
+        return '계좌번호 형식이 올바르지 않아요.';
+      default:
+        return err.message;
+    }
+  }
+  return '예금주 조회에 실패했어요.';
+}
 
 export default function AddAccountPage() {
   const navigate = useNavigate();
-  const [bankName, setBankName] = useState<string>('국민은행');
-  const [accountNumber, setAccountNumber] = useState<string>('1234567890');
-  const [accountHolder, setAccountHolder] = useState<string>('김소영');
+  const { data: bankData, isLoading: banksLoading, error: banksError } = useSupportedBanks();
+  const banks = bankData?.banks ?? [];
 
+  const [bankCode, setBankCode] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  // 기본 선택: 사용자가 고르기 전엔 첫 은행(백엔드가 가나다순 정렬).
+  const selectedBankCode = bankCode || banks[0]?.bank_code || '';
+  // 200 + 빈 배열 — 에러가 아니라 "지원 은행이 아직 없음"(DB 미등록 등) 정상 케이스.
+  const banksEmpty = !banksLoading && !banksError && banks.length === 0;
+
+  const holder = useAccountHolder();
+  const verifiedName = holder.data?.account_holder_name ?? '';
+  const canLookup = selectedBankCode !== '' && accountNumber.trim() !== '' && !holder.isPending;
+  const canSubmit = verifiedName !== '';
+  const selectedBank = banks.find((b) => b.bank_code === selectedBankCode);
+
+  // 확인한 입력값을 다음 화면들로 전달(AutoDebitAuth → AccountRegistered).
+  // canSubmit일 때만 호출되므로 selectedBank/verifiedName은 채워져 있다.
   const handleNext = () => {
-    navigate('/charge/auto-debit');
+    const draft: AccountRegisterDraft = {
+      bankName: selectedBank?.bank_name ?? '',
+      accountNumber,
+      holderName: verifiedName,
+    };
+    navigate('/charge/auto-debit', { state: draft });
+  };
+
+  // 입력이 바뀌면 직전 조회 결과는 무효 → 초기화(다음 버튼도 다시 비활성).
+  const resetHolder = () => {
+    if (holder.data || holder.error) holder.reset();
+  };
+
+  const handleLookup = () => {
+    if (!canLookup) return;
+    holder.mutate({ bankCode: selectedBankCode, accountNumber: accountNumber.trim() });
   };
 
   return (
@@ -35,12 +74,19 @@ export default function AddAccountPage() {
         <select
           id="bank-name"
           className={styles.select}
-          value={bankName}
-          onChange={(e) => setBankName(e.target.value)}
+          value={selectedBankCode}
+          disabled={banksLoading || !!banksError || banksEmpty}
+          onChange={(e) => {
+            setBankCode(e.target.value);
+            resetHolder();
+          }}
         >
-          {BANKS.map((bank) => (
-            <option key={bank} value={bank}>
-              {bank}
+          {banksLoading && <option value="">은행 목록을 불러오는 중…</option>}
+          {banksError && <option value="">은행 목록을 불러오지 못했어요</option>}
+          {banksEmpty && <option value="">지원하는 은행이 없어요</option>}
+          {banks.map((bank) => (
+            <option key={bank.bank_code} value={bank.bank_code}>
+              {bank.bank_name}
             </option>
           ))}
         </select>
@@ -51,21 +97,37 @@ export default function AddAccountPage() {
         <input
           id="account-number"
           type="text"
+          inputMode="numeric"
           className={styles.input}
+          placeholder="- 없이 숫자만 입력"
           value={accountNumber}
-          onChange={(event) => setAccountNumber(event.target.value)}
+          onChange={(event) => {
+            setAccountNumber(event.target.value.replace(/[^0-9]/g, ''));
+            resetHolder();
+          }}
         />
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="account-holder">예금주</label>
-        <input
-          id="account-holder"
-          type="text"
-          className={styles.input}
-          value={accountHolder}
-          onChange={(event) => setAccountHolder(event.target.value)}
-        />
+        <label htmlFor="account-holder-lookup">예금주</label>
+        <div className={styles.holderRow}>
+          <div className={styles.holderName}>
+            {verifiedName || <span className={styles.holderPlaceholder}>조회 전</span>}
+          </div>
+          <button
+            id="account-holder-lookup"
+            type="button"
+            className={styles.verifyBtn}
+            disabled={!canLookup}
+            onClick={handleLookup}
+          >
+            {holder.isPending ? '조회 중…' : '예금주 조회'}
+          </button>
+        </div>
+        {holder.error && (
+          <div className={styles.holderError}>{holderErrorMessage(holder.error)}</div>
+        )}
+        {verifiedName && <div className={styles.holderOk}>✓ 예금주가 확인됐어요.</div>}
       </div>
 
       <div className={`${styles.card} ${styles.cardWarn}`}>
@@ -74,7 +136,7 @@ export default function AddAccountPage() {
       </div>
 
       <div className={styles.primaryFixed}>
-        <button type="button" className={styles.primary} onClick={handleNext}>
+        <button type="button" className={styles.primary} disabled={!canSubmit} onClick={handleNext}>
           다음
         </button>
       </div>

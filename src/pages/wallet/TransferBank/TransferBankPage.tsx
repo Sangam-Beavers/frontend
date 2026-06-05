@@ -39,10 +39,15 @@ export default function TransferBankPage() {
             </div>
           )}
           {!isLoading && !error && accounts.length === 0 && (
-            <div className={styles.item}>
-              <div className={styles.itemMain}>
-                <div className={styles.itemMeta}>등록된 계좌가 없습니다.</div>
-              </div>
+            <div className={styles.emptyState}>
+              <div className={styles.emptyText}>등록된 계좌가 없어요.</div>
+              <button
+                type="button"
+                className={styles.registerBtn}
+                onClick={() => navigate('/charge/add-account')}
+              >
+                계좌 등록하기
+              </button>
             </div>
           )}
           {accounts.map((acc) => {

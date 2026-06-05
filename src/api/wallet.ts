@@ -126,6 +126,25 @@ export interface AccountListResponse {
   accounts: AccountItem[];
 }
 
+/** 지원 은행 한 건 (백엔드 SupportedBankResponse). 계좌 등록 시 선택 가능한 은행. */
+export interface SupportedBank {
+  /** 은행 코드 (예: "004"). 예금주 조회·계좌 등록 시 식별자로 사용. */
+  bank_code: string;
+  /** 은행명 (예: "KB국민은행"). */
+  bank_name: string;
+}
+
+/** 추가 지원 은행 목록 응답 (GET /accounts/supported-banks) — 이름 가나다순. */
+export interface SupportedBankListResponse {
+  banks: SupportedBank[];
+}
+
+/** 예금주 실명 조회 응답 (GET /accounts/holder). */
+export interface AccountHolderResponse {
+  /** Mock 은행에서 조회된 예금주 실명 (예: "홍길동"). */
+  account_holder_name: string;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -219,6 +238,29 @@ export const walletApi = {
    * 사용자는 JWT의 public_id claim으로 식별 — 인증 누락은 AUTH4011(interceptor가 로그인 이동).
    */
   getMyAccounts: () => apiClient.get<unknown, AccountListResponse>('/accounts'),
+
+  /**
+   * 추가 지원 은행 목록 조회 (200) — 계좌 등록 시 선택 가능한 활성 국내 은행(이름 가나다순).
+   *
+   * <p>은행 목록은 자주 바뀌지 않는 마스터 데이터 — hook에서 staleTime을 길게(5분) 둔다.
+   * 인증 누락은 AUTH4011(interceptor가 로그인 이동).
+   */
+  getSupportedBanks: () =>
+    apiClient.get<unknown, SupportedBankListResponse>('/accounts/supported-banks'),
+
+  /**
+   * 예금주 실명 조회 (200) — bankCode + accountNumber로 Mock 은행에 실명을 조회한다.
+   *
+   * <p>사용자가 계좌번호 입력 후 "예금주 조회"를 누를 때 호출(온디맨드). 조회 횟수 rate-limit이
+   * 있어(COMMON4291, 429) 자동 호출/재시도하지 않는다 — useMutation으로 명시적 트리거만.
+   *
+   * <p>존재하지 않는 계좌 ACCOUNT4001(404), 형식 오류 COMMON4001(400),
+   * Mock 은행 통신 장애 COMMON5031(503) → 모두 ApiException으로 throw.
+   */
+  getAccountHolder: (bankCode: string, accountNumber: string) =>
+    apiClient.get<unknown, AccountHolderResponse>('/accounts/holder', {
+      params: { bankCode, accountNumber },
+    }),
 
   // TODO: 다음 사이클에서 추가
   //   원화 환산 총액: getWalletMe (GET /wallets/me, Kyubo)

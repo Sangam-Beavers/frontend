@@ -234,6 +234,37 @@
   cursor: not-allowed;
 }
 
+/* Empty state — 등록된 계좌가 없을 때 CTA */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.registerBtn {
+  border-radius: 12px;
+  padding: 11px 18px;
+  background: var(--soft2, #eef4ff);
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 13px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.registerBtn:active {
+  background: #d4e8ff;
+}
+
 .itemSelected {
   background: var(--soft2, #eef4ff);
 }

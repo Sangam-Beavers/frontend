@@ -25,5 +25,8 @@ export type {
   WalletBalancesResponse,
   AccountItem,
   AccountListResponse,
+  SupportedBank,
+  SupportedBankListResponse,
+  AccountHolderResponse,
 } from './wallet';
 export { documentApi } from './document';

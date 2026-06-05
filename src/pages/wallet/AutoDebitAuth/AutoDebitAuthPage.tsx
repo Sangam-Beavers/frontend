@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import type { AuthStep } from '@/types/charge';
 import styles from './AutoDebitAuthPage.module.css';
@@ -11,6 +11,9 @@ const STEPS: AuthStep[] = [
 
 export default function AutoDebitAuthPage() {
   const navigate = useNavigate();
+  // AddAccount에서 받은 입력값(AccountRegisterDraft)을 그대로 등록완료 화면으로 넘긴다.
+  const { state } = useLocation();
+  const goRegistered = () => navigate('/charge/account-registered', { state });
 
   return (
     <>
@@ -32,18 +35,10 @@ export default function AutoDebitAuthPage() {
         ))}
       </div>
 
-      <button
-        type="button"
-        className={styles.primary}
-        onClick={() => navigate('/charge/account-registered')}
-      >
+      <button type="button" className={styles.primary} onClick={goRegistered}>
         인증 요청하기
       </button>
-      <button
-        type="button"
-        className={styles.ghost}
-        onClick={() => navigate('/charge/account-registered')}
-      >
+      <button type="button" className={styles.ghost} onClick={goRegistered}>
         계좌 등록 완료
       </button>
     </>
