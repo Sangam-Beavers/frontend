@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
-import { TRANSFER_CURRENCIES } from '@/constants/currencies';
+import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
 import { RECENT_USERS_MOCK, type AvatarTone, type RecentUser } from '@/mocks/transferMock';
 import styles from './TransferAppPage.module.css';
 
 const RECENT_USERS = RECENT_USERS_MOCK.result;
-const CURRENCIES = TRANSFER_CURRENCIES;
 
 const AVATAR_CLASS: Record<AvatarTone, string> = {
   best: styles.avatarBest,
@@ -17,6 +16,14 @@ const AVATAR_CLASS: Record<AvatarTone, string> = {
 };
 
 export default function TransferAppPage() {
+  const {
+    data: currenciesData,
+    isLoading: currenciesLoading,
+    error: currenciesError,
+    refetch: refetchCurrencies,
+  } = useTransferSupportedCurrencies();
+  const currencies = currenciesData?.currencies ?? [];
+  const hasCurrenciesError = currenciesError != null;
   const navigate = useNavigate();
   const [recipient, setRecipient] = useState('');
   const [verified, setVerified] = useState<RecentUser | null>(null);
@@ -102,13 +109,23 @@ export default function TransferAppPage() {
             className={styles.select}
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
+            disabled={currenciesLoading || hasCurrenciesError || currencies.length === 0}
           >
-            {CURRENCIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.code} {c.label}
-              </option>
-            ))}
+            {currenciesLoading && <option value="">불러오는 중...</option>}
+            {hasCurrenciesError && <option value="">통화 불러오기 실패</option>}
+            {!currenciesLoading &&
+              !hasCurrenciesError &&
+              currencies.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.code} · {c.name}
+                </option>
+              ))}
           </select>
+          {hasCurrenciesError && (
+            <button type="button" className={styles.retryBtn} onClick={() => refetchCurrencies()}>
+              다시 시도
+            </button>
+          )}
         </div>
 
         <div className={styles.field}>
