@@ -10,4 +10,14 @@ export type { ApiSuccess, ApiError } from './client';
 export { communityApi } from './community';
 export { memberApi } from './member';
 export { walletApi } from './wallet';
+export type {
+  TransferPinBody,
+  ExchangeTypeCode,
+  SupportedCurrency,
+  SupportedCurrenciesResponse,
+  ExchangeQuoteRequest,
+  ExchangeQuoteResponse,
+  ExchangeExecuteRequest,
+  ExchangeResponse,
+} from './wallet';
 export { documentApi } from './document';
