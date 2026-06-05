@@ -95,14 +95,7 @@ export default function CommunityPostDetailPage() {
 
   return (
     <>
-      <TopBar
-        title="게시글"
-        rightAction={
-          <button type="button" className={styles.reportBtn}>
-            신고
-          </button>
-        }
-      />
+      <TopBar title="게시글" />
 
       <div className={styles.authorCard}>
         <div className={styles.authorRow}>
