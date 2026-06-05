@@ -303,6 +303,27 @@ export interface TransferSupportedCurrenciesResponse {
   currencies: TransferSupportedCurrency[];
 }
 
+/** 최근 송금한 앱 사용자 한 건 (백엔드 RecentRecipientsResponse.RecipientItem). */
+export interface RecentRecipientItem {
+  /** 수신자 회원 식별자(UUID) — 검증/송금 API 호출 시 사용. */
+  member_public_id: string;
+  /** 수신자 닉네임. */
+  nickname: string;
+  /** 국적 코드(ISO 3166-1 alpha-2, 예: "VN", "KR"). */
+  nationality: string;
+  /** 회원 인증 배지 여부. */
+  is_verified: boolean;
+  /** 가장 최근 송금의 통화 코드 (KRW/USD/PHP/VND 중 1). */
+  last_currency_code: string;
+  /** 가장 최근 송금 시각 (ISO 8601 UTC Z). */
+  last_transferred_at: string;
+}
+
+/** 최근 송금 수신자 목록 응답 (GET /transfers/recent-recipients/members). */
+export interface RecentRecipientsResponse {
+  receivers: RecentRecipientItem[];
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -494,6 +515,17 @@ export const walletApi = {
    */
   getTransferSupportedCurrencies: () =>
     apiClient.get<unknown, TransferSupportedCurrenciesResponse>('/transfers/supported-currencies'),
+
+  /**
+   * 최근 송금 앱 사용자 조회 (200) — TransferApp 화면 상단 "최근 송금" 칩용.
+   *
+   * <p>수신자별 최신 송금 1건씩, 최근순. 송금 이력 없으면 빈 배열(받은 사람만 있어도 X).
+   * 신규 사용자는 빈 배열 응답 — UI에서 빈 상태 안내.
+   *
+   * <p>경로 주의: 노션 표는 /transfers/recent-receivers로 잘못 표기됨 → 실제는 /recent-recipients/members.
+   */
+  getRecentInternalRecipients: () =>
+    apiClient.get<unknown, RecentRecipientsResponse>('/transfers/recent-recipients/members'),
 
   /**
    * 내 거래내역 목록 조회 (200) — 본인이 송신자 또는 수신자인 전 유형 거래를 최근순으로 페이지 조회.
