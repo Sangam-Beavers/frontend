@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { useMyAccounts } from '@/hooks/useMyAccounts';
 import { useBalances, balanceOf } from '@/hooks/useBalances';
@@ -22,12 +23,16 @@ export default function ChargePage() {
     accounts[0]?.account_public_id ??
     null;
 
-  // 잔액은 실제 API(KRW). 충전 성공 시 useChargeAccount가 invalidate → 자동 갱신.
-  const { data: balanceData } = useBalances();
-  const currentBalance = Number(balanceOf(balanceData, 'KRW'));
+  // 실제 KRW 잔액 — useBalances는 string("1530000.0000") 반환 → Number 변환.
+  // 지갑 없음(WALLET4001)이면 0으로 fallback (가입 직후 등 일시 상태).
+  // 충전 성공 시 useChargeAccount가 ['wallet','balances']를 invalidate → 자동 갱신.
+  const { data: balances, isLoading: balancesLoading, error: balancesError } = useBalances();
+  const hasWalletError =
+    balancesError instanceof ApiException && balancesError.code === 'WALLET4001';
+  const walletBalance = hasWalletError ? 0 : Number(balanceOf(balances, 'KRW'));
 
   const [chargeAmount, setChargeAmount] = useState<number>(0);
-  const afterBalance = currentBalance + chargeAmount;
+  const afterBalance = walletBalance + chargeAmount;
 
   const charge = useChargeAccount();
   const canCharge = selectedAccountId !== null && chargeAmount > 0 && !charge.isPending;
@@ -66,7 +71,7 @@ export default function ChargePage() {
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>현재 전자지갑 잔액</div>
-        <div className={styles.cardBalance}>{formatKRW(currentBalance)}</div>
+        <div className={styles.cardBalance}>{balancesLoading ? '—' : formatKRW(walletBalance)}</div>
       </div>
 
       <div className={styles.section}>등록된 내 계좌</div>
@@ -134,7 +139,7 @@ export default function ChargePage() {
       <div className={styles.card}>
         <div className={styles.row}>
           <span>충전 후 전자지갑</span>
-          <b>{formatKRW(afterBalance)}</b>
+          <b>{balancesLoading ? '—' : formatKRW(afterBalance)}</b>
         </div>
       </div>
 

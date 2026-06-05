@@ -33,5 +33,22 @@ export type {
   RegisterAccountRequest,
   ChargeRequest,
   ChargeResponse,
+  WalletBalanceWithKrwItem,
+  WalletMeResponse,
+  ExchangeRateItem,
+  ExchangeRateWidgetResponse,
 } from './wallet';
 export { documentApi } from './document';
+export type {
+  AnalysisDocumentType,
+  DocumentStatus,
+  ProcessingStatus,
+  RiskLevel,
+  SubmitRequest,
+  SubmissionResponse,
+  DocumentStatusResponse,
+  DeductionDto,
+  WageSummaryDto,
+  RiskItemDto,
+  DocumentResultResponse,
+} from './document';
