@@ -25,6 +25,8 @@ export type {
   WalletBalancesResponse,
   WalletBalanceWithKrwItem,
   WalletMeResponse,
+  ExchangeRateItem,
+  ExchangeRateWidgetResponse,
 } from './wallet';
 export { documentApi } from './document';
 export type {

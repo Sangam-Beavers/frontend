@@ -122,6 +122,28 @@ export interface WalletMeResponse {
   updated_at: string;
 }
 
+/** 환율 위젯의 통화별 1건 (백엔드 ExchangeRateWidgetResponse.RateItem). */
+export interface ExchangeRateItem {
+  currency_code: string;
+  /** 한국어 통화명 (예: "미국 달러"). */
+  currency_name: string;
+  /** 기호 (예: "$"). */
+  currency_symbol: string;
+  /** "1 외화→KRW" 환율 (소수 4자리 string). */
+  exchange_rate: string;
+  /** 전일 대비 등락률 (%). 표시 전용 number. 직전 값 없으면 0. */
+  change_rate: number;
+  /** 환율 기준 시각 (ISO 8601 UTC Z). */
+  updated_at: string;
+}
+
+/** 주요 통화 환율 위젯 응답 (GET /wallets/exchange-rates). */
+export interface ExchangeRateWidgetResponse {
+  /** 기준 통화 — 항상 "KRW" (1 외화→KRW 환산 기준). */
+  base_currency_code: string;
+  rates: ExchangeRateItem[];
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -218,8 +240,24 @@ export const walletApi = {
    */
   getWalletMe: () => apiClient.get<unknown, WalletMeResponse>('/wallets/me'),
 
+  /**
+   * 주요 통화 환율 위젯 조회 (200) — KRW 기준 "1 외화→KRW" 환율 + 등락률.
+   *
+   * <p>홈 화면 "실시간 환율" 가로 카드용. currencyCodes 미지정 시 KRW 제외 전체 지원 통화 반환.
+   *
+   * <p>change_rate는 표시 전용 number (등락률 %). 직전 값 없으면 0.
+   * dev 환경은 Mock 고정값, prod는 Redis cron(exchange-updater) 매일 자정 갱신.
+   *
+   * <p>에러: TRANSFER4002(400, 미지원 통화) / AUTH4011(401 — interceptor 처리) / COMMON5000(500).
+   *
+   * @param currencyCodes 조회할 통화 코드 콤마 구분 (예: "USD,PHP,VND"). 생략 시 KRW 제외 전체.
+   */
+  getExchangeRatesWidget: (currencyCodes?: string) =>
+    apiClient.get<unknown, ExchangeRateWidgetResponse>('/wallets/exchange-rates', {
+      params: currencyCodes ? { currency_codes: currencyCodes } : undefined,
+    }),
+
   // TODO: 다음 사이클에서 추가
-  //   환율 위젯: getExchangeRates (GET /wallets/exchange-rates, Kyubo)
   //   계좌: registerAccount, deleteAccount, getMyAccounts
   //   충전: charge
   //   송금: validateMember, validateBank, execute, getReceipt, getRecentRecipients

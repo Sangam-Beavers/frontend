@@ -2,16 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import { balanceOf, useBalances } from '@/hooks/useBalances';
+import { useExchangeRatesWidget } from '@/hooks/useExchangeRatesWidget';
 import { useWalletMe } from '@/hooks/useWalletMe';
-import {
-  HOME_ALL_CURRENCIES_MOCK,
-  HOME_EXCHANGE_RATES_MOCK,
-  HOME_NOTIFICATIONS_MOCK,
-} from '@/mocks/homeMock';
+import { HOME_ALL_CURRENCIES_MOCK, HOME_NOTIFICATIONS_MOCK } from '@/mocks/homeMock';
 import type { CurrencyOption } from '@/types/home';
 import styles from './HomePage.module.css';
 
-const EXCHANGE_RATES = HOME_EXCHANGE_RATES_MOCK.result;
 const NOTIFICATIONS = HOME_NOTIFICATIONS_MOCK.result;
 const STORAGE_KEY = 'homeCurrencies';
 
@@ -57,6 +53,8 @@ export default function HomePage() {
   const { data: balances, isLoading: balancesLoading, error: balancesError } = useBalances();
   // "지금 나의 원화" 카드용 — 보유 통화 전체의 KRW 환산 합계.
   const { data: walletMe, isLoading: walletMeLoading, error: walletMeError } = useWalletMe();
+  // 실시간 환율 (KRW 기준 "1 외화→KRW") — 홈 카드용. KRW 제외 전체 통화.
+  const { data: ratesData, isLoading: ratesLoading } = useExchangeRatesWidget();
 
   useEffect(() => {
     setCurrencies(loadCurrencies());
@@ -144,7 +142,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 실시간 환율 카드도 별도 API(/wallets/exchange-rates, Kyubo) 연동 후 교체 예정. */}
+      {/* 실시간 환율 (GET /wallets/exchange-rates) — KRW 기준 "1 외화→KRW" + 등락률.
+          로딩 중 빈 자리, dev 환경은 Mock 고정값이라 등락률 0으로 내려옴. */}
       <div className={styles.section}>
         실시간 환율
         <span
@@ -156,22 +155,36 @@ export default function HomePage() {
         </span>
       </div>
       <div className={styles.scrollRow}>
-        {EXCHANGE_RATES.map((rate) => (
-          <div
-            key={rate.code}
-            className={styles.rateCard}
-            onClick={() => navigate('/exchange/form')}
-            style={{ cursor: 'pointer' }}
-          >
-            <span className={styles.rateLabel}>
-              {rate.country} {rate.code}
-            </span>
-            <b className={styles.rateValue}>{rate.rate}</b>
-            <span className={`${styles.rateChange} ${rate.isUp ? styles.rateUp : styles.rateDown}`}>
-              {rate.change}
-            </span>
+        {ratesLoading ? (
+          <div className={styles.rateCard}>
+            <span className={styles.rateLabel}>불러오는 중...</span>
           </div>
-        ))}
+        ) : (
+          (ratesData?.rates ?? []).map((rate) => {
+            const isUp = rate.change_rate >= 0;
+            const changeAbs = Math.abs(rate.change_rate);
+            const changeLabel = `${isUp ? '▲' : '▼'} ${changeAbs.toFixed(2)}%`;
+            const rateLabel = Number(rate.exchange_rate).toLocaleString(undefined, {
+              maximumFractionDigits: 4,
+            });
+            return (
+              <div
+                key={rate.currency_code}
+                className={styles.rateCard}
+                onClick={() => navigate('/exchange/form')}
+                style={{ cursor: 'pointer' }}
+              >
+                <span className={styles.rateLabel}>
+                  {rate.currency_name} {rate.currency_code}
+                </span>
+                <b className={styles.rateValue}>{rateLabel}</b>
+                <span className={`${styles.rateChange} ${isUp ? styles.rateUp : styles.rateDown}`}>
+                  {changeLabel}
+                </span>
+              </div>
+            );
+          })
+        )}
       </div>
 
       <div className={styles.section}>알림</div>
