@@ -182,13 +182,36 @@
   color: #8a97aa;
 }
 
+.commentEmpty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 22px 0;
+}
+
+.loadMore {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 10px 0;
+  min-height: 8px;
+}
+
+/* 고정 입력 바 높이만큼 목록 끝에 여백을 줘 마지막 댓글이 가리지 않게 한다. */
+.commentListEnd {
+  height: 76px;
+}
+
 .commentInputRow {
   position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 72px;
+  left: 0;
+  right: 0;
+  bottom: 66px; /* BottomNav(66px) 바로 위에 고정 — 목록과 겹치지 않는 불투명 바 */
   display: flex;
   gap: 8px;
+  padding: 10px 18px;
+  background: #fff;
+  border-top: 1px solid var(--line);
 }
 
 .commentInput {

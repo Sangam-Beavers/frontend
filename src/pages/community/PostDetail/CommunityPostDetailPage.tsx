@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { buildCommunityPostEditPath } from '@/constants/routes';
@@ -16,9 +16,33 @@ export default function CommunityPostDetailPage() {
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
 
   const { data: post, isLoading, error } = usePostDetail(postId);
-  const { data: commentsData } = useComments(postId);
-  const comments = commentsData?.comments ?? [];
+  const {
+    data: commentsData,
+    isLoading: isCommentsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useComments(postId);
+  const comments = commentsData?.pages.flatMap((page) => page.comments) ?? [];
+  const totalComments = commentsData?.pages[0]?.total_elements ?? comments.length;
   const del = useDeletePost();
+
+  // 무한 스크롤 — 목록 끝 센티넬이 뷰포트에 들어오면 다음 페이지를 이어 붙인다.
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '160px' }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleDelete = () => {
     del.mutate(postId, { onSuccess: () => navigate('/community') });
@@ -126,24 +150,38 @@ export default function CommunityPostDetailPage() {
       )}
 
       <div className={styles.section}>
-        <span>댓글 {comments.length}</span>
+        <span>댓글 {totalComments}</span>
       </div>
 
-      {comments.map((comment) => (
-        <div key={comment.public_id} className={styles.comment}>
-          <div className={styles.commentAvatar}>{comment.author_nickname.charAt(0) || '?'}</div>
-          <div className={styles.commentBody}>
-            <div className={styles.commentName}>
-              {comment.author_nickname}
-              {comment.author_is_verified && <span className={styles.pill}>인증</span>}
-            </div>
-            <div className={styles.commentText}>{comment.content}</div>
-            <div className={styles.commentMeta}>
-              {formatCommunityDate(comment.created_at)} &middot; 답글 쓰기
+      {isCommentsLoading ? (
+        <div className={styles.commentEmpty}>댓글을 불러오는 중…</div>
+      ) : comments.length === 0 ? (
+        <div className={styles.commentEmpty}>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</div>
+      ) : (
+        comments.map((comment) => (
+          <div key={comment.public_id} className={styles.comment}>
+            <div className={styles.commentAvatar}>{comment.author_nickname.charAt(0) || '?'}</div>
+            <div className={styles.commentBody}>
+              <div className={styles.commentName}>
+                {comment.author_nickname}
+                {comment.author_is_verified && <span className={styles.pill}>인증</span>}
+              </div>
+              <div className={styles.commentText}>{comment.content}</div>
+              <div className={styles.commentMeta}>
+                {formatCommunityDate(comment.created_at)} &middot; 답글 쓰기
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
+
+      {/* 무한 스크롤 센티넬 + 다음 페이지 로딩 표시 */}
+      <div ref={loadMoreRef} className={styles.loadMore}>
+        {isFetchingNextPage ? '댓글 더 불러오는 중…' : ''}
+      </div>
+
+      {/* 고정된 댓글 입력 바에 마지막 댓글이 가리지 않도록 여백 확보 */}
+      <div className={styles.commentListEnd} aria-hidden="true" />
 
       <div className={styles.commentInputRow}>
         <input
