@@ -20,5 +20,8 @@ export type {
   ExchangeExecuteRequest,
   ExchangeResponse,
   ExchangeListResponse,
+  WalletStatusCode,
+  WalletBalanceItem,
+  WalletBalancesResponse,
 } from './wallet';
 export { documentApi } from './document';
