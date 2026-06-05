@@ -23,5 +23,7 @@ export type {
   WalletStatusCode,
   WalletBalanceItem,
   WalletBalancesResponse,
+  AccountItem,
+  AccountListResponse,
 } from './wallet';
 export { documentApi } from './document';

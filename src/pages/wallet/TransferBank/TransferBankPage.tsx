@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
-import { MY_ACCOUNTS_MOCK, type MyAccount } from '@/mocks/transferMock';
+import { useMyAccounts } from '@/hooks/useMyAccounts';
+import type { AccountItem } from '@/api/wallet';
 import styles from './TransferBankPage.module.css';
-
-const MY_ACCOUNTS = MY_ACCOUNTS_MOCK.result;
 
 export default function TransferBankPage() {
   const navigate = useNavigate();
-  const [selectedAccount, setSelectedAccount] = useState<MyAccount | null>(null);
+  const { data, isLoading, error } = useMyAccounts();
+  const accounts = data?.accounts ?? [];
+
+  const [selectedAccount, setSelectedAccount] = useState<AccountItem | null>(null);
   const [amount, setAmount] = useState('');
 
   const num = Number(amount) || 0;
@@ -22,18 +24,40 @@ export default function TransferBankPage() {
         <div className={styles.section}>등록된 내 계좌</div>
 
         <div className={styles.list}>
-          {MY_ACCOUNTS.map((acc) => {
-            const isSelected = selectedAccount?.id === acc.id;
+          {isLoading && (
+            <div className={styles.item}>
+              <div className={styles.itemMain}>
+                <div className={styles.itemMeta}>계좌를 불러오는 중…</div>
+              </div>
+            </div>
+          )}
+          {error && (
+            <div className={styles.item}>
+              <div className={styles.itemMain}>
+                <div className={styles.itemMeta}>계좌를 불러오지 못했어요.</div>
+              </div>
+            </div>
+          )}
+          {!isLoading && !error && accounts.length === 0 && (
+            <div className={styles.item}>
+              <div className={styles.itemMain}>
+                <div className={styles.itemMeta}>등록된 계좌가 없습니다.</div>
+              </div>
+            </div>
+          )}
+          {accounts.map((acc) => {
+            const isSelected = selectedAccount?.account_public_id === acc.account_public_id;
             return (
               <div
-                key={acc.id}
+                key={acc.account_public_id}
                 className={`${styles.item} ${isSelected ? styles.itemSelected : ''}`}
                 onClick={() => setSelectedAccount(acc)}
               >
                 <div className={styles.itemMain}>
-                  <div className={styles.itemTitle}>{acc.bank}</div>
+                  <div className={styles.itemTitle}>{acc.bank_name}</div>
                   <div className={styles.itemMeta}>
-                    {acc.nickname} · {acc.masked}
+                    {acc.account_number_masked}
+                    {acc.is_primary ? ' · 주 계좌' : ''}
                   </div>
                 </div>
                 {isSelected && <span className={styles.checkMark}>✓</span>}
@@ -66,11 +90,11 @@ export default function TransferBankPage() {
           onClick={() =>
             navigate('/transfer/confirm', {
               state: {
-                recipientName: selectedAccount?.bank,
-                recipientInitial: selectedAccount?.bank?.[0] ?? '',
+                recipientName: selectedAccount?.bank_name,
+                recipientInitial: selectedAccount?.bank_name?.[0] ?? '',
                 currency: 'KRW',
                 amount: num.toLocaleString(),
-                memo: selectedAccount?.masked ?? '',
+                memo: selectedAccount?.account_number_masked ?? '',
               },
             })
           }

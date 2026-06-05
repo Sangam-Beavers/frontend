@@ -100,6 +100,32 @@ export interface WalletBalancesResponse {
   updated_at: string;
 }
 
+/** 등록된 계좌 한 건 (백엔드 AccountResponse). 실제 응답은 snake_case(Jackson 전역 설정). */
+export interface AccountItem {
+  /** 계좌 식별자(UUID) — 주 계좌 지정·해제 등 후속 API의 path variable. */
+  account_public_id: string;
+  /** 은행 코드 (예: "004"). */
+  bank_code: string;
+  /** 은행명 (예: "KB국민은행"). */
+  bank_name: string;
+  /** 마스킹된 계좌번호 — 앞 3 + 끝 2만 노출 (예: "123*********34"). */
+  account_number_masked: string;
+  /** 주 계좌 여부. */
+  is_primary: boolean;
+  /** 가상계좌(앱 내부 발급) 여부. */
+  is_virtual: boolean;
+  /** 외부 은행 인증 완료 여부. */
+  is_verified: boolean;
+  /** 계좌 등록 시각 (ISO 8601 UTC Z). */
+  created_at: string;
+}
+
+/** 등록된 내 계좌 목록 응답 (GET /accounts) — 주 계좌 우선, 최신 등록순. */
+export interface AccountListResponse {
+  /** 활성 계좌 목록. 등록된 계좌가 없으면 빈 배열(404 아님). */
+  accounts: AccountItem[];
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -185,10 +211,19 @@ export const walletApi = {
    */
   getBalances: () => apiClient.get<unknown, WalletBalancesResponse>('/wallets/me/balances'),
 
+  /**
+   * 등록된 내 계좌 목록 조회 (200) — 주 계좌 우선, 최신 등록순.
+   *
+   * <p>계좌번호는 마스킹되어(앞 3 + 끝 2) 내려온다. 등록된 계좌가 없어도 404가 아니라
+   * 200 + accounts: [] 빈 배열로 응답하므로, 화면은 길이 0을 "계좌 없음"으로 분기한다.
+   * 사용자는 JWT의 public_id claim으로 식별 — 인증 누락은 AUTH4011(interceptor가 로그인 이동).
+   */
+  getMyAccounts: () => apiClient.get<unknown, AccountListResponse>('/accounts'),
+
   // TODO: 다음 사이클에서 추가
   //   원화 환산 총액: getWalletMe (GET /wallets/me, Kyubo)
   //   환율 위젯: getExchangeRates (GET /wallets/exchange-rates, Kyubo)
-  //   계좌: registerAccount, deleteAccount, getMyAccounts
+  //   계좌: registerAccount, deleteAccount (DELETE /accounts/{id}), setPrimary (PATCH /accounts/{id}/primary)
   //   충전: charge
   //   송금: validateMember, validateBank, execute, getReceipt, getRecentRecipients
   //   정기송금: validateScheduled, createScheduled, listScheduled, getHistory

@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
-import { CHARGE_ACCOUNTS_MOCK } from '@/mocks/chargeMock';
+import { useMyAccounts } from '@/hooks/useMyAccounts';
 import { HOME_WALLET_BALANCE_MOCK } from '@/mocks/homeMock';
 import styles from './ChargePage.module.css';
 
-const ACCOUNTS = CHARGE_ACCOUNTS_MOCK.result;
 const WALLET_BALANCE = HOME_WALLET_BALANCE_MOCK.result;
 const CHARGE_AMOUNT = 300_000;
 
@@ -13,9 +12,14 @@ const formatKRW = (value: number) => `₩${value.toLocaleString('ko-KR')}`;
 
 export default function ChargePage() {
   const navigate = useNavigate();
-  const [selectedAccountId, setSelectedAccountId] = useState<string>(ACCOUNTS[0].id);
-  const [chargeAmount, setChargeAmount] = useState<number>(CHARGE_AMOUNT);
+  const { data, isLoading, error } = useMyAccounts();
+  const accounts = data?.accounts ?? [];
 
+  // 기본 선택: 사용자가 고르기 전엔 첫 계좌(백엔드가 주 계좌 우선으로 정렬해 내려줌).
+  const [picked, setPicked] = useState<string | null>(null);
+  const selectedAccountId = picked ?? accounts[0]?.account_public_id ?? null;
+
+  const [chargeAmount, setChargeAmount] = useState<number>(CHARGE_AMOUNT);
   const afterBalance = WALLET_BALANCE + chargeAmount;
 
   return (
@@ -29,21 +33,37 @@ export default function ChargePage() {
 
       <div className={styles.section}>등록된 내 계좌</div>
       <div className={styles.list}>
-        {ACCOUNTS.map((account) => (
+        {isLoading && (
+          <div className={styles.item}>
+            <div className={styles.itemMain}>
+              <div className={styles.itemMeta}>계좌를 불러오는 중…</div>
+            </div>
+          </div>
+        )}
+        {error && (
+          <div className={styles.item}>
+            <div className={styles.itemMain}>
+              <div className={styles.itemMeta}>계좌를 불러오지 못했어요.</div>
+            </div>
+          </div>
+        )}
+        {accounts.map((account) => (
           <button
-            key={account.id}
+            key={account.account_public_id}
             type="button"
             className={styles.item}
-            onClick={() => setSelectedAccountId(account.id)}
+            onClick={() => setPicked(account.account_public_id)}
           >
             <div className={styles.itemMain}>
-              <div className={styles.itemTitle}>{account.bankName}</div>
+              <div className={styles.itemTitle}>{account.bank_name}</div>
               <div className={styles.itemMeta}>
-                {account.maskedNumber}
-                {account.isPrimary ? ' · 주 계좌' : ''}
+                {account.account_number_masked}
+                {account.is_primary ? ' · 주 계좌' : ''}
               </div>
             </div>
-            {selectedAccountId === account.id && <span className={styles.pill}>선택</span>}
+            {selectedAccountId === account.account_public_id && (
+              <span className={styles.pill}>선택</span>
+            )}
           </button>
         ))}
         <button
