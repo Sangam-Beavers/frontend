@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import CommunityMenu from '@/components/community/CommunityMenu';
 import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
@@ -8,18 +9,6 @@ import { useQna } from '@/hooks/useQna';
 import { usePagedPosts } from '@/hooks/usePagedPosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityJobPage.module.css';
-
-interface QuickItem {
-  id: string;
-  label: string;
-}
-
-const QUICK_ITEMS: QuickItem[] = [
-  { id: 'recommend', label: '💼 일자리 추천' },
-  { id: 'rating', label: '🏢 기업 평가' },
-  { id: 'qna', label: '❓ 주요 QnA' },
-  { id: 'interview', label: '📝 면접 후기' },
-];
 
 export default function CommunityJobPage() {
   const [showSearch, setShowSearch] = useState(false);
@@ -41,23 +30,11 @@ export default function CommunityJobPage() {
 
   return (
     <>
-      <TopBar
-        title="커뮤니티"
-        rightAction={
-          <button
-            type="button"
-            className={styles.searchIcon}
-            aria-label="검색"
-            aria-pressed={showSearch}
-            onClick={() => setShowSearch((s) => !s)}
-          >
-            🔍
-          </button>
-        }
-      />
+      <TopBar title="커뮤니티" />
 
       <CommunityTabs active="job" />
 
+      <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
       {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
 
       <div className={styles.jobAd}>
@@ -67,31 +44,6 @@ export default function CommunityJobPage() {
           공고 보기
         </button>
       </div>
-
-      <div className={styles.quickGrid}>
-        {QUICK_ITEMS.map((item) => (
-          <button key={item.id} type="button" className={styles.quickCard}>
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      {isLoading ? (
-        <div className={styles.empty}>게시글을 불러오는 중…</div>
-      ) : error ? (
-        <div className={styles.empty}>게시글을 불러오지 못했어요.</div>
-      ) : posts.length > 0 ? (
-        <>
-          {posts.map((item) => (
-            <FeedPost key={item.public_id} post={toFeedPostItem(item)} />
-          ))}
-          <Pagination page={page} totalPages={totalPages} onChange={goToPage} />
-        </>
-      ) : (
-        <div className={styles.empty}>
-          {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
-        </div>
-      )}
 
       <div className={styles.qnaCard}>
         <b>주요 QnA</b>
@@ -111,6 +63,23 @@ export default function CommunityJobPage() {
           </>
         )}
       </div>
+
+      {isLoading ? (
+        <div className={styles.empty}>게시글을 불러오는 중…</div>
+      ) : error ? (
+        <div className={styles.empty}>게시글을 불러오지 못했어요.</div>
+      ) : posts.length > 0 ? (
+        <>
+          {posts.map((item) => (
+            <FeedPost key={item.public_id} post={toFeedPostItem(item)} />
+          ))}
+          <Pagination page={page} totalPages={totalPages} onChange={goToPage} />
+        </>
+      ) : (
+        <div className={styles.empty}>
+          {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
+        </div>
+      )}
     </>
   );
 }

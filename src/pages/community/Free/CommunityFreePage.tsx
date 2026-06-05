@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import CommunityMenu from '@/components/community/CommunityMenu';
 import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
@@ -17,23 +18,11 @@ export default function CommunityFreePage() {
 
   return (
     <>
-      <TopBar
-        title="커뮤니티"
-        rightAction={
-          <button
-            type="button"
-            className={styles.searchIcon}
-            aria-label="검색"
-            aria-pressed={showSearch}
-            onClick={() => setShowSearch((s) => !s)}
-          >
-            🔍
-          </button>
-        }
-      />
+      <TopBar title="커뮤니티" />
 
       <CommunityTabs active="free" />
 
+      <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
       {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
 
       <div className={styles.banner}>

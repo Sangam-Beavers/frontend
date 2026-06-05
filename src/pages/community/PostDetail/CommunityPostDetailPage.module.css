@@ -182,21 +182,28 @@
   color: #8a97aa;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
 }
 
-/* 댓글 우측 하단 삭제 — 빨강 글씨(클릭 시 확인 팝업) */
+/* 날짜 옆 삭제 — 평소엔 메타와 같은 회색으로 차분하게, hover 시에만 빨강(클릭 시 확인 팝업) */
 .commentDelete {
   border: none;
   background: none;
   padding: 0;
   font-family: inherit;
-  font-size: 12px;
-  font-weight: 800;
-  color: #e11d48;
+  font-size: inherit; /* 날짜(메타)와 동일한 크기 상속 */
+  font-weight: 700; /* 볼드 유지 */
+  color: #8a97aa;
   cursor: pointer;
-  flex-shrink: 0;
+}
+
+.commentDelete::before {
+  content: '·';
+  margin: 0 6px;
+  color: #8a97aa;
+}
+
+.commentDelete:hover {
+  color: #e11d48;
 }
 
 .commentEmpty {

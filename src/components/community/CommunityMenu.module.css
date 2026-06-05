@@ -1,0 +1,39 @@
+.menu {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.item {
+  flex: 1;
+  height: 44px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.primary {
+  background: linear-gradient(135deg, #0b66ff, #0348dd);
+  color: #fff;
+  border: none;
+}
+
+.itemActive {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: #eef6ff;
+}

@@ -1,4 +1,6 @@
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import CommunityMenu from '@/components/community/CommunityMenu';
+import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
 import Pagination from '@/components/community/Pagination';
@@ -8,7 +10,7 @@ import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityPage.module.css';
 
 export default function CommunityPage() {
-  const navigate = useNavigate();
+  const [showSearch, setShowSearch] = useState(false);
   // 전체 탭 → category 미지정. 페이지·검색 상태는 URL(?page=&keyword=)로 관리(뒤로 가기 복원).
   const { data, isLoading, error, page, goToPage, searchQuery, setSearchQuery, keyword } =
     usePagedPosts();
@@ -21,25 +23,8 @@ export default function CommunityPage() {
 
       <CommunityTabs active="all" />
 
-      <input
-        className={styles.search}
-        placeholder="궁금한 생활 정보, 일자리, 거주 후기를 검색해보세요"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
-
-      <div className={styles.actions}>
-        <button
-          type="button"
-          className={`${styles.actionBtn} ${styles.primary}`}
-          onClick={() => navigate('/community/write')}
-        >
-          글쓰기
-        </button>
-        <button type="button" className={`${styles.actionBtn} ${styles.ghost}`}>
-          내 관심글
-        </button>
-      </div>
+      <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
+      {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
 
       <div className={styles.section}>전체 게시글</div>
 
