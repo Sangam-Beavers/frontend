@@ -31,3 +31,10 @@
   font-size: 12px;
   opacity: 0.92;
 }
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 40px 0;
+}

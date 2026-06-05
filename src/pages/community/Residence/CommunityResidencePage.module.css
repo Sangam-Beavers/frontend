@@ -71,3 +71,10 @@
   background: #dbeafe;
   color: #1d4ed8;
 }
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 40px 0;
+}

@@ -1,4 +1,4 @@
-export type CommunityCategory = 'all' | 'residence' | 'life' | 'job' | 'free';
+export type CommunityCategory = 'all' | 'residence' | 'life' | 'job' | 'visa' | 'country' | 'free';
 
 export type AvatarTone = 'best' | 'good' | 'mid' | 'warn' | 'bad' | 'purple' | 'default';
 
@@ -47,5 +47,7 @@ export const COMMUNITY_TABS: CommunityTabItem[] = [
   { category: 'residence', label: '거주', path: ROUTES.COMMUNITY_RESIDENCE },
   { category: 'life', label: '생활', path: ROUTES.COMMUNITY_LIFE },
   { category: 'job', label: '취업', path: ROUTES.COMMUNITY_JOB },
+  { category: 'visa', label: '비자', path: ROUTES.COMMUNITY_VISA },
+  { category: 'country', label: '국가별 정보', path: ROUTES.COMMUNITY_COUNTRY },
   { category: 'free', label: '자유게시판', path: ROUTES.COMMUNITY_FREE },
 ];

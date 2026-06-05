@@ -6,27 +6,12 @@ import TopBar from '@/components/navigation/TopBar';
 import { useDebouncedKeyword } from '@/hooks/useDebouncedKeyword';
 import { usePosts } from '@/hooks/usePosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
-import styles from './CommunityLifePage.module.css';
+import styles from './CommunityVisaPage.module.css';
 
-interface QuickItem {
-  id: string;
-  label: string;
-}
-
-const QUICK_ITEMS: QuickItem[] = [
-  { id: 'food', label: '🍜 고향의 맛' },
-  { id: 'club', label: '⚽ 동호회' },
-  { id: 'hospital', label: '🏥 병원 정보' },
-  { id: 'mart', label: '🛒 마트 정보' },
-];
-
-export default function CommunityLifePage() {
+export default function CommunityVisaPage() {
   const [showSearch, setShowSearch] = useState(false);
   const { searchQuery, setSearchQuery, keyword } = useDebouncedKeyword();
-  const { data, isLoading, error } = usePosts({
-    category: 'LIFE_INFO',
-    keyword: keyword || undefined,
-  });
+  const { data, isLoading, error } = usePosts({ category: 'VISA', keyword: keyword || undefined });
   const posts = data?.posts ?? [];
 
   return (
@@ -46,21 +31,13 @@ export default function CommunityLifePage() {
         }
       />
 
-      <CommunityTabs active="life" />
+      <CommunityTabs active="visa" />
 
       {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
 
       <div className={styles.banner}>
-        <b>생활 게시판</b>
-        <span>고향의 맛 · 동호회 · 병원/마트 · 지역 정보</span>
-      </div>
-
-      <div className={styles.quickGrid}>
-        {QUICK_ITEMS.map((item) => (
-          <button key={item.id} type="button" className={styles.quickCard}>
-            {item.label}
-          </button>
-        ))}
+        <b>비자 게시판</b>
+        <span>비자 발급·연장·변경, 체류 자격 관련 정보를 나눠요.</span>
       </div>
 
       {isLoading ? (

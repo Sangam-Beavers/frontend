@@ -1,18 +1,31 @@
+import { useState } from 'react';
+import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
 import TopBar from '@/components/navigation/TopBar';
-import { COMMUNITY_POSTS_FREE_MOCK } from '@/mocks/communityMock';
+import { useDebouncedKeyword } from '@/hooks/useDebouncedKeyword';
+import { usePosts } from '@/hooks/usePosts';
+import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityFreePage.module.css';
 
-const POSTS = COMMUNITY_POSTS_FREE_MOCK.result;
-
 export default function CommunityFreePage() {
+  const [showSearch, setShowSearch] = useState(false);
+  const { searchQuery, setSearchQuery, keyword } = useDebouncedKeyword();
+  const { data, isLoading, error } = usePosts({ category: 'FREE', keyword: keyword || undefined });
+  const posts = data?.posts ?? [];
+
   return (
     <>
       <TopBar
         title="커뮤니티"
         rightAction={
-          <button type="button" className={styles.searchIcon} aria-label="검색">
+          <button
+            type="button"
+            className={styles.searchIcon}
+            aria-label="검색"
+            aria-pressed={showSearch}
+            onClick={() => setShowSearch((s) => !s)}
+          >
             🔍
           </button>
         }
@@ -20,14 +33,24 @@ export default function CommunityFreePage() {
 
       <CommunityTabs active="free" />
 
+      {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
+
       <div className={styles.banner}>
         <b>자유게시판</b>
         <span>질문, 잡담, 하루 이야기, 정보 공유를 자유롭게 남겨보세요.</span>
       </div>
 
-      {POSTS.map((post) => (
-        <FeedPost key={post.id} post={post} />
-      ))}
+      {isLoading ? (
+        <div className={styles.empty}>게시글을 불러오는 중…</div>
+      ) : error ? (
+        <div className={styles.empty}>게시글을 불러오지 못했어요.</div>
+      ) : posts.length > 0 ? (
+        posts.map((item) => <FeedPost key={item.public_id} post={toFeedPostItem(item)} />)
+      ) : (
+        <div className={styles.empty}>
+          {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
+        </div>
+      )}
     </>
   );
 }
