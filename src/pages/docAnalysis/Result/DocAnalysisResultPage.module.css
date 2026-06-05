@@ -1,26 +1,25 @@
-/* 전문가 상담 카드를 콘텐츠 최하단으로 밀기 */
+/* ──────────────────────────────────────────────────────────
+   분석 결과 화면 — 모바일 핀테크 앱 위계 (결론 → 근거 → CTA → 보조 → 안내)
+   섹션 사이 일관된 호흡(20~24px)을 두고, disclaimer는 차분한 회색 인라인.
+   ────────────────────────────────────────────────────────── */
 .pageWrapper {
   display: flex;
   flex-direction: column;
   min-height: 100%;
 }
 
+/* 전문가 상담 카드는 disclaimer와 함께 하단에 그룹지어 안착시킨다.
+   margin-top: auto는 disclaimer에 걸려 있어 disclaimer + expertCard가 같이 밀린다. */
 .expertCard {
-  margin-top: auto;
-}
-
-/* flex 컨텍스트에서는 margin이 합산되므로, 위 요소의 margin-bottom만 남기고
-   아래 요소의 margin-top을 제거해 원래 간격을 유지 */
-.pageWrapper .cardDanger,
-.pageWrapper .list {
   margin-top: 0;
 }
 
-.pageWrapper .btnRow {
-  margin-top: 2px;
+/* flex 안에서 첫 카드의 위쪽 마진 정리 */
+.pageWrapper > .cardDanger:first-of-type {
+  margin-top: 0;
 }
 
-/* Cards */
+/* ─────────── 카드 공통 ─────────── */
 .card {
   border: 1px solid var(--line);
   background: #fff;
@@ -42,9 +41,10 @@
   border-color: #d8c8ff;
 }
 
+/* 결론 카드 — 다소 강조하되 페이지 톤을 해치지 않게 그라데이션 살짝 */
 .cardDanger {
-  background: #fff0f0;
-  box-shadow: none;
+  background: linear-gradient(180deg, #fff5f5, #fff0f0);
+  box-shadow: 0 6px 14px rgba(225, 29, 72, 0.06);
   border-color: #fecaca;
 }
 
@@ -57,7 +57,7 @@
 
 .cardText {
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--muted);
   margin-bottom: 10px;
 }
@@ -68,15 +68,18 @@
 
 .cardDanger .cardText {
   margin-bottom: 0;
+  color: #7f1d1d;
+  opacity: 0.78;
 }
 
-/* Issue list */
+/* ─────────── 이슈 리스트 ─────────── */
 .list {
   border: 1px solid var(--line);
   border-radius: 16px;
   background: #fff;
   overflow: hidden;
-  margin: 12px 0;
+  margin: 14px 0 0;
+  box-shadow: 0 4px 12px rgba(7, 91, 255, 0.04);
 }
 
 .item {
@@ -84,7 +87,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px;
+  padding: 14px 16px;
   border-bottom: 1px solid #eef4ff;
 }
 
@@ -122,12 +125,24 @@
   border: 1px solid #fecaca;
 }
 
-/* Buttons */
+/* ─────────── ③ 챗봇 CTA 호흡 영역 ───────────
+   리스트와 CTA, CTA와 액션 버튼 row 사이에 명확한 호흡을 준다.
+   ChatbotEntryButton 자체 margin은 0으로 통제하고 여기서만 간격 잡음 */
+.ctaWrap {
+  margin-top: 22px;
+  margin-bottom: 14px;
+}
+
+.ctaWrap > button {
+  margin: 0;
+}
+
+/* ─────────── ④ 액션 버튼 row ─────────── */
 .btnRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 0;
 }
 
 .primaryBtn {
@@ -140,7 +155,11 @@
   border: none;
   cursor: pointer;
   font-family: inherit;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, transform 0.12s;
+}
+
+.primaryBtn:active {
+  transform: translateY(0.5px);
 }
 
 .secondaryBtn {
@@ -157,6 +176,11 @@
   width: 100%;
   text-align: center;
   margin-top: 0;
+  transition: background 0.12s;
+}
+
+.secondaryBtn:hover {
+  background: var(--soft);
 }
 
 /* 카드 내부(전문가 상담 바로 알아보기)는 제목과의 간격 유지 */
@@ -167,4 +191,29 @@
 /* btnRow 내부 secondaryBtn은 margin 없이 primaryBtn과 동일 높이 정렬 */
 .btnRow .secondaryBtn {
   margin-top: 0;
+}
+
+/* ─────────── ⑤ Disclaimer (작은 안내) ───────────
+   기존 큰 노란 카드 → 차분한 회색 인라인 텍스트로 축소.
+   전문가 상담 카드 바로 위에 위치해 "AI는 참고 → 전문가가 결론"이라는
+   에스컬레이션 맥락을 자연스럽게 만든다. */
+.disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  /* margin-top: auto 로 자기와 이후 형제(전문가 상담 카드)를 하단으로 밀어 그룹화 */
+  margin: auto 4px 10px;
+  padding: 0;
+
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.disclaimerIcon {
+  font-size: 12px;
+  line-height: 1.55;
+  flex-shrink: 0;
+  opacity: 0.85;
 }

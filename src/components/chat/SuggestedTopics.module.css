@@ -1,0 +1,80 @@
+/* 분석 결과 기반 추천 질문 — 시트 초기 화면, 도구 안내 아래 */
+.wrap {
+  padding: 4px 4px 4px;
+  margin-top: 4px;
+}
+
+.label {
+  font-weight: 900;
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.labelIcon {
+  font-size: 14px;
+}
+
+.chips {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.12s ease;
+}
+
+.chip:hover {
+  background: var(--soft);
+}
+
+.chip:active {
+  transform: scale(0.99);
+}
+
+.chipIcon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.chipBody {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+
+.chipTitle {
+  font-weight: 900;
+  color: var(--blue);
+}
+
+.chipMeta {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.divider {
+  border: 0;
+  border-top: 1px dashed var(--line);
+  margin: 4px 0 14px;
+}

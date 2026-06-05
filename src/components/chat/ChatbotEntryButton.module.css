@@ -1,0 +1,63 @@
+/* 인라인 챗봇 진입 버튼.
+   DocAnalysisResultPage에서 분석 결과 리스트와 액션 버튼(저장/공유) 사이에 풀 너비로 배치된다.
+   분석을 보고 → "더 궁금하면 챗봇" → 액션 흐름이 자연스러워지도록.
+
+   2줄 구성: 위 = 호기심 자극(분석 결과 맥락), 아래 = 부드러운 초대(챗봇 정체성). */
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+  padding: 13px 16px;
+  margin: 12px 0 4px;
+
+  border: none;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #075bff, #00b4d8);
+  color: #fff;
+
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  box-shadow: 0 8px 20px rgba(7, 91, 255, 0.25);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(7, 91, 255, 0.32);
+  filter: brightness(1.02);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.icon {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.headline {
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.sub {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.9;
+  line-height: 1.3;
+}
