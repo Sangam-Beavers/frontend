@@ -1,0 +1,39 @@
+/* 우하단 플로팅 버튼. BottomNav 높이(66px) 위에 띄움. */
+.fab {
+  position: absolute;
+  right: 16px;
+  bottom: 78px; /* 66(nav) + 12 여백 */
+  z-index: 30;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, var(--blue), #0348dd);
+  color: #fff;
+
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
+
+  box-shadow: 0 10px 24px rgba(7, 91, 255, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.fab:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(7, 91, 255, 0.42);
+}
+
+.fab:active {
+  transform: translateY(0);
+}
+
+.icon {
+  font-size: 16px;
+  line-height: 1;
+}

@@ -1,0 +1,28 @@
+/* 각 이슈 카드 옆에 붙어 컨텍스트 챗봇 진입을 여는 작은 칩. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--soft2);
+  color: var(--blue);
+
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.chip:hover {
+  background: #dceaff;
+}
+
+.icon {
+  font-size: 12px;
+  line-height: 1;
+}
