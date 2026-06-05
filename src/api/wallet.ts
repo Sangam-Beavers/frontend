@@ -234,6 +234,22 @@ export interface ExchangeRateWidgetResponse {
   rates: ExchangeRateItem[];
 }
 
+/** 송금 지원 통화 한 건 (백엔드 transaction/SupportedCurrenciesResponse.CurrencyItem).
+ *  ⚠️ 환전 도메인 SupportedCurrency와 필드명 다름 (code/name/symbol). */
+export interface TransferSupportedCurrency {
+  /** ISO 4217 코드 (예: "KRW", "USD"). */
+  code: string;
+  /** 영문 표시명 (예: "Korean Won"). */
+  name: string;
+  /** 기호 (예: "₩", "$"). */
+  symbol: string;
+}
+
+/** 송금 지원 통화 목록 응답 (GET /transfers/supported-currencies). */
+export interface TransferSupportedCurrenciesResponse {
+  currencies: TransferSupportedCurrency[];
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -414,6 +430,17 @@ export const walletApi = {
     apiClient.get<unknown, ExchangeRateWidgetResponse>('/wallets/exchange-rates', {
       params: currencyCodes ? { currency_codes: currencyCodes } : undefined,
     }),
+
+  /**
+   * 송금 지원 통화 목록 조회 (200) — 송금 화면 통화 드롭다운용.
+   *
+   * <p>백엔드 CurrencyType enum SSOT — 현재 4종(KRW/USD/PHP/VND).
+   * ⚠️ 환전 도메인의 getSupportedCurrencies와 별개(필드명: code/name/symbol).
+   *
+   * <p>경로: /transfers/supported-currencies (노션 표는 /currencies/supported로 잘못 표기됨).
+   */
+  getTransferSupportedCurrencies: () =>
+    apiClient.get<unknown, TransferSupportedCurrenciesResponse>('/transfers/supported-currencies'),
 
   // TODO: 다음 사이클에서 추가
   //   계좌: deleteAccount (DELETE /accounts/{id}), setPrimary (PATCH /accounts/{id}/primary)
