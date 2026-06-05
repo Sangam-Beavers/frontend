@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { SETTING_LANGUAGES } from '@/constants/languages';
@@ -26,14 +26,17 @@ export default function ProfileEditPage() {
   const [language, setLanguage] = useState('한국어');
   const [bio, setBio] = useState('');
 
-  // profile 로드 직후 한 번 폼 초기값을 채운다. 그 후엔 사용자 입력에 맡긴다.
-  // queryClient 재조회로 profile이 갱신되면 사용자 입력을 덮어쓰므로(요구상 OK — 조회만 단계),
-  // PATCH 작업 시엔 더 정교한 dirty 상태 관리 필요.
+  // 폼 초기화는 profile 도착 시 단 한 번만(ref로 가드) — 그 후엔 사용자 입력에 맡긴다.
+  // useState lazy initializer를 못 쓰는 이유: 첫 render 시점에 profile은 항상 undefined(비동기 도착).
+  // ref 가드를 안 두면 queryClient 재조회로 profile이 다시 들어올 때마다 setState가 사용자 입력을 덮어쓰고
+  // cascading render도 발생한다(React 19 비권장 패턴). CodeRabbit PR #91 리뷰 반영.
+  const initializedRef = useRef(false);
   useEffect(() => {
-    if (!profile) return;
+    if (!profile || initializedRef.current) return;
     setNickname(profile.nickname);
     setLanguage(LANGUAGE_CODE_TO_LABEL[profile.language] ?? '한국어');
     setBio(profile.bio ?? '');
+    initializedRef.current = true;
   }, [profile]);
 
   const avatarInitial = nickname.charAt(0).toUpperCase() || '?';
