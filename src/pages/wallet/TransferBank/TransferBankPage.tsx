@@ -110,11 +110,15 @@ export default function TransferBankPage() {
           onClick={() =>
             navigate('/transfer/confirm', {
               state: {
-                recipientName: selectedAccount?.bank_name,
+                // 받는 대상은 본인 계좌 → 이름 칸은 "내 계좌", 상세 칸은 은행 + 마스킹 번호.
+                recipientName: '내 계좌',
                 recipientInitial: selectedAccount?.bank_name?.[0] ?? '',
+                recipientMeta: selectedAccount
+                  ? `${selectedAccount.bank_name} ${selectedAccount.account_number_masked}`
+                  : '',
+                recipientKind: 'account',
                 currency: 'KRW',
                 amount: num.toLocaleString(),
-                memo: selectedAccount?.account_number_masked ?? '',
               },
             })
           }
