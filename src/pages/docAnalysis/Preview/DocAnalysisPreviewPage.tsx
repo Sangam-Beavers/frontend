@@ -1,26 +1,45 @@
+import { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
+import { useDocAnalysisStore } from '@/stores/docAnalysisStore';
 import styles from './DocAnalysisPreviewPage.module.css';
 
 export default function DocAnalysisPreviewPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { docType } = (location.state as { docType?: string }) ?? {};
+  const docImage = useDocAnalysisStore((s) => s.docImage);
+
+  const imageUrl = useMemo(() => (docImage ? URL.createObjectURL(docImage) : null), [docImage]);
+
+  useEffect(() => {
+    return () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+    };
+  }, [imageUrl]);
 
   return (
     <>
       <TopBar title="업로드 이미지 확인" onBack={() => navigate(-1)} />
 
       <div className={styles.preview}>
-        <div className={styles.previewInner}>
-          <span className={styles.previewIcon}>🖼️</span>
-          <p className={styles.previewLabel}>
-            {docType ? `${docType} 이미지` : '업로드된 문서 이미지'}
-          </p>
-          <p className={styles.previewHint}>
-            이미지를 확인해주세요. 이미지가 흐릿하거나 잘렸다면 다시 업로드하세요.
-          </p>
-        </div>
+        {imageUrl ? (
+          <img
+            className={styles.previewImage}
+            src={imageUrl}
+            alt={docType ? `${docType} 이미지` : '업로드된 문서 이미지'}
+          />
+        ) : (
+          <div className={styles.previewInner}>
+            <span className={styles.previewIcon}>🖼️</span>
+            <p className={styles.previewLabel}>
+              {docType ? `${docType} 이미지` : '업로드된 문서 이미지'}
+            </p>
+            <p className={styles.previewHint}>
+              이미지를 확인해주세요. 이미지가 흐릿하거나 잘렸다면 다시 업로드하세요.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className={`${styles.card} ${styles.cardWarn}`}>

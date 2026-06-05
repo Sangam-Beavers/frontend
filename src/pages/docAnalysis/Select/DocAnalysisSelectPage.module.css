@@ -27,46 +27,32 @@
 }
 
 /* Document type selection */
-.grid2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 0 0 0 0;
-}
-
-.typeCard {
+.select {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 15px;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: inherit;
   cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230b66ff' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
   transition: border-color 0.15s, box-shadow 0.15s;
-  margin: 0;
 }
 
-.typeCard:hover {
+.select:hover,
+.select:focus {
   border-color: var(--blue);
+  outline: none;
 }
 
-.typeCardActive {
-  border-color: var(--blue);
+.select:focus {
   box-shadow: 0 0 0 2px rgba(7, 91, 255, 0.15);
-}
-
-.typeIcon {
-  font-size: 22px;
-  margin-bottom: 8px;
-}
-
-.typeRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.typeRow .typeIcon {
-  margin-bottom: 0;
-}
-
-/* Full-width type card (고용계약서) */
-.card.typeCard:not(.grid2 *) {
-  margin: 10px 0;
 }
 
 /* Buttons */

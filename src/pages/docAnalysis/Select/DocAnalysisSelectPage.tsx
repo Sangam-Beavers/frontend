@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { DOC_TYPES, type DocType } from '@/constants/docTypes';
 import { RECENT_DOCS_MOCK } from '@/mocks/docAnalysisMock';
+import { useDocAnalysisStore } from '@/stores/docAnalysisStore';
 import styles from './DocAnalysisSelectPage.module.css';
 
 const RECENT = RECENT_DOCS_MOCK.result;
@@ -10,8 +11,17 @@ const RECENT = RECENT_DOCS_MOCK.result;
 export default function DocAnalysisSelectPage() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<DocType | null>(null);
+  const setDocImage = useDocAnalysisStore((s) => s.setDocImage);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const goPreview = () => navigate('/doc-analysis/preview', { state: { docType: selected } });
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // 같은 파일 재선택 가능하도록 초기화
+    if (!file) return;
+    setDocImage(file);
+    navigate('/doc-analysis/preview', { state: { docType: selected } });
+  };
 
   return (
     <>
@@ -24,35 +34,37 @@ export default function DocAnalysisSelectPage() {
         </div>
       </div>
 
-      <div className={styles.grid2}>
-        {DOC_TYPES.slice(0, 2).map((t) => (
-          <div
-            key={t}
-            className={`${styles.card} ${styles.typeCard} ${selected === t ? styles.typeCardActive : ''}`}
-            onClick={() => setSelected(t)}
-          >
-            <div className={styles.typeIcon}>📄</div>
-            <div className={styles.cardTitle}>{t}</div>
-          </div>
-        ))}
-      </div>
-
-      <div
-        className={`${styles.card} ${styles.typeCard} ${selected === '고용계약서' ? styles.typeCardActive : ''}`}
-        onClick={() => setSelected('고용계약서')}
+      <select
+        className={styles.select}
+        value={selected ?? ''}
+        onChange={(e) => setSelected(e.target.value as DocType)}
       >
-        <div className={styles.typeRow}>
-          <div className={styles.typeIcon}>📝</div>
-          <div className={styles.cardTitle}>고용계약서</div>
-        </div>
-      </div>
+        <option value="" disabled>
+          문서 종류 선택
+        </option>
+        {DOC_TYPES.map((t) => (
+          <option key={t} value={t}>
+            {t}
+          </option>
+        ))}
+      </select>
+
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={handleImageSelect}
+      />
+      <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleImageSelect} />
 
       <div className={styles.btnRow}>
         <button
           type="button"
           className={styles.secondaryBtn}
           disabled={!selected}
-          onClick={goPreview}
+          onClick={() => cameraInputRef.current?.click()}
         >
           카메라 촬영
         </button>
@@ -60,9 +72,9 @@ export default function DocAnalysisSelectPage() {
           type="button"
           className={styles.primaryBtn}
           disabled={!selected}
-          onClick={goPreview}
+          onClick={() => fileInputRef.current?.click()}
         >
-          파일 업로드
+          이미지 업로드
         </button>
       </div>
 
