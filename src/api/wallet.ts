@@ -80,6 +80,26 @@ export interface ExchangeListResponse {
   total_pages: number;
 }
 
+/** 지갑 상태. */
+export type WalletStatusCode = 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
+
+/** 통화별 잔액 한 건 (백엔드 WalletBalanceResponse.BalanceItem). */
+export interface WalletBalanceItem {
+  /** ISO 4217 코드 (예: "KRW", "USD"). 백엔드 CurrencyType enum 4종(KRW/USD/PHP/VND). */
+  currency_code: string;
+  /** 잔액 — 소수 4자리 고정 string ("1530000.0000"). Number 변환 후 표시. */
+  balance: string;
+}
+
+/** 전자지갑 잔액 조회 응답 (GET /wallets/me/balances). */
+export interface WalletBalancesResponse {
+  wallet_public_id: string;
+  status: WalletStatusCode;
+  balances: WalletBalanceItem[];
+  /** 잔액 최종 변경 시각 (ISO 8601 UTC Z). */
+  updated_at: string;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -153,8 +173,21 @@ export const walletApi = {
   getExchange: (publicId: string) =>
     apiClient.get<unknown, ExchangeResponse>(`/exchanges/${publicId}`),
 
+  /**
+   * 내 전자지갑 잔액 조회 (200) — 통화별 잔액 배열을 받는다.
+   *
+   * <p>잔액(balance)은 소수 4자리 string("1530000.0000"). 호출 측은 Number() 변환 후 표시.
+   * balances 배열은 사용자가 보유한 통화만 포함 — 화면에서 특정 통화만 표시하고 싶다면
+   * code 매칭 후 없으면 0 처리 (useBalances hook의 balanceOf helper 권장).
+   *
+   * <p>지갑 자체가 없으면 WALLET4001(404) → 신규 회원이거나 지갑 생성 실패 케이스.
+   * 인증 누락은 AUTH4011(apiClient interceptor가 로그인 화면 이동).
+   */
+  getBalances: () => apiClient.get<unknown, WalletBalancesResponse>('/wallets/me/balances'),
+
   // TODO: 다음 사이클에서 추가
-  //   잔액: getBalance
+  //   원화 환산 총액: getWalletMe (GET /wallets/me, Kyubo)
+  //   환율 위젯: getExchangeRates (GET /wallets/exchange-rates, Kyubo)
   //   계좌: registerAccount, deleteAccount, getMyAccounts
   //   충전: charge
   //   송금: validateMember, validateBank, execute, getReceipt, getRecentRecipients
