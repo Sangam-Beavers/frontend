@@ -75,7 +75,8 @@ export function usePagedPosts({ category, sort, size }: UsePagedPostsParams = {}
       },
       { replace: true }
     );
-    window.scrollTo({ top: 0 });
+    // 실제 스크롤 컨테이너는 MobileScreen의 .content(window가 아님) — 그걸 맨 위로 올린다.
+    document.querySelector<HTMLElement>('[data-scroll-root]')?.scrollTo({ top: 0 });
   };
 
   return { ...query, page, goToPage, keyword, searchQuery, setSearchQuery };
