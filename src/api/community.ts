@@ -114,6 +114,13 @@ export interface PostCreateRequest {
   content: string;
 }
 
+/** 게시글 수정 요청 body (PATCH /community/posts/{id}). 부분 수정 — 보낸 필드만 변경. */
+export interface PostUpdateRequest {
+  category?: string;
+  title?: string;
+  content?: string;
+}
+
 // ---------- API 함수 ----------
 
 export const communityApi = {
@@ -157,7 +164,22 @@ export const communityApi = {
   createPost: (body: PostCreateRequest) =>
     apiClient.post<unknown, PostDetailResponse>('/community/posts', body),
 
+  /**
+   * 게시글 수정 (200) — 보낸 필드만 부분 수정한다. 성공 시 수정된 게시글(PostDetailResponse) 반환.
+   *
+   * <p>본인 글이 아니면 COMMON4031(403), 없는 글 COMMUNITY4001(404),
+   * 잘못된 category/형식 COMMON4001(400) → ApiException.
+   */
+  updatePost: (postId: string, body: PostUpdateRequest) =>
+    apiClient.patch<unknown, PostDetailResponse>(`/community/posts/${postId}`, body),
+
+  /**
+   * 게시글 삭제 (200, data: null). 본인 글만 삭제 가능.
+   *
+   * <p>본인 글이 아니면 COMMON4031(403), 없는 글 COMMUNITY4001(404) → ApiException.
+   */
+  deletePost: (postId: string) => apiClient.delete<unknown, null>(`/community/posts/${postId}`),
+
   // TODO: 다음 사이클에서 추가
-  //   updatePost, deletePost, likePost, unlikePost
-  //   createComment, deleteComment
+  //   likePost, unlikePost, createComment, deleteComment
 };

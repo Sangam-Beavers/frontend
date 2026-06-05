@@ -1,18 +1,28 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
-import { usePostDetail } from '@/hooks/usePostDetail';
+import { buildCommunityPostEditPath } from '@/constants/routes';
 import { useComments } from '@/hooks/useComments';
+import { useDeletePost } from '@/hooks/useDeletePost';
+import { usePostDetail } from '@/hooks/usePostDetail';
 import { categoryLabel, formatCommunityDate } from '@/utils/communityFeed';
+import { communityErrorMessage } from '@/utils/communityErrorMessage';
 import styles from './CommunityPostDetailPage.module.css';
 
 export default function CommunityPostDetailPage() {
+  const navigate = useNavigate();
   const { postId = '' } = useParams<{ postId: string }>();
   const [draft, setDraft] = useState<string>('');
+  const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
 
   const { data: post, isLoading, error } = usePostDetail(postId);
   const { data: commentsData } = useComments(postId);
   const comments = commentsData?.comments ?? [];
+  const del = useDeletePost();
+
+  const handleDelete = () => {
+    del.mutate(postId, { onSuccess: () => navigate('/community') });
+  };
 
   if (isLoading) {
     return (
@@ -74,9 +84,49 @@ export default function CommunityPostDetailPage() {
         </button>
       </div>
 
+      {/* 작성자만 가능 — 권한은 백엔드가 검증(403). */}
+      <div className={styles.authorActions}>
+        <button
+          type="button"
+          className={styles.editBtn}
+          onClick={() => navigate(buildCommunityPostEditPath(postId))}
+        >
+          수정
+        </button>
+        <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>
+          삭제
+        </button>
+      </div>
+
+      {confirmDelete && (
+        <div className={styles.confirmCard}>
+          <div className={styles.confirmText}>이 글을 삭제하시겠습니까? 되돌릴 수 없어요.</div>
+          {del.error && (
+            <div className={styles.confirmError}>{communityErrorMessage(del.error)}</div>
+          )}
+          <div className={styles.confirmBtnRow}>
+            <button
+              type="button"
+              className={styles.secondary}
+              disabled={del.isPending}
+              onClick={() => setConfirmDelete(false)}
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              className={styles.deleteBtnFilled}
+              disabled={del.isPending}
+              onClick={handleDelete}
+            >
+              {del.isPending ? '삭제 중…' : '삭제'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className={styles.section}>
         <span>댓글 {comments.length}</span>
-        <span className={styles.pill}>작성자 수정/삭제</span>
       </div>
 
       {comments.map((comment) => (

@@ -86,6 +86,7 @@ export const mainRoutes: PageRoute[] = [
   { path: ROUTES.COMMUNITY_COUNTRY, Component: CommunityCountryPage },
   { path: ROUTES.COMMUNITY_FREE, Component: CommunityFreePage },
   { path: ROUTES.COMMUNITY_WRITE, Component: CommunityWritePage },
+  { path: ROUTES.COMMUNITY_POST_EDIT, Component: CommunityWritePage },
   { path: ROUTES.COMMUNITY_POST_DETAIL, Component: CommunityPostDetailPage },
 
   { path: ROUTES.MYPAGE, Component: MyPage },
