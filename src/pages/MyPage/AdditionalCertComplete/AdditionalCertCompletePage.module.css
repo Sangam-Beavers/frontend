@@ -46,3 +46,18 @@
   font-family: inherit;
   margin-top: 10px;
 }
+
+/* Ghost (secondary) button — 마이페이지로 돌아가기 보조 CTA */
+.ghostBtn {
+  width: 100%;
+  border-radius: 15px;
+  padding: 15px 16px;
+  background: #fff;
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 8px;
+}

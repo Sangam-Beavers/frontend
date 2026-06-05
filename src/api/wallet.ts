@@ -83,6 +83,13 @@ export interface ExchangeListResponse {
 /** 지갑 상태. */
 export type WalletStatusCode = 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
 
+/** POST /api/v1/wallets 응답 data (이슈 #108/#152 — 멱등 지갑 생성). */
+export interface WalletCreateResult {
+  wallet_public_id: string;
+  status: WalletStatusCode;
+  created_at: string;
+}
+
 /** 통화별 잔액 한 건 (백엔드 WalletBalanceResponse.BalanceItem). */
 export interface WalletBalanceItem {
   /** ISO 4217 코드 (예: "KRW", "USD"). 백엔드 CurrencyType enum 4종(KRW/USD/PHP/VND). */
@@ -184,6 +191,18 @@ export const walletApi = {
    * 인증 누락은 AUTH4011(apiClient interceptor가 로그인 화면 이동).
    */
   getBalances: () => apiClient.get<unknown, WalletBalancesResponse>('/wallets/me/balances'),
+
+  /**
+   * 전자지갑 생성(멱등) — 이슈 #108/#152.
+   *
+   * <p>백엔드 멱등 API. 이미 지갑이 있으면 그대로 반환, 없으면 신규 생성 + KRW 0 잔액 1행 작성.
+   * 사용 시점:
+   * <ul>
+   *   <li>신분증 인증 직후(AdditionalCertPage) — BE의 자동 개설이 실패해도 안전망으로 동작</li>
+   *   <li>WALLET4001을 받은 다른 흐름(PIN 설정 등)의 보정 — 호출 후 원 작업 재시도</li>
+   * </ul>
+   */
+  createWallet: () => apiClient.post<unknown, WalletCreateResult>('/wallets'),
 
   // TODO: 다음 사이클에서 추가
   //   원화 환산 총액: getWalletMe (GET /wallets/me, Kyubo)

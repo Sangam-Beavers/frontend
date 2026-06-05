@@ -85,26 +85,92 @@
   color: var(--blue);
 }
 
-/* Upload preview */
-.preview {
-  height: 160px;
-  border: 1.5px dashed #a8c9ff;
-  border-radius: 18px;
-  background: #f8fbff;
+/* Upload preview는 이슈 #108에서 제거 — OCR 도입 시 복원. */
+
+/* Document number input (이슈 #108 / BE #152 — 신분증 번호 직접 입력) */
+.inputBlock {
+  margin: 12px 0;
+}
+
+.inputLabel {
+  display: block;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: var(--blue);
+}
+
+.inputHint {
+  margin: 6px 2px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.errorMsg {
+  margin: 6px 2px 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #d6253c;
+}
+
+/* Country chips (이슈 #108 — 본국 신분증 선택 시 국가 라디오) */
+.countryRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.countryChip {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin: 12px 0;
+  gap: 4px;
+  padding: 12px 6px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
   cursor: pointer;
+  font-family: inherit;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
-.previewLabel {
-  margin: 0;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--muted);
+.countryChipActive {
+  border-color: var(--blue);
+  background: var(--soft2);
+}
+
+.countryFlag {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.countryLabel {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
 }
 
 /* Fixed button */

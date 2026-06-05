@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
+import { ROUTES } from '@/constants/routes';
 import { balanceOf, useBalances } from '@/hooks/useBalances';
+import { useMyProfile } from '@/hooks/useMyProfile';
 import {
   HOME_ALL_CURRENCIES_MOCK,
   HOME_EXCHANGE_RATES_MOCK,
@@ -54,6 +56,9 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [currencies, setCurrencies] = useState<CurrencyOption[]>(loadCurrencies);
   const { data: balances, isLoading: balancesLoading, error: balancesError } = useBalances();
+  // 이슈 #108 — 신분증 미인증 사용자는 전자지갑 카드 자체를 잠그고 인증 안내로 교체한다.
+  const { data: profile } = useMyProfile();
+  const isVerified = profile?.is_verified ?? false;
 
   useEffect(() => {
     setCurrencies(loadCurrencies());
@@ -87,52 +92,75 @@ export default function HomePage() {
         </div>
       </header>
 
-      <div className={styles.wallet}>
-        <div className={styles.walletRow}>
-          <span>전자지갑</span>
-          <span>메인 통화 KRW · 변경</span>
+      {isVerified ? (
+        <div className={styles.wallet}>
+          <div className={styles.walletRow}>
+            <span>전자지갑</span>
+            <span>메인 통화 KRW · 변경</span>
+          </div>
+          <div className={styles.amount}>{mainAmount}</div>
+          <div
+            className={styles.walletRowClickable}
+            onClick={() => navigate('/home/currency-settings')}
+          >
+            <span>선택 표시 통화 {currencies.length}개</span>
+            <span>설정 ›</span>
+          </div>
+          <div className={styles.currencyGrid}>
+            {currencies.map((currency) => {
+              // 사용자가 고른 통화의 실제 잔액. 백엔드 미지원 통화(THB/CNY/JPY/EUR)는 0으로 표시됨.
+              const display = balancesLoading
+                ? `${currency.code} —`
+                : `${currency.code} ${formatBalance(currency.code, balanceOf(balances, currency.code))}`;
+              return (
+                <div key={currency.code} className={styles.currencyChip}>
+                  {display}
+                </div>
+              );
+            })}
+          </div>
+          <div className={styles.walletActions}>
+            <button className={styles.walletBtn} onClick={() => navigate('/charge')}>
+              가져오기
+            </button>
+            <button className={styles.walletBtn} onClick={() => navigate('/transfer')}>
+              보내기
+            </button>
+            <button className={styles.walletBtn} onClick={() => navigate('/exchange')}>
+              환전하기
+            </button>
+          </div>
+          <p className={styles.walletFooter}>Global Bridge 전자지갑</p>
         </div>
-        <div className={styles.amount}>{mainAmount}</div>
-        <div
-          className={styles.walletRowClickable}
-          onClick={() => navigate('/home/currency-settings')}
-        >
-          <span>선택 표시 통화 {currencies.length}개</span>
-          <span>설정 ›</span>
+      ) : (
+        // 이슈 #108 — 신분증 미인증 사용자: 전자지갑 카드를 인증 안내로 교체.
+        // 환율 위젯·문서분석 등 비금융 기능은 그대로 사용 가능.
+        <div className={styles.wallet}>
+          <div className={styles.walletRow}>
+            <span>전자지갑</span>
+            <span>잠금</span>
+          </div>
+          <div className={styles.lockedTitle}>신분증을 인증해주세요</div>
+          <p className={styles.lockedText}>
+            전자지갑 사용을 위해 신분증 본인 인증이 필요해요. 인증을 완료하면 충전·송금·환전을 바로
+            시작할 수 있습니다.
+          </p>
+          <div className={styles.lockedActions}>
+            <button className={styles.walletBtn} onClick={() => navigate(ROUTES.MYPAGE_BADGE)}>
+              신분증 인증하기
+            </button>
+          </div>
+          <p className={styles.walletFooter}>Global Bridge 전자지갑</p>
         </div>
-        <div className={styles.currencyGrid}>
-          {currencies.map((currency) => {
-            // 사용자가 고른 통화의 실제 잔액. 백엔드 미지원 통화(THB/CNY/JPY/EUR)는 0으로 표시됨.
-            const display = balancesLoading
-              ? `${currency.code} —`
-              : `${currency.code} ${formatBalance(currency.code, balanceOf(balances, currency.code))}`;
-            return (
-              <div key={currency.code} className={styles.currencyChip}>
-                {display}
-              </div>
-            );
-          })}
-        </div>
-        <div className={styles.walletActions}>
-          <button className={styles.walletBtn} onClick={() => navigate('/charge')}>
-            가져오기
-          </button>
-          <button className={styles.walletBtn} onClick={() => navigate('/transfer')}>
-            보내기
-          </button>
-          <button className={styles.walletBtn} onClick={() => navigate('/exchange')}>
-            환전하기
-          </button>
-        </div>
-        <p className={styles.walletFooter}>Global Bridge 전자지갑</p>
-      </div>
+      )}
 
-      {/* "지금 나의 원화" 환산 총액 카드는 별도 API(/wallets/me, Kyubo) 연동 후 교체 예정.
-          현재는 mock 값 유지. */}
+      {/* "지금 나의 원화" 환산 총액 카드 — 미인증이면 마스킹 (실 API 미연동 — 현재 mock). */}
       <div className={styles.card}>
         <div className={styles.cardTitle}>지금 나의 원화</div>
-        <div className={styles.cardText}>모든 통화를 현재 환율로 바꾸면</div>
-        <div className={styles.totalAmount}>₩1,820,000</div>
+        <div className={styles.cardText}>
+          {isVerified ? '모든 통화를 현재 환율로 바꾸면' : '인증 후 표시됩니다'}
+        </div>
+        <div className={styles.totalAmount}>{isVerified ? '₩1,820,000' : '₩ —'}</div>
       </div>
 
       {/* 실시간 환율 카드도 별도 API(/wallets/exchange-rates, Kyubo) 연동 후 교체 예정. */}

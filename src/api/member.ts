@@ -43,6 +43,67 @@ export interface ResetPasswordBody {
   new_password: string;
 }
 
+// ---------- 신분증 인증 (이슈 #108 / 백엔드 #152) ----------
+
+/**
+ * 신분증 유형. 백엔드 {@code IdentityDocumentType} enum SSOT.
+ *
+ * <p>이슈 #108 — 여권/일반 NATIONAL_ID 제거. 한국 거주 외국인(외국인등록증) + 본국 거주 4개국
+ * (한국/미국/베트남/필리핀) 5개로 사용자 분류를 끝냈다.
+ */
+export type IdentityDocumentTypeCode =
+  | 'ALIEN_REGISTRATION'
+  | 'NATIONAL_ID_KR'
+  | 'NATIONAL_ID_US'
+  | 'NATIONAL_ID_VN'
+  | 'NATIONAL_ID_PH';
+
+/** 인증 상태. 백엔드 VerificationStatus enum. 형식 검증 통과 시 즉시 APPROVED(데모). */
+export type VerificationStatusCode = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+/** POST /api/v1/members/me/verification 요청 body. */
+export interface VerificationSubmitBody {
+  identity_document_type: IdentityDocumentTypeCode;
+  document_number: string;
+  /**
+   * 사전 업로드된 신분증 이미지 S3 key. **현재 선택(OCR 미도입 데모 정책)** — 미전송 가능(백엔드 #152).
+   * 향후 이미지 업로드 도입 시 필수로 복구.
+   */
+  s3_key?: string;
+}
+
+/** POST 응답 data — 형식 검증 통과 시 즉시 APPROVED + 인증 배지 + 자동 지갑 개설(BE #152). */
+export interface VerificationSubmitResult {
+  status: VerificationStatusCode;
+  submitted_at: string;
+}
+
+/** GET 응답 data — 가장 최근 인증 1건. */
+export interface VerificationStatusResult {
+  identity_document_type: IdentityDocumentTypeCode;
+  status: VerificationStatusCode;
+  /** 검토 시각. 미검토(PENDING)면 null. */
+  reviewed_at: string | null;
+  created_at: string;
+}
+
+// ---------- 내 프로필 (이슈 #108 — is_verified 출처 SSOT) ----------
+
+/** GET /api/v1/members/me 응답 data. 자동생성 타입과 달리 snake_case (실제 응답 형식). */
+export interface MyProfileResult {
+  public_id: string;
+  email: string;
+  nickname: string;
+  nationality: string;
+  language: string;
+  bio: string | null;
+  /** 신분증 인증 배지 여부. true면 금융 기능 사용 가능(이슈 #108 가드 기준). */
+  is_verified: boolean;
+  temperature_grade: string;
+  profile_image_url: string | null;
+  created_at: string;
+}
+
 // ---------- API 함수 ----------
 
 export const memberApi = {
@@ -84,6 +145,43 @@ export const memberApi = {
   resetPassword: (body: ResetPasswordBody) =>
     apiClient.post<unknown, void>('/auth/password/reset', body),
 
+  /**
+   * 내 프로필 조회 (200) — 이슈 #108에서 is_verified 가드 기준으로 사용.
+   *
+   * <p>미인증(`is_verified=false`)이면 프론트가 금융 기능 진입을 차단한다(VerifiedRoute / HomePage).
+   * 404 MEMBER4001은 회원 미존재(탈퇴 등) — 호출 측에서 ApiException으로 처리.
+   */
+  getMyProfile: () => apiClient.get<unknown, MyProfileResult>('/members/me'),
+
   // TODO: 다음 사이클
-  //   getMe, signup, withdraw, updateLanguage 등
+  //   signup, withdraw, updateLanguage 등
+};
+
+/**
+ * 신분증 인증 API (이슈 #108 / 백엔드 #152).
+ *
+ * <p>{@link verificationApi.submit}는 형식 검증 통과 시 즉시 APPROVED + 인증 배지 부여 + wallet-service에
+ * 전자지갑 자동 개설을 트리거한다(BE 사이드이펙트). OCR 미도입 데모 단계라 {@code s3_key}는 선택값이다.
+ *
+ * <p>에러 코드(ApiException으로 throw):
+ * - 400 COMMON4001 — 신분증 번호 형식 불일치 / 잘못된 유형 / 필수 필드 누락
+ * - 401 AUTH4011 — 인증 누락(interceptor가 로그인 페이지로 자동 이동)
+ * - 409 COMMON4091 — 이미 진행중/승인된 인증 존재(중복 제출)
+ * - 404 MEMBER4001 — 회원/인증 이력 없음 (getStatus 한정)
+ */
+export const verificationApi = {
+  /**
+   * 신분증 인증 요청 (201). 형식 검증 통과 시 즉시 APPROVED + 인증 배지 + 자동 지갑 개설(BE #152 fail-open).
+   *
+   * <p>{@code s3_key}는 OCR 미도입 단계라 미전송 가능. 향후 이미지 업로드 도입 시 필수.
+   */
+  submit: (body: VerificationSubmitBody) =>
+    apiClient.post<unknown, VerificationSubmitResult>('/members/me/verification', body),
+
+  /**
+   * 인증 상태 조회 (200) — 가장 최근 인증 1건.
+   *
+   * <p>인증 이력이 없으면 404 MEMBER4001. 호출 측에서 ApiException 처리.
+   */
+  getStatus: () => apiClient.get<unknown, VerificationStatusResult>('/members/me/verification'),
 };
