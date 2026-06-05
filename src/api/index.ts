@@ -23,5 +23,10 @@ export type {
   WalletStatusCode,
   WalletBalanceItem,
   WalletBalancesResponse,
+  TransactionTypeCode,
+  TransactionStatusCode,
+  TransactionDirection,
+  TransactionHistoryItem,
+  TransactionListResponse,
 } from './wallet';
 export { documentApi } from './document';

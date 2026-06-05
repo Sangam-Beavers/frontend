@@ -80,6 +80,59 @@ export interface ExchangeListResponse {
   total_pages: number;
 }
 
+/**
+ * 거래 유형 (백엔드 TransactionType enum SSOT).
+ * - CHARGE: 외부 은행계좌에서 전자지갑으로 충전
+ * - INTERNAL_TRANSFER: 앱 사용자 간 송금 (송신/수신 모두 해당)
+ * - REMITTANCE: 해외 송금 (외부 은행계좌로)
+ * - EXCHANGE: 환전 (지갑 내 통화 변환)
+ */
+export type TransactionTypeCode = 'CHARGE' | 'INTERNAL_TRANSFER' | 'REMITTANCE' | 'EXCHANGE';
+
+/** 거래 상태 (백엔드 TransactionStatus enum SSOT). */
+export type TransactionStatusCode = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+
+/**
+ * 본인 기준 거래 방향. OUT = 본인이 송신자(출금), IN = 본인이 수신자(입금).
+ * CHARGE/REMITTANCE/EXCHANGE는 항상 OUT, INTERNAL_TRANSFER만 OUT/IN 분기.
+ */
+export type TransactionDirection = 'OUT' | 'IN';
+
+/**
+ * 거래내역 단건 항목 (백엔드 TransactionHistoryItemResponse — api-spec §3).
+ *
+ * 모든 유형(CHARGE/INTERNAL_TRANSFER/REMITTANCE/EXCHANGE)을 하나의 형태로 표현.
+ * 금액은 string(소수 4자리), 식별자는 public_id(UUID), 시각은 ISO 8601 UTC Z.
+ */
+export interface TransactionHistoryItem {
+  public_id: string;
+  type: TransactionTypeCode;
+  direction: TransactionDirection;
+  status: TransactionStatusCode;
+  /** 거래(출금) 금액 — string 소수 4자리. */
+  amount: string;
+  currency_code: string;
+  /** 수수료 — string 소수 4자리. 무료면 "0.0000". */
+  fee: string;
+  /** 수령액 — 환전·송금만, 그 외 null. */
+  receive_amount: string | null;
+  /** 수령 통화 코드 — 환전·송금만. */
+  receive_currency_code: string | null;
+  /** 수취인 이름 — 송금만. */
+  receiver_name: string | null;
+  /** 거래 시각 (ISO 8601 UTC Z). */
+  created_at: string;
+}
+
+/** 거래내역 목록 응답 — 페이지 메타 + transactions 배열 (백엔드 TransactionListResponse). */
+export interface TransactionListResponse {
+  transactions: TransactionHistoryItem[];
+  page: number;
+  size: number;
+  total_elements: number;
+  total_pages: number;
+}
+
 /** 지갑 상태. */
 export type WalletStatusCode = 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
 
@@ -184,6 +237,23 @@ export const walletApi = {
    * 인증 누락은 AUTH4011(apiClient interceptor가 로그인 화면 이동).
    */
   getBalances: () => apiClient.get<unknown, WalletBalancesResponse>('/wallets/me/balances'),
+
+  /**
+   * 내 거래내역 목록 조회 (200) — 본인이 송신자 또는 수신자인 전 유형 거래를 최근순으로 페이지 조회.
+   *
+   * <p>INTERNAL_TRANSFER는 transactions 테이블에 송신자 row 1건만 INSERT되고 수신자는
+   * receiver_wallet FK로만 연결되므로, 백엔드가 송수신 OR 조회로 양쪽을 모은다. 각 항목의
+   * direction(OUT/IN)으로 본인 시점의 출금/입금을 판단한다 (api-spec §3).
+   *
+   * <p>응답에 페이지 메타(page/size/total_elements/total_pages)와 transactions 배열이 함께 온다.
+   * 페이지 0부터 시작. size 기본 20, 최대 100 (백엔드 @Min/@Max 검증).
+   *
+   * <p>지갑 미존재/거래 없음은 예외가 아니라 빈 페이지로 반환된다. 인증 누락은 AUTH4011.
+   */
+  getTransactions: (page = 0, size = 20) =>
+    apiClient.get<unknown, TransactionListResponse>('/wallets/me/transactions', {
+      params: { page, size },
+    }),
 
   // TODO: 다음 사이클에서 추가
   //   원화 환산 총액: getWalletMe (GET /wallets/me, Kyubo)
