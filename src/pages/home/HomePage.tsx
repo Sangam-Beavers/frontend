@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApiException } from '@/api';
+import { balanceOf, useBalances } from '@/hooks/useBalances';
 import {
   HOME_ALL_CURRENCIES_MOCK,
   HOME_EXCHANGE_RATES_MOCK,
@@ -11,6 +13,30 @@ import styles from './HomePage.module.css';
 const EXCHANGE_RATES = HOME_EXCHANGE_RATES_MOCK.result;
 const NOTIFICATIONS = HOME_NOTIFICATIONS_MOCK.result;
 const STORAGE_KEY = 'homeCurrencies';
+
+// 통화 기호 매핑 — 백엔드 응답에는 잔액만 있고 기호는 없어서 클라이언트에서 보강.
+// 백엔드 지원 통화(KRW/USD/PHP/VND)만 실제 잔액이 들어오고, 나머지(THB/CNY/JPY/EUR)는
+// 사용자가 홈 설정에 골라도 항상 0으로 표시된다(잔액 자체가 없음).
+const CURRENCY_SYMBOL: Record<string, string> = {
+  KRW: '₩',
+  USD: '$',
+  PHP: '₱',
+  VND: '₫',
+  THB: '฿',
+  CNY: '¥',
+  JPY: '¥',
+  EUR: '€',
+};
+
+function formatBalance(code: string, balance: string): string {
+  const symbol = CURRENCY_SYMBOL[code] ?? '';
+  const num = Number(balance);
+  if (code === 'KRW') return `${symbol}${num.toLocaleString()}`;
+  return `${symbol}${num.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  })}`;
+}
 
 function loadCurrencies(): CurrencyOption[] {
   try {
@@ -27,10 +53,20 @@ function loadCurrencies(): CurrencyOption[] {
 export default function HomePage() {
   const navigate = useNavigate();
   const [currencies, setCurrencies] = useState<CurrencyOption[]>(loadCurrencies);
+  const { data: balances, isLoading: balancesLoading, error: balancesError } = useBalances();
 
   useEffect(() => {
     setCurrencies(loadCurrencies());
   }, []);
+
+  // 메인 KRW 잔액 표시. 지갑 없음(WALLET4001)이면 ₩0으로 fallback (가입 직후 등 일시 상태).
+  // 그 외 에러는 로딩 중 표시와 동일하게 "—"로 두어 가짜 값 노출을 피함.
+  const krwBalance =
+    balancesError instanceof ApiException && balancesError.code === 'WALLET4001'
+      ? '0.0000'
+      : balanceOf(balances, 'KRW');
+  const mainAmount = balancesLoading ? '—' : formatBalance('KRW', krwBalance);
+
   return (
     <>
       <header className={styles.header}>
@@ -56,7 +92,7 @@ export default function HomePage() {
           <span>전자지갑</span>
           <span>메인 통화 KRW · 변경</span>
         </div>
-        <div className={styles.amount}>₩1,250,000</div>
+        <div className={styles.amount}>{mainAmount}</div>
         <div
           className={styles.walletRowClickable}
           onClick={() => navigate('/home/currency-settings')}
@@ -65,11 +101,17 @@ export default function HomePage() {
           <span>설정 ›</span>
         </div>
         <div className={styles.currencyGrid}>
-          {currencies.map((currency) => (
-            <div key={currency.code} className={styles.currencyChip}>
-              {currency.displayAmount}
-            </div>
-          ))}
+          {currencies.map((currency) => {
+            // 사용자가 고른 통화의 실제 잔액. 백엔드 미지원 통화(THB/CNY/JPY/EUR)는 0으로 표시됨.
+            const display = balancesLoading
+              ? `${currency.code} —`
+              : `${currency.code} ${formatBalance(currency.code, balanceOf(balances, currency.code))}`;
+            return (
+              <div key={currency.code} className={styles.currencyChip}>
+                {display}
+              </div>
+            );
+          })}
         </div>
         <div className={styles.walletActions}>
           <button className={styles.walletBtn} onClick={() => navigate('/charge')}>
@@ -85,12 +127,15 @@ export default function HomePage() {
         <p className={styles.walletFooter}>Global Bridge 전자지갑</p>
       </div>
 
+      {/* "지금 나의 원화" 환산 총액 카드는 별도 API(/wallets/me, Kyubo) 연동 후 교체 예정.
+          현재는 mock 값 유지. */}
       <div className={styles.card}>
         <div className={styles.cardTitle}>지금 나의 원화</div>
         <div className={styles.cardText}>모든 통화를 현재 환율로 바꾸면</div>
         <div className={styles.totalAmount}>₩1,820,000</div>
       </div>
 
+      {/* 실시간 환율 카드도 별도 API(/wallets/exchange-rates, Kyubo) 연동 후 교체 예정. */}
       <div className={styles.section}>
         실시간 환율
         <span
