@@ -112,17 +112,80 @@
   margin-top: 3px;
 }
 
-.pillWarn {
+.pillWarn,
+.pillDanger,
+.pillInfo {
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
   border-radius: 999px;
-  background: #fff0f0;
-  color: #e11d48;
   font-weight: 800;
   font-size: 11px;
   white-space: nowrap;
-  border: 1px solid #fecaca;
+  border: 1px solid transparent;
+}
+
+/* HIGH 위험 — 빨강 */
+.pillDanger {
+  background: #fff0f0;
+  color: #e11d48;
+  border-color: #fecaca;
+}
+
+/* MEDIUM 위험 — 주황(노랑) */
+.pillWarn {
+  background: #fff7e6;
+  color: #b45309;
+  border-color: #fcd9a0;
+}
+
+/* LOW / 일반 확인 — 차분한 파랑 */
+.pillInfo {
+  background: var(--soft2);
+  color: var(--blue);
+  border-color: var(--line);
+}
+
+/* 부드러운 결과 카드 (MEDIUM/LOW 헤드라인용). cardDanger 보다 톤 약함. */
+.cardSoft {
+  background: linear-gradient(180deg, #f7faff, #eef5ff);
+  box-shadow: 0 6px 14px rgba(7, 91, 255, 0.05);
+  border-color: var(--line);
+}
+
+.cardSoft .cardTitle {
+  color: var(--blue);
+}
+
+.cardSoft .cardText {
+  color: var(--ink);
+  opacity: 0.78;
+  margin-bottom: 0;
+}
+
+/* 로딩/분석중/에러 상태 안내 카드 */
+.stateCard {
+  background: var(--soft);
+  box-shadow: none;
+  border-color: var(--line);
+}
+
+/* 챗봇 비활성 상태 — 분석이 아직 안 끝났을 때 */
+.ctaDisabled {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 13px 16px;
+  margin: 0;
+  border: 1px dashed var(--line);
+  border-radius: 15px;
+  background: var(--soft);
+  color: var(--muted);
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: not-allowed;
 }
 
 /* ─────────── ③ 챗봇 CTA 호흡 영역 ───────────
