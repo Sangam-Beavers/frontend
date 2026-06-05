@@ -10,7 +10,9 @@ export default function TransferBankPage() {
   const { data, isLoading, error } = useMyAccounts();
   const accounts = data?.accounts ?? [];
 
-  const [selectedAccount, setSelectedAccount] = useState<AccountItem | null>(null);
+  // 사용자가 직접 고르기 전엔 주 계좌를 기본 선택(없으면 첫 계좌). 백엔드가 주 계좌 우선 정렬.
+  const [picked, setPicked] = useState<AccountItem | null>(null);
+  const selectedAccount = picked ?? accounts.find((a) => a.is_primary) ?? accounts[0] ?? null;
   const [amount, setAmount] = useState('');
 
   const num = Number(amount) || 0;
@@ -56,7 +58,7 @@ export default function TransferBankPage() {
               <div
                 key={acc.account_public_id}
                 className={`${styles.item} ${isSelected ? styles.itemSelected : ''}`}
-                onClick={() => setSelectedAccount(acc)}
+                onClick={() => setPicked(acc)}
               >
                 <div className={styles.itemMain}>
                   <div className={styles.itemTitle}>{acc.bank_name}</div>
@@ -69,6 +71,19 @@ export default function TransferBankPage() {
               </div>
             );
           })}
+          {accounts.length > 0 && (
+            <button
+              type="button"
+              className={styles.addItem}
+              onClick={() => navigate('/charge/add-account')}
+            >
+              <div className={styles.itemMain}>
+                <div className={styles.itemTitle}>계좌 추가</div>
+                <div className={styles.itemMeta}>내 계좌를 새로 등록합니다</div>
+              </div>
+              <span className={styles.addIcon}>＋</span>
+            </button>
+          )}
         </div>
 
         <div className={styles.field}>

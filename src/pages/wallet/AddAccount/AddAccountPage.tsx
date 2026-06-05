@@ -1,30 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
-import { ApiException } from '@/api';
 import { useSupportedBanks } from '@/hooks/useSupportedBanks';
 import { useAccountHolder } from '@/hooks/useAccountHolder';
+import { accountErrorMessage } from '@/utils/accountErrorMessage';
 import type { AccountRegisterDraft } from '@/types/charge';
 import styles from './AddAccountPage.module.css';
-
-/** 예금주 조회 실패 시 백엔드 에러 코드를 사용자용 메시지로 매핑. */
-function holderErrorMessage(err: unknown): string {
-  if (err instanceof ApiException) {
-    switch (err.code) {
-      case 'ACCOUNT4001':
-        return '존재하지 않는 계좌예요. 계좌번호를 확인해 주세요.';
-      case 'COMMON4291':
-        return '조회 횟수를 초과했어요. 잠시 후 다시 시도해 주세요.';
-      case 'COMMON5031':
-        return '은행 통신이 일시적으로 불안정해요. 잠시 후 다시 시도해 주세요.';
-      case 'COMMON4001':
-        return '계좌번호 형식이 올바르지 않아요.';
-      default:
-        return err.message;
-    }
-  }
-  return '예금주 조회에 실패했어요.';
-}
 
 export default function AddAccountPage() {
   const navigate = useNavigate();
@@ -39,8 +20,14 @@ export default function AddAccountPage() {
   const banksEmpty = !banksLoading && !banksError && banks.length === 0;
 
   const holder = useAccountHolder();
-  const verifiedName = holder.data?.account_holder_name ?? '';
-  const canLookup = selectedBankCode !== '' && accountNumber.trim() !== '' && !holder.isPending;
+  // 조회 응답이 "현재 입력값"과 일치할 때만 확인된 것으로 본다.
+  // (조회 도중 은행/계좌를 바꿔 응답이 엉뚱한 계좌에 붙는 레이스 방지 — variables 비교)
+  const v = holder.variables;
+  const verifiedName =
+    holder.data && v && v.bankCode === selectedBankCode && v.accountNumber === accountNumber
+      ? holder.data.account_holder_name
+      : '';
+  const canLookup = selectedBankCode !== '' && accountNumber !== '' && !holder.isPending;
   const canSubmit = verifiedName !== '';
   const selectedBank = banks.find((b) => b.bank_code === selectedBankCode);
 
@@ -48,6 +35,7 @@ export default function AddAccountPage() {
   // canSubmit일 때만 호출되므로 selectedBank/verifiedName은 채워져 있다.
   const handleNext = () => {
     const draft: AccountRegisterDraft = {
+      bankCode: selectedBankCode,
       bankName: selectedBank?.bank_name ?? '',
       accountNumber,
       holderName: verifiedName,
@@ -62,7 +50,7 @@ export default function AddAccountPage() {
 
   const handleLookup = () => {
     if (!canLookup) return;
-    holder.mutate({ bankCode: selectedBankCode, accountNumber: accountNumber.trim() });
+    holder.mutate({ bankCode: selectedBankCode, accountNumber });
   };
 
   return (
@@ -125,7 +113,7 @@ export default function AddAccountPage() {
           </button>
         </div>
         {holder.error && (
-          <div className={styles.holderError}>{holderErrorMessage(holder.error)}</div>
+          <div className={styles.holderError}>{accountErrorMessage(holder.error)}</div>
         )}
         {verifiedName && <div className={styles.holderOk}>✓ 예금주가 확인됐어요.</div>}
       </div>

@@ -145,6 +145,29 @@ export interface AccountHolderResponse {
   account_holder_name: string;
 }
 
+/** 계좌 연결+자동이체 인증 요청 body. 실제 요청은 snake_case(Jackson 전역). */
+export interface VerifyAccountRequest {
+  bank_code: string;
+  /** 하이픈 없는 계좌번호 숫자 문자열. */
+  account_number: string;
+  /** 예금주명 — GET /accounts/holder로 확인한 값. */
+  holder_name: string;
+}
+
+/** 계좌 인증 응답 — register 단계에 그대로 넘길 외부(Mock) 은행 토큰. */
+export interface VerifyAccountResponse {
+  account_token: string;
+}
+
+/** 계좌 등록 최종 완료 요청 body. account_token은 verify 응답값. */
+export interface RegisterAccountRequest {
+  bank_code: string;
+  account_number: string;
+  /** verify 단계에서 발급받은 account_token. */
+  account_token: string;
+  holder_name: string;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -262,10 +285,31 @@ export const walletApi = {
       params: { bankCode, accountNumber },
     }),
 
+  /**
+   * 계좌 연결 + 자동이체 인증 요청 (200) — Mock 은행에 인증을 요청하고 account_token을 받는다.
+   *
+   * <p>받은 account_token을 {@link registerAccount}에 그대로 넘겨야 등록이 완료된다.
+   * 인증 실패 ACCOUNT4002(400), 없는 계좌 ACCOUNT4001(404), 횟수초과 ACCOUNT4005(429),
+   * 은행장애 COMMON5031(503) → 모두 ApiException으로 throw.
+   */
+  verifyAccount: (body: VerifyAccountRequest) =>
+    apiClient.post<unknown, VerifyAccountResponse>('/accounts/verify', body),
+
+  /**
+   * 계좌 등록 최종 완료 (201) — verify에서 받은 account_token으로 계좌를 등록한다.
+   *
+   * <p>성공 시 등록된 계좌(AccountResponse, AccountItem과 동일 구조)를 반환.
+   * 목록(getMyAccounts)에 즉시 반영하려면 ['wallet','accounts']를 invalidate한다
+   * (useRegisterAccount hook의 onSuccess가 처리).
+   * 이미 등록된 계좌 ACCOUNT4004(409), 형식/은행코드 오류 COMMON4001(400) → ApiException.
+   */
+  registerAccount: (body: RegisterAccountRequest) =>
+    apiClient.post<unknown, AccountItem>('/accounts', body),
+
   // TODO: 다음 사이클에서 추가
   //   원화 환산 총액: getWalletMe (GET /wallets/me, Kyubo)
   //   환율 위젯: getExchangeRates (GET /wallets/exchange-rates, Kyubo)
-  //   계좌: registerAccount, deleteAccount (DELETE /accounts/{id}), setPrimary (PATCH /accounts/{id}/primary)
+  //   계좌: deleteAccount (DELETE /accounts/{id}), setPrimary (PATCH /accounts/{id}/primary)
   //   충전: charge
   //   송금: validateMember, validateBank, execute, getReceipt, getRecentRecipients
   //   정기송금: validateScheduled, createScheduled, listScheduled, getHistory

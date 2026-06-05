@@ -265,6 +265,39 @@
   background: #d4e8ff;
 }
 
+/* 목록 맨 아래 계좌 추가 행 */
+.addItem {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.addItem:active {
+  background: var(--soft2, #eef4ff);
+}
+
+.addIcon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--soft2, #eef4ff);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 16px;
+}
+
 .itemSelected {
   background: var(--soft2, #eef4ff);
 }

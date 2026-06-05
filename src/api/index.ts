@@ -28,5 +28,8 @@ export type {
   SupportedBank,
   SupportedBankListResponse,
   AccountHolderResponse,
+  VerifyAccountRequest,
+  VerifyAccountResponse,
+  RegisterAccountRequest,
 } from './wallet';
 export { documentApi } from './document';
