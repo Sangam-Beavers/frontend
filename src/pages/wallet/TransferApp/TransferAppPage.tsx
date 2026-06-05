@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
+import { useRecentInternalRecipients } from '@/hooks/useRecentInternalRecipients';
 import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
-import { RECENT_USERS_MOCK, type AvatarTone, type RecentUser } from '@/mocks/transferMock';
 import styles from './TransferAppPage.module.css';
 
-const RECENT_USERS = RECENT_USERS_MOCK.result;
+// 아바타 색상 톤 — mock에서 들고 있던 5색 그대로. 백엔드는 톤을 안 주므로 인덱스로 순환 매핑.
+type AvatarTone = 'best' | 'good' | 'mid' | 'warn' | 'bad';
+const TONES: AvatarTone[] = ['best', 'good', 'mid', 'warn', 'bad'];
 
 const AVATAR_CLASS: Record<AvatarTone, string> = {
   best: styles.avatarBest,
@@ -15,7 +17,19 @@ const AVATAR_CLASS: Record<AvatarTone, string> = {
   bad: styles.avatarBad,
 };
 
+/** 화면에서 다루는 수신자 표시 모델 — API 응답에서 파생. */
+interface RecipientDisplay {
+  identifier: string; // nickname (검증/송금 API용 식별자는 다음 PR에서 member_public_id로 교체 검토)
+  name: string;
+  initial: string;
+  currency: string;
+  tone: AvatarTone;
+}
+
 export default function TransferAppPage() {
+  const navigate = useNavigate();
+
+  // 통화 드롭다운 (#120 패턴)
   const {
     data: currenciesData,
     isLoading: currenciesLoading,
@@ -24,22 +38,44 @@ export default function TransferAppPage() {
   } = useTransferSupportedCurrencies();
   const currencies = currenciesData?.currencies ?? [];
   const hasCurrenciesError = currenciesError != null;
-  const navigate = useNavigate();
+
+  // 최근 송금 앱 사용자 (#122 신규)
+  const {
+    data: recipientsData,
+    isLoading: recipientsLoading,
+    error: recipientsError,
+    refetch: refetchRecipients,
+  } = useRecentInternalRecipients();
+  const hasRecipientsError = recipientsError != null;
+
+  // API 응답 → 화면용 모델 변환. tone은 인덱스 순환.
+  const recentRecipients: RecipientDisplay[] = useMemo(() => {
+    const list = recipientsData?.receivers ?? [];
+    return list.map((r, idx) => ({
+      identifier: r.nickname,
+      name: r.nickname,
+      initial: r.nickname.charAt(0).toUpperCase() || '?',
+      currency: r.last_currency_code,
+      tone: TONES[idx % TONES.length],
+    }));
+  }, [recipientsData]);
+
   const [recipient, setRecipient] = useState('');
-  const [verified, setVerified] = useState<RecentUser | null>(null);
+  const [verified, setVerified] = useState<RecipientDisplay | null>(null);
   const [currency, setCurrency] = useState('VND');
   const [amount, setAmount] = useState('');
   const [memo, setMemo] = useState('');
 
   function handleVerify() {
-    const found = RECENT_USERS.find(
-      (u) => u.email === recipient || u.name.toLowerCase() === recipient.toLowerCase()
+    // 임시: 최근 수신자 리스트에서 닉네임 매칭. 진짜 검증은 다음 PR(POST /transfers/receivers/search).
+    const found = recentRecipients.find(
+      (u) => u.identifier.toLowerCase() === recipient.toLowerCase()
     );
     setVerified(found ?? null);
   }
 
-  function handleRecentSelect(user: RecentUser) {
-    setRecipient(user.email);
+  function handleRecentSelect(user: RecipientDisplay) {
+    setRecipient(user.identifier);
     setVerified(user);
     setCurrency(user.currency);
   }
@@ -53,26 +89,40 @@ export default function TransferAppPage() {
 
         <div className={styles.section}>최근 송금한 대상</div>
 
-        <div className={styles.scrollRow}>
-          {RECENT_USERS.map((user) => (
-            <div
-              key={user.name}
-              className={styles.recentCard}
-              onClick={() => handleRecentSelect(user)}
-            >
-              <div className={`${styles.avatar} ${AVATAR_CLASS[user.tone]}`}>{user.initial}</div>
-              <div className={styles.recentName}>{user.name}</div>
-              <div className={styles.recentCurrency}>{user.currency}</div>
-            </div>
-          ))}
-        </div>
+        {/* 최근 수신자 칩 — 로딩/에러/빈 상태 처리 (#120 패턴) */}
+        {recipientsLoading ? (
+          <div className={styles.emptyText}>불러오는 중...</div>
+        ) : hasRecipientsError ? (
+          <div className={styles.emptyText}>
+            최근 송금 기록을 불러오지 못했어요.
+            <button type="button" className={styles.retryBtn} onClick={() => refetchRecipients()}>
+              다시 시도
+            </button>
+          </div>
+        ) : recentRecipients.length === 0 ? (
+          <div className={styles.emptyText}>아직 송금 기록이 없습니다.</div>
+        ) : (
+          <div className={styles.scrollRow}>
+            {recentRecipients.map((user) => (
+              <div
+                key={user.identifier}
+                className={styles.recentCard}
+                onClick={() => handleRecentSelect(user)}
+              >
+                <div className={`${styles.avatar} ${AVATAR_CLASS[user.tone]}`}>{user.initial}</div>
+                <div className={styles.recentName}>{user.name}</div>
+                <div className={styles.recentCurrency}>{user.currency}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className={styles.field}>
-          <label className={styles.label}>받는 사람 이메일 / 아이디</label>
+          <label className={styles.label}>받는 사람 닉네임</label>
           <div className={styles.inputRow}>
             <input
               type="text"
-              placeholder="이메일 또는 아이디 입력"
+              placeholder="닉네임 입력"
               value={recipient}
               onChange={(e) => {
                 setRecipient(e.target.value);
@@ -95,7 +145,7 @@ export default function TransferAppPage() {
                 {verified.name}
                 <span className={styles.pill}>인증</span>
               </div>
-              <div className={styles.verifiedMeta}>친절한 온도 매우 좋음 · 베트남어</div>
+              <div className={styles.verifiedMeta}>최근 송금했던 사용자</div>
             </div>
           </div>
         )}
