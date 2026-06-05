@@ -23,6 +23,8 @@ export type {
   WalletStatusCode,
   WalletBalanceItem,
   WalletBalancesResponse,
+  WalletBalanceWithKrwItem,
+  WalletMeResponse,
 } from './wallet';
 export { documentApi } from './document';
 export type {
