@@ -214,3 +214,11 @@
   font-size: 14px;
   cursor: pointer;
 }
+
+.stateMsg {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 48px 16px;
+  line-height: 1.6;
+}

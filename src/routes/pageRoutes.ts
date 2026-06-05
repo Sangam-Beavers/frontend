@@ -6,9 +6,11 @@ import Login from '@/pages/auth/Login/Login';
 import PasswordRecovery from '@/pages/auth/PasswordRecovery/PasswordRecovery';
 import ResetPassword from '@/pages/auth/ResetPassword/ResetPassword';
 import Signup from '@/pages/auth/Signup/Signup';
+import CommunityCountryPage from '@/pages/community/Country/CommunityCountryPage';
 import CommunityFreePage from '@/pages/community/Free/CommunityFreePage';
 import CommunityJobPage from '@/pages/community/Job/CommunityJobPage';
 import CommunityLifePage from '@/pages/community/Life/CommunityLifePage';
+import CommunityVisaPage from '@/pages/community/Visa/CommunityVisaPage';
 import CommunityPage from '@/pages/community/Main/CommunityPage';
 import CommunityPostDetailPage from '@/pages/community/PostDetail/CommunityPostDetailPage';
 import CommunityResidencePage from '@/pages/community/Residence/CommunityResidencePage';
@@ -80,6 +82,8 @@ export const mainRoutes: PageRoute[] = [
   { path: ROUTES.COMMUNITY_RESIDENCE, Component: CommunityResidencePage },
   { path: ROUTES.COMMUNITY_LIFE, Component: CommunityLifePage },
   { path: ROUTES.COMMUNITY_JOB, Component: CommunityJobPage },
+  { path: ROUTES.COMMUNITY_VISA, Component: CommunityVisaPage },
+  { path: ROUTES.COMMUNITY_COUNTRY, Component: CommunityCountryPage },
   { path: ROUTES.COMMUNITY_FREE, Component: CommunityFreePage },
   { path: ROUTES.COMMUNITY_WRITE, Component: CommunityWritePage },
   { path: ROUTES.COMMUNITY_POST_DETAIL, Component: CommunityPostDetailPage },

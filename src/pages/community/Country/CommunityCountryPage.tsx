@@ -3,10 +3,10 @@ import FeedPost from '@/components/community/FeedPost';
 import TopBar from '@/components/navigation/TopBar';
 import { usePosts } from '@/hooks/usePosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
-import styles from './CommunityFreePage.module.css';
+import styles from './CommunityCountryPage.module.css';
 
-export default function CommunityFreePage() {
-  const { data, isLoading, error } = usePosts({ category: 'FREE' });
+export default function CommunityCountryPage() {
+  const { data, isLoading, error } = usePosts({ category: 'COUNTRY' });
   const posts = data?.posts ?? [];
 
   return (
@@ -20,11 +20,11 @@ export default function CommunityFreePage() {
         }
       />
 
-      <CommunityTabs active="free" />
+      <CommunityTabs active="country" />
 
       <div className={styles.banner}>
-        <b>자유게시판</b>
-        <span>질문, 잡담, 하루 이야기, 정보 공유를 자유롭게 남겨보세요.</span>
+        <b>국가별 정보</b>
+        <span>같은 나라 사람들과 생활·행정·커뮤니티 정보를 모아봐요.</span>
       </div>
 
       {isLoading ? (

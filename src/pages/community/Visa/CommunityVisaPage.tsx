@@ -3,10 +3,10 @@ import FeedPost from '@/components/community/FeedPost';
 import TopBar from '@/components/navigation/TopBar';
 import { usePosts } from '@/hooks/usePosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
-import styles from './CommunityFreePage.module.css';
+import styles from './CommunityVisaPage.module.css';
 
-export default function CommunityFreePage() {
-  const { data, isLoading, error } = usePosts({ category: 'FREE' });
+export default function CommunityVisaPage() {
+  const { data, isLoading, error } = usePosts({ category: 'VISA' });
   const posts = data?.posts ?? [];
 
   return (
@@ -20,11 +20,11 @@ export default function CommunityFreePage() {
         }
       />
 
-      <CommunityTabs active="free" />
+      <CommunityTabs active="visa" />
 
       <div className={styles.banner}>
-        <b>자유게시판</b>
-        <span>질문, 잡담, 하루 이야기, 정보 공유를 자유롭게 남겨보세요.</span>
+        <b>비자 게시판</b>
+        <span>비자 발급·연장·변경, 체류 자격 관련 정보를 나눠요.</span>
       </div>
 
       {isLoading ? (

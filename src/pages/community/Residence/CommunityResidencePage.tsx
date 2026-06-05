@@ -1,7 +1,8 @@
 import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
 import TopBar from '@/components/navigation/TopBar';
-import { COMMUNITY_POSTS_RESIDENCE_MOCK } from '@/mocks/communityMock';
+import { usePosts } from '@/hooks/usePosts';
+import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityResidencePage.module.css';
 
 interface TemperatureChip {
@@ -17,9 +18,10 @@ const TEMPERATURES: TemperatureChip[] = [
   { label: '매우 좋음', toneClass: styles.tempBlue },
 ];
 
-const POSTS = COMMUNITY_POSTS_RESIDENCE_MOCK.result;
-
 export default function CommunityResidencePage() {
+  const { data, isLoading, error } = usePosts({ category: 'RESIDENCE' });
+  const posts = data?.posts ?? [];
+
   return (
     <>
       <TopBar
@@ -46,9 +48,15 @@ export default function CommunityResidencePage() {
         ))}
       </div>
 
-      {POSTS.map((post) => (
-        <FeedPost key={post.id} post={post} />
-      ))}
+      {isLoading ? (
+        <div className={styles.empty}>게시글을 불러오는 중…</div>
+      ) : error ? (
+        <div className={styles.empty}>게시글을 불러오지 못했어요.</div>
+      ) : posts.length > 0 ? (
+        posts.map((item) => <FeedPost key={item.public_id} post={toFeedPostItem(item)} />)
+      ) : (
+        <div className={styles.empty}>등록된 게시글이 없습니다</div>
+      )}
     </>
   );
 }

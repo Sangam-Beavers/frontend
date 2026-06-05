@@ -20,6 +20,8 @@ export const ROUTES = {
   COMMUNITY_RESIDENCE: '/community/residence',
   COMMUNITY_LIFE: '/community/life',
   COMMUNITY_JOB: '/community/job',
+  COMMUNITY_VISA: '/community/visa',
+  COMMUNITY_COUNTRY: '/community/country',
   COMMUNITY_FREE: '/community/free',
   COMMUNITY_WRITE: '/community/write',
   COMMUNITY_POST_DETAIL: '/community/posts/:postId',
