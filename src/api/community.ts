@@ -114,11 +114,9 @@ export interface PostCreateRequest {
   content: string;
 }
 
-/** 댓글 작성 요청 body (POST /community/posts/{id}/comments). content 필수. */
+/** 댓글 작성 요청 body (POST /community/posts/{id}/comments). content 필수. 대댓글 미지원. */
 export interface CommentCreateRequest {
   content: string;
-  /** 대댓글이면 부모 댓글 public_id, 최상위 댓글이면 생략. */
-  parent_comment_public_id?: string;
 }
 
 /** 게시글 수정 요청 body (PATCH /community/posts/{id}). 부분 수정 — 보낸 필드만 변경. */

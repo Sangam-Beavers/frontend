@@ -141,30 +141,19 @@ export default function CommunityPostDetailPage() {
       </div>
 
       {confirmDelete && (
-        <div className={styles.confirmCard}>
-          <div className={styles.confirmText}>이 글을 삭제하시겠습니까? 되돌릴 수 없어요.</div>
-          {del.error && (
-            <div className={styles.confirmError}>{communityErrorMessage(del.error)}</div>
-          )}
-          <div className={styles.confirmBtnRow}>
-            <button
-              type="button"
-              className={styles.secondary}
-              disabled={del.isPending}
-              onClick={() => setConfirmDelete(false)}
-            >
-              취소
-            </button>
-            <button
-              type="button"
-              className={styles.deleteBtnFilled}
-              disabled={del.isPending}
-              onClick={handleDelete}
-            >
-              {del.isPending ? '삭제 중…' : '삭제'}
-            </button>
-          </div>
-        </div>
+        <ConfirmDialog
+          title="게시글 삭제"
+          message="이 글을 삭제하시겠습니까? 되돌릴 수 없어요."
+          confirmLabel="삭제"
+          danger
+          loading={del.isPending}
+          error={del.error ? communityErrorMessage(del.error) : undefined}
+          onConfirm={handleDelete}
+          onCancel={() => {
+            setConfirmDelete(false);
+            del.reset();
+          }}
+        />
       )}
 
       <div className={styles.section}>
@@ -186,7 +175,7 @@ export default function CommunityPostDetailPage() {
               </div>
               <div className={styles.commentText}>{comment.content}</div>
               <div className={styles.commentMeta}>
-                <span>{formatCommunityDate(comment.created_at)} &middot; 답글 쓰기</span>
+                <span>{formatCommunityDate(comment.created_at)}</span>
                 <button
                   type="button"
                   className={styles.commentDelete}
