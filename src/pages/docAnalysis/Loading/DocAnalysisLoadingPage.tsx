@@ -45,7 +45,10 @@ export default function DocAnalysisLoadingPage() {
     }
   }, [status, navigate, docType, publicId]);
 
-  const failed = status?.status === 'FAILED' || !!error;
+  // 폴링 중 일시적 오류(네트워크 등)는 실패로 보지 않는다 — 마지막 상태가 ANALYZING이면
+  // refetchInterval이 유지돼 다음 폴링 성공 시 자체 회복된다. 에러를 실패로 취급하는 건
+  // 마지막 상태가 없거나(첫 조회 실패) 종료 상태일 때만.
+  const failed = status?.status === 'FAILED' || (!!error && status?.status !== 'ANALYZING');
 
   return (
     <>

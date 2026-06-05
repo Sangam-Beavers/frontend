@@ -197,7 +197,9 @@ export const documentApi = {
    */
   list: (page = 0, size = 20, statuses?: DocumentStatusCode[]) =>
     apiClient.get<unknown, DocumentListResponse>('/documents', {
-      params: { page, size, status: statuses?.join(',') },
+      // 빈 배열이면 status= (빈 값)이 전송돼 백엔드 enum 변환이 COMMON4001로 실패한다.
+      // undefined로 두면 axios가 파라미터 자체를 생략 — 전체 조회와 동일하게 동작.
+      params: { page, size, status: statuses?.length ? statuses.join(',') : undefined },
     }),
 
   /**
