@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import { balanceOf, useBalances } from '@/hooks/useBalances';
+import { useWalletMe } from '@/hooks/useWalletMe';
 import {
   HOME_ALL_CURRENCIES_MOCK,
   HOME_EXCHANGE_RATES_MOCK,
@@ -54,6 +55,8 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [currencies, setCurrencies] = useState<CurrencyOption[]>(loadCurrencies);
   const { data: balances, isLoading: balancesLoading, error: balancesError } = useBalances();
+  // "지금 나의 원화" 카드용 — 보유 통화 전체의 KRW 환산 합계.
+  const { data: walletMe, isLoading: walletMeLoading, error: walletMeError } = useWalletMe();
 
   useEffect(() => {
     setCurrencies(loadCurrencies());
@@ -127,12 +130,18 @@ export default function HomePage() {
         <p className={styles.walletFooter}>Global Bridge 전자지갑</p>
       </div>
 
-      {/* "지금 나의 원화" 환산 총액 카드는 별도 API(/wallets/me, Kyubo) 연동 후 교체 예정.
-          현재는 mock 값 유지. */}
+      {/* "지금 나의 원화" 환산 총액 (GET /wallets/me).
+          로딩 중 '—' / WALLET4001(지갑 없음) 시 ₩0 fallback — 가짜 값 노출 방지. */}
       <div className={styles.card}>
         <div className={styles.cardTitle}>지금 나의 원화</div>
         <div className={styles.cardText}>모든 통화를 현재 환율로 바꾸면</div>
-        <div className={styles.totalAmount}>₩1,820,000</div>
+        <div className={styles.totalAmount}>
+          {walletMeLoading
+            ? '—'
+            : walletMeError instanceof ApiException && walletMeError.code === 'WALLET4001'
+              ? '₩0'
+              : `₩${Number(walletMe?.total_balance_in_krw ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+        </div>
       </div>
 
       {/* 실시간 환율 카드도 별도 API(/wallets/exchange-rates, Kyubo) 연동 후 교체 예정. */}

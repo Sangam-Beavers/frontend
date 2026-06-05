@@ -100,6 +100,28 @@ export interface WalletBalancesResponse {
   updated_at: string;
 }
 
+/** 통화별 잔액 + 환율 + 원화 환산액 (백엔드 WalletMeResponse.BalanceWithKrwItem). */
+export interface WalletBalanceWithKrwItem {
+  currency_code: string;
+  /** 해당 통화 잔액 (소수 4자리 string). */
+  balance: string;
+  /** "1 외화→KRW" 환율 (소수 4자리 string). KRW는 "1". */
+  exchange_rate: string;
+  /** 해당 통화 원화 환산액 (소수 4자리 string). */
+  balance_in_krw: string;
+}
+
+/** 전자지갑 + 원화 환산 총액 응답 (GET /wallets/me). */
+export interface WalletMeResponse {
+  wallet_public_id: string;
+  status: WalletStatusCode;
+  /** 전체 보유 통화의 원화 환산 합계 (소수 4자리 string, 예: "1888500.0000"). */
+  total_balance_in_krw: string;
+  balances: WalletBalanceWithKrwItem[];
+  /** 잔액·환산 기준 시각 (ISO 8601 UTC Z). */
+  updated_at: string;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -185,8 +207,18 @@ export const walletApi = {
    */
   getBalances: () => apiClient.get<unknown, WalletBalancesResponse>('/wallets/me/balances'),
 
+  /**
+   * 내 전자지갑 + 원화 환산 총액 조회 (200) — 보유 통화별 잔액·환율·환산액·전체 합산을 한 번에.
+   *
+   * <p>홈 화면 "지금 나의 원화" 카드에 total_balance_in_krw 표시용. KRW 포함 보유 모든 통화의
+   * "잔액 × KRW 환율" 합계가 백엔드에서 계산돼 string으로 내려온다 (소수 4자리).
+   *
+   * <p>에러: WALLET4001(404, 지갑 없음) / TRANSFER4002(400, 미지원 통화 = 환율 누락) /
+   * AUTH4011(401 — interceptor 처리) / COMMON5000(500, 서버 오류).
+   */
+  getWalletMe: () => apiClient.get<unknown, WalletMeResponse>('/wallets/me'),
+
   // TODO: 다음 사이클에서 추가
-  //   원화 환산 총액: getWalletMe (GET /wallets/me, Kyubo)
   //   환율 위젯: getExchangeRates (GET /wallets/exchange-rates, Kyubo)
   //   계좌: registerAccount, deleteAccount, getMyAccounts
   //   충전: charge
