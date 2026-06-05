@@ -25,3 +25,16 @@ export type {
   WalletBalancesResponse,
 } from './wallet';
 export { documentApi } from './document';
+export type {
+  AnalysisDocumentType,
+  DocumentStatus,
+  ProcessingStatus,
+  RiskLevel,
+  SubmitRequest,
+  SubmissionResponse,
+  DocumentStatusResponse,
+  DeductionDto,
+  WageSummaryDto,
+  RiskItemDto,
+  DocumentResultResponse,
+} from './document';
