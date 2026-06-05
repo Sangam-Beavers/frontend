@@ -1,12 +1,20 @@
+import { useState } from 'react';
+import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
 import TopBar from '@/components/navigation/TopBar';
+import { useDebouncedKeyword } from '@/hooks/useDebouncedKeyword';
 import { usePosts } from '@/hooks/usePosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityCountryPage.module.css';
 
 export default function CommunityCountryPage() {
-  const { data, isLoading, error } = usePosts({ category: 'COUNTRY' });
+  const [showSearch, setShowSearch] = useState(false);
+  const { searchQuery, setSearchQuery, keyword } = useDebouncedKeyword();
+  const { data, isLoading, error } = usePosts({
+    category: 'COUNTRY',
+    keyword: keyword || undefined,
+  });
   const posts = data?.posts ?? [];
 
   return (
@@ -14,13 +22,21 @@ export default function CommunityCountryPage() {
       <TopBar
         title="커뮤니티"
         rightAction={
-          <button type="button" className={styles.searchIcon} aria-label="검색">
+          <button
+            type="button"
+            className={styles.searchIcon}
+            aria-label="검색"
+            aria-pressed={showSearch}
+            onClick={() => setShowSearch((s) => !s)}
+          >
             🔍
           </button>
         }
       />
 
       <CommunityTabs active="country" />
+
+      {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
 
       <div className={styles.banner}>
         <b>국가별 정보</b>
@@ -34,7 +50,9 @@ export default function CommunityCountryPage() {
       ) : posts.length > 0 ? (
         posts.map((item) => <FeedPost key={item.public_id} post={toFeedPostItem(item)} />)
       ) : (
-        <div className={styles.empty}>등록된 게시글이 없습니다</div>
+        <div className={styles.empty}>
+          {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
+        </div>
       )}
     </>
   );

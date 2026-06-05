@@ -1,6 +1,9 @@
+import { useState } from 'react';
+import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
 import TopBar from '@/components/navigation/TopBar';
+import { useDebouncedKeyword } from '@/hooks/useDebouncedKeyword';
 import { useQna } from '@/hooks/useQna';
 import { usePosts } from '@/hooks/usePosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
@@ -19,6 +22,9 @@ const QUICK_ITEMS: QuickItem[] = [
 ];
 
 export default function CommunityJobPage() {
+  const [showSearch, setShowSearch] = useState(false);
+  const { searchQuery, setSearchQuery, keyword } = useDebouncedKeyword();
+
   // 주요 QnA — JOB 카테고리 답변 많은 순 Top 1 (api-spec §8).
   // 4상태 분리(로딩/에러/빈/정상) — 에러를 "빈 결과"로 오인 방지(CodeRabbit 리뷰 반영).
   const {
@@ -28,8 +34,8 @@ export default function CommunityJobPage() {
   } = useQna({ category: 'JOB', size: 1 });
   const topQna = qnaData?.posts[0];
 
-  // 취업 게시판 글 목록 (실제 API).
-  const { data, isLoading, error } = usePosts({ category: 'JOB' });
+  // 취업 게시판 글 목록 (실제 API) + 게시판 내 검색.
+  const { data, isLoading, error } = usePosts({ category: 'JOB', keyword: keyword || undefined });
   const posts = data?.posts ?? [];
 
   return (
@@ -37,13 +43,21 @@ export default function CommunityJobPage() {
       <TopBar
         title="커뮤니티"
         rightAction={
-          <button type="button" className={styles.searchIcon} aria-label="검색">
+          <button
+            type="button"
+            className={styles.searchIcon}
+            aria-label="검색"
+            aria-pressed={showSearch}
+            onClick={() => setShowSearch((s) => !s)}
+          >
             🔍
           </button>
         }
       />
 
       <CommunityTabs active="job" />
+
+      {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
 
       <div className={styles.jobAd}>
         <b>잡코리아 연동 공고</b>
@@ -68,7 +82,9 @@ export default function CommunityJobPage() {
       ) : posts.length > 0 ? (
         posts.map((item) => <FeedPost key={item.public_id} post={toFeedPostItem(item)} />)
       ) : (
-        <div className={styles.empty}>등록된 게시글이 없습니다</div>
+        <div className={styles.empty}>
+          {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
+        </div>
       )}
 
       <div className={styles.qnaCard}>

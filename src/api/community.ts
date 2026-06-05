@@ -106,6 +106,14 @@ export interface CommentListResponse {
   total_pages: number;
 }
 
+/** 게시글 작성 요청 body (POST /community/posts). 전부 필수. */
+export interface PostCreateRequest {
+  /** 카테고리 — 백엔드 enum 대문자 (예: "JOB", "LIFE_INFO"). */
+  category: string;
+  title: string;
+  content: string;
+}
+
 // ---------- API 함수 ----------
 
 export const communityApi = {
@@ -140,7 +148,16 @@ export const communityApi = {
   getComments: (postId: string, params?: { page?: number; size?: number }) =>
     apiClient.get<unknown, CommentListResponse>(`/community/posts/${postId}/comments`, { params }),
 
+  /**
+   * 게시글 작성 (201) — 성공 시 생성된 게시글(PostDetailResponse)을 반환한다.
+   *
+   * <p>필수값 누락·잘못된 category는 COMMON4001(400) → ApiException. 인증 필요(AUTH4011).
+   * 작성 후 목록 갱신은 ['community','posts'] invalidate(useCreatePost hook가 처리).
+   */
+  createPost: (body: PostCreateRequest) =>
+    apiClient.post<unknown, PostDetailResponse>('/community/posts', body),
+
   // TODO: 다음 사이클에서 추가
-  //   createPost, updatePost, deletePost, likePost, unlikePost
+  //   updatePost, deletePost, likePost, unlikePost
   //   createComment, deleteComment
 };

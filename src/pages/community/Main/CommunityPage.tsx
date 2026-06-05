@@ -1,24 +1,16 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
 import TopBar from '@/components/navigation/TopBar';
+import { useDebouncedKeyword } from '@/hooks/useDebouncedKeyword';
 import { usePosts } from '@/hooks/usePosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityPage.module.css';
 
 export default function CommunityPage() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // 검색어 디바운스(300ms) — 매 타이핑마다 요청하지 않도록 keyword를 늦춰서 반영.
-  const [keyword, setKeyword] = useState('');
-  useEffect(() => {
-    const timer = setTimeout(() => setKeyword(searchQuery.trim()), 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  // 전체 탭 → category 미지정. 검색은 서버(keyword)로.
+  // 전체 탭 → category 미지정. 검색은 서버(keyword)로. (디바운스 300ms는 useDebouncedKeyword)
+  const { searchQuery, setSearchQuery, keyword } = useDebouncedKeyword();
   const { data, isLoading, error } = usePosts({ keyword: keyword || undefined });
   const posts = data?.posts ?? [];
 

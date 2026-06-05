@@ -1,34 +1,54 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import { buildCommunityPostPath } from '@/constants/routes';
+import { useCreatePost } from '@/hooks/useCreatePost';
 import styles from './CommunityWritePage.module.css';
 
-const CATEGORIES = ['거주', '생활', '취업', '자유게시판'] as const;
-type Category = (typeof CATEGORIES)[number];
-
-const SUB_CATEGORIES: Record<Category, string[]> = {
-  거주: ['룸메 구하기', '집 구하기', '거주 후기'],
-  생활: ['생활 꿀팁', '음식/맛집', '문화'],
-  취업: ['일자리 정보', '취업 후기', '노무/법률'],
-  자유게시판: ['잡담', '질문', '정보 공유'],
-};
+// 백엔드 PostCreateRequest.category enum(value) ↔ 표시 라벨. API는 category 하나만 받는다(세부 카테고리 없음).
+// FREE(자유게시판)는 백엔드 create enum 추가 작업 중 — 추가되면 작성 동작.
+const CATEGORIES = [
+  { value: 'RESIDENCE', label: '거주' },
+  { value: 'LIFE_INFO', label: '생활' },
+  { value: 'JOB', label: '취업' },
+  { value: 'VISA', label: '비자' },
+  { value: 'COUNTRY', label: '국가별 정보' },
+  { value: 'QUESTION', label: '질문' },
+  { value: 'FREE', label: '자유게시판' },
+] as const;
 
 export default function CommunityWritePage() {
   const navigate = useNavigate();
-  const [category, setCategory] = useState<Category>('거주');
-  const [subCategory, setSubCategory] = useState<string>(SUB_CATEGORIES['거주'][0]);
+  // 기본 선택 없음('') — 사용자가 반드시 카테고리를 직접 골라야 한다.
+  const [category, setCategory] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [body, setBody] = useState<string>('');
   const [allowAutoTranslate, setAllowAutoTranslate] = useState<boolean>(false);
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const next = e.target.value as Category;
-    setCategory(next);
-    setSubCategory(SUB_CATEGORIES[next][0]);
-  };
+  const create = useCreatePost();
+  const canSubmit =
+    category !== '' && title.trim() !== '' && body.trim() !== '' && !create.isPending;
+
+  const errorMessage = (() => {
+    const err = create.error;
+    if (!err) return '';
+    if (err instanceof ApiException) {
+      if (err.code === 'COMMON4001') return '제목·본문·카테고리를 다시 확인해 주세요.';
+      return err.message;
+    }
+    return '게시글 작성에 실패했어요. 잠시 후 다시 시도해 주세요.';
+  })();
 
   const handleSubmit = () => {
-    navigate('/community');
+    if (!canSubmit) return;
+    create.mutate(
+      { category, title: title.trim(), content: body.trim() },
+      {
+        // 작성 성공 → 생성된 게시글 상세로 이동.
+        onSuccess: (post) => navigate(buildCommunityPostPath(post.public_id)),
+      }
+    );
   };
 
   return (
@@ -41,27 +61,14 @@ export default function CommunityWritePage() {
           id="write-category"
           className={styles.select}
           value={category}
-          onChange={handleCategoryChange}
+          onChange={(e) => setCategory(e.target.value)}
         >
+          <option value="" disabled>
+            카테고리를 선택하세요
+          </option>
           {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className={styles.field}>
-        <label htmlFor="write-sub-category">세부 카테고리</label>
-        <select
-          id="write-sub-category"
-          className={styles.select}
-          value={subCategory}
-          onChange={(e) => setSubCategory(e.target.value)}
-        >
-          {SUB_CATEGORIES[category].map((s) => (
-            <option key={s} value={s}>
-              {s}
+            <option key={c.value} value={c.value}>
+              {c.label}
             </option>
           ))}
         </select>
@@ -90,10 +97,6 @@ export default function CommunityWritePage() {
         />
       </div>
 
-      <button type="button" className={styles.secondary}>
-        이미지 첨부
-      </button>
-
       <div className={styles.toggleRow}>
         <span>자동 번역 허용</span>
         <button
@@ -107,9 +110,16 @@ export default function CommunityWritePage() {
         </button>
       </div>
 
+      {errorMessage && <div className={styles.errorText}>{errorMessage}</div>}
+
       <div className={styles.primaryFixed}>
-        <button type="button" className={styles.primary} onClick={handleSubmit}>
-          작성 완료
+        <button
+          type="button"
+          className={styles.primary}
+          disabled={!canSubmit}
+          onClick={handleSubmit}
+        >
+          {create.isPending ? '작성 중…' : '작성 완료'}
         </button>
       </div>
     </>
