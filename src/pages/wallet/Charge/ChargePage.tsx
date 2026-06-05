@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import { balanceOf, useBalances } from '@/hooks/useBalances';
 import { CHARGE_ACCOUNTS_MOCK } from '@/mocks/chargeMock';
-import { HOME_WALLET_BALANCE_MOCK } from '@/mocks/homeMock';
 import styles from './ChargePage.module.css';
 
 const ACCOUNTS = CHARGE_ACCOUNTS_MOCK.result;
-const WALLET_BALANCE = HOME_WALLET_BALANCE_MOCK.result;
 const CHARGE_AMOUNT = 300_000;
 
 const formatKRW = (value: number) => `₩${value.toLocaleString('ko-KR')}`;
@@ -16,7 +16,12 @@ export default function ChargePage() {
   const [selectedAccountId, setSelectedAccountId] = useState<string>(ACCOUNTS[0].id);
   const [chargeAmount, setChargeAmount] = useState<number>(CHARGE_AMOUNT);
 
-  const afterBalance = WALLET_BALANCE + chargeAmount;
+  // 실제 KRW 잔액 — useBalances는 string("1530000.0000") 반환 → Number 변환.
+  // 지갑 없음(WALLET4001)이면 0으로 fallback (가입 직후 등 일시 상태).
+  const { data: balances, isLoading, error } = useBalances();
+  const hasWalletError = error instanceof ApiException && error.code === 'WALLET4001';
+  const walletBalance = hasWalletError ? 0 : Number(balanceOf(balances, 'KRW'));
+  const afterBalance = walletBalance + chargeAmount;
 
   return (
     <>
@@ -24,7 +29,7 @@ export default function ChargePage() {
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>현재 전자지갑 잔액</div>
-        <div className={styles.cardBalance}>{formatKRW(WALLET_BALANCE)}</div>
+        <div className={styles.cardBalance}>{isLoading ? '—' : formatKRW(walletBalance)}</div>
       </div>
 
       <div className={styles.section}>등록된 내 계좌</div>
@@ -75,7 +80,7 @@ export default function ChargePage() {
       <div className={styles.card}>
         <div className={styles.row}>
           <span>충전 후 전자지갑</span>
-          <b>{formatKRW(afterBalance)}</b>
+          <b>{isLoading ? '—' : formatKRW(afterBalance)}</b>
         </div>
       </div>
 
