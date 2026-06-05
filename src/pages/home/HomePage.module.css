@@ -122,6 +122,29 @@
   margin: 12px 0 0;
 }
 
+/* Locked state (이슈 #108 — 신분증 미인증 사용자용) */
+.lockedTitle {
+  font-size: 22px;
+  font-weight: 900;
+  margin: 18px 0 8px;
+  color: #fff;
+}
+
+.lockedText {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #dbeafe;
+  margin: 0 0 6px;
+}
+
+/* 잠금 상태에서 인증 CTA만 1열로 — walletActions(3열)과 별도 컨테이너 */
+.lockedActions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+
 /* Card */
 .card {
   border: 1px solid var(--line);

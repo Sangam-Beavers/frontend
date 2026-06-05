@@ -2,10 +2,18 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import { useMyAccounts } from '@/hooks/useMyAccounts';
 import type { AccountListResponse } from '@/api/wallet';
 import styles from './AccountManagePage.module.css';
 
+/**
+ * 계좌 관리 화면.
+ *
+ * <p>실 API 연동(#102) 후 {@link useMyAccounts}로 서버 목록 표시. 이슈 #108 — 계좌가 0건이면
+ * 단순 "등록된 계좌 없음" 대신 "계좌를 연동해주세요" 안내 카드 + 계좌 추가 CTA로 유도한다.
+ * 전자지갑 1계정 1개 보장(BE #152)은 백엔드에서 처리하므로 프론트는 계좌 유무만 분기한다.
+ */
 export default function AccountManagePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -36,7 +44,13 @@ export default function AccountManagePage() {
         <div className={styles.state}>계좌를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>
       )}
       {!isLoading && !error && accounts.length === 0 && (
-        <div className={styles.state}>등록된 계좌가 없습니다.</div>
+        <div className={styles.card}>
+          <div className={styles.cardTitle}>계좌를 연동해주세요</div>
+          <div className={styles.cardText}>
+            전자지갑은 개설되었지만 아직 연동된 계좌가 없습니다. 계좌를 연동하면 충전·송금을 시작할
+            수 있어요.
+          </div>
+        </div>
       )}
 
       {accounts.length > 0 && (
@@ -63,7 +77,7 @@ export default function AccountManagePage() {
       <button
         type="button"
         className={styles.primaryBtn}
-        onClick={() => navigate('/charge/add-account')}
+        onClick={() => navigate(ROUTES.CHARGE_ADD_ACCOUNT)}
       >
         계좌 추가
       </button>

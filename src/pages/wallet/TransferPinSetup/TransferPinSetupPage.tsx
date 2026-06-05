@@ -27,11 +27,22 @@ interface AuthState {
   amount: string;
 }
 
+/** 신분증 인증 완료 직후 진입(이슈 #108) — 등록 완료 시 홈으로 가도록 분기. */
+interface OnboardingState {
+  fromOnboarding: true;
+}
+
+type IncomingState = AuthState | OnboardingState | null;
+
 export default function TransferPinSetupPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  // 송금 흐름에서 왔으면 state가 있고, 직접 진입이면 null
-  const transferState = (location.state as AuthState | null) ?? null;
+  const incomingState = (location.state as IncomingState) ?? null;
+  // 송금 인증에서 PIN 미설정으로 튕긴 경우 — 등록 후 송금 인증 화면으로 복귀하기 위해 들고 옴.
+  const transferState = incomingState && 'recipientName' in incomingState ? incomingState : null;
+  // 신분증 인증 완료 직후 — 등록 완료 시 마이페이지/완료 페이지로 돌아가지 않고 홈으로 바로.
+  const fromOnboarding =
+    incomingState !== null && 'fromOnboarding' in incomingState && incomingState.fromOnboarding;
 
   const [pin, setPin] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -40,10 +51,15 @@ export default function TransferPinSetupPage() {
   const [alreadySet, setAlreadySet] = useState(false); // COMMON4091 — 이미 등록됨
   const [error, setError] = useState<string | null>(null);
 
-  // 완료/이미등록 후 이동: 송금 중이었으면 인증 화면으로 복귀, 아니면 이전 화면으로
+  // 완료/이미등록 후 이동:
+  //   1) 송금 흐름에서 왔으면 인증 화면으로 복귀
+  //   2) 신분증 인증 직후 온보딩이면 홈으로 (인증 완료 페이지 다시 보일 필요 없음 — replace)
+  //   3) 그 외(마이페이지 등 직접 진입)는 이전 화면으로
   const goNext = () => {
     if (transferState) {
       navigate(ROUTES.TRANSFER_AUTH, { state: transferState, replace: true });
+    } else if (fromOnboarding) {
+      navigate(ROUTES.HOME, { replace: true });
     } else {
       navigate(-1);
     }
@@ -70,6 +86,24 @@ export default function TransferPinSetupPage() {
       if (e instanceof ApiException) {
         if (e.code === 'COMMON4091') {
           setAlreadySet(true); // 이미 PIN이 있음 → 입력 화면으로 보내기
+        } else if (e.code === 'WALLET4001') {
+          // 인증은 됐지만 지갑 자동 개설이 안 된 케이스(이슈 #108) — 멱등 createWallet으로 보정 후
+          // PIN 설정을 한 번 더 시도한다. 두 번째 시도도 실패하면 일반 에러로 안내.
+          try {
+            await walletApi.createWallet();
+            await walletApi.setTransferPin({ pin });
+            setDone(true);
+          } catch (retryErr) {
+            if (retryErr instanceof ApiException && retryErr.code === 'COMMON4091') {
+              setAlreadySet(true);
+            } else if (retryErr instanceof ApiException) {
+              setError(
+                retryErr.message || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.'
+              );
+            } else {
+              setError('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+            }
+          }
         } else if (e.code === 'NETWORK_ERROR') {
           setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         } else {

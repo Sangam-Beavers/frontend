@@ -102,8 +102,15 @@ export const mainRoutes: PageRoute[] = [
   { path: ROUTES.MYPAGE_DOC_ANALYSIS_HISTORY, Component: DocAnalysisHistoryPage },
 ];
 
-// 기능 플로우: 충전/환전/정기송금/송금/문서분석
-export const serviceRoutes: PageRoute[] = [
+/**
+ * 금융 기능 플로우 (충전/환전/송금/정기송금) — 이슈 #108로 VerifiedRoute 가드 적용 대상.
+ * 미인증 사용자는 진입 시 `/mypage/badge`로 강제 이동한다(Router.tsx).
+ *
+ * <p>환율 위젯/전체 환율(`/exchange/rates`)은 "환전 시작" 흐름의 일부라 같은 가드를 적용한다 —
+ * 환율 조회만 하는 경우 홈 화면의 위젯과 `EXCHANGE_RATES_FULL` 자체 라우트로 충분.
+ * 단순 환율 정보 노출(홈 위젯)은 가드 없음.
+ */
+export const financialServiceRoutes: PageRoute[] = [
   { path: ROUTES.CHARGE, Component: ChargePage },
   { path: ROUTES.CHARGE_ADD_ACCOUNT, Component: AddAccountPage },
   { path: ROUTES.CHARGE_AUTO_DEBIT, Component: AutoDebitAuthPage },
@@ -127,10 +134,21 @@ export const serviceRoutes: PageRoute[] = [
   { path: ROUTES.TRANSFER_PIN_SETUP, Component: TransferPinSetupPage },
   { path: ROUTES.TRANSFER_COMPLETE, Component: TransferCompletePage },
   { path: ROUTES.TRANSFER_RECEIPT, Component: TransferReceiptPage },
+];
 
+/**
+ * 비금융 서비스 라우트 — 문서분석 등. VerifiedRoute 가드 없음 (미인증도 사용 가능).
+ */
+export const nonFinancialServiceRoutes: PageRoute[] = [
   { path: ROUTES.DOC_ANALYSIS, Component: DocAnalysisSelectPage },
   { path: ROUTES.DOC_ANALYSIS_PREVIEW, Component: DocAnalysisPreviewPage },
   { path: ROUTES.DOC_ANALYSIS_LOADING, Component: DocAnalysisLoadingPage },
   { path: ROUTES.DOC_ANALYSIS_RESULT, Component: DocAnalysisResultPage },
   { path: ROUTES.DOC_ANALYSIS_PAYMENT, Component: DocAnalysisPaymentPage },
 ];
+
+/**
+ * @deprecated 이슈 #108부터 {@link financialServiceRoutes}와 {@link nonFinancialServiceRoutes}로 분리.
+ * 두 배열을 합친 형태이며, 호환을 위해 잠시 유지한다(외부 참조 없으면 제거 가능).
+ */
+export const serviceRoutes: PageRoute[] = [...financialServiceRoutes, ...nonFinancialServiceRoutes];
