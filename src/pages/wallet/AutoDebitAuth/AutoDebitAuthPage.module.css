@@ -70,10 +70,25 @@
 .primary {
   background: linear-gradient(135deg, #0b66ff, #0348dd);
   color: #fff;
+  cursor: pointer;
 }
 
 .ghost {
   background: var(--soft);
   color: var(--blue);
   border: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.primary:disabled,
+.ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.errorText {
+  margin: 4px 2px 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e11d48;
 }

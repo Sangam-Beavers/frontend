@@ -1,3 +1,10 @@
+.state {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 28px 14px;
+}
+
 .list {
   border: 1px solid var(--line);
   border-radius: 16px;

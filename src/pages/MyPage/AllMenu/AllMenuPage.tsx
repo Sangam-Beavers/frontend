@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { startLogout } from '@/auth/logout';
 import styles from './AllMenuPage.module.css';
 
 const LEFT_NAV = ['전체', '금융', '문서 분석', '커뮤니티', '마이페이지', '고객센터'] as const;
@@ -206,7 +207,7 @@ export default function AllMenuPage() {
         <div className={styles.footer}>
           <span onClick={() => navigate('/mypage')}>개인정보</span>
           <span onClick={() => navigate('/mypage')}>이용약관</span>
-          <span onClick={() => navigate('/login')}>로그아웃</span>
+          <span onClick={() => startLogout()}>로그아웃</span>
         </div>
       </div>
     </>

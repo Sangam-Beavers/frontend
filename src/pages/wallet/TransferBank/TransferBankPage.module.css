@@ -234,6 +234,70 @@
   cursor: not-allowed;
 }
 
+/* Empty state — 등록된 계좌가 없을 때 CTA */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.registerBtn {
+  border-radius: 12px;
+  padding: 11px 18px;
+  background: var(--soft2, #eef4ff);
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 13px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.registerBtn:active {
+  background: #d4e8ff;
+}
+
+/* 목록 맨 아래 계좌 추가 행 */
+.addItem {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.addItem:active {
+  background: var(--soft2, #eef4ff);
+}
+
+.addIcon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--soft2, #eef4ff);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 16px;
+}
+
 .itemSelected {
   background: var(--soft2, #eef4ff);
 }

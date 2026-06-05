@@ -153,6 +153,140 @@ export interface WalletBalancesResponse {
   updated_at: string;
 }
 
+/** 등록된 계좌 한 건 (백엔드 AccountResponse). 실제 응답은 snake_case(Jackson 전역 설정). */
+export interface AccountItem {
+  /** 계좌 식별자(UUID) — 주 계좌 지정·해제 등 후속 API의 path variable. */
+  account_public_id: string;
+  /** 은행 코드 (예: "004"). */
+  bank_code: string;
+  /** 은행명 (예: "KB국민은행"). */
+  bank_name: string;
+  /** 마스킹된 계좌번호 — 앞 3 + 끝 2만 노출 (예: "123*********34"). */
+  account_number_masked: string;
+  /** 주 계좌 여부. */
+  is_primary: boolean;
+  /** 가상계좌(앱 내부 발급) 여부. */
+  is_virtual: boolean;
+  /** 외부 은행 인증 완료 여부. */
+  is_verified: boolean;
+  /** 계좌 등록 시각 (ISO 8601 UTC Z). */
+  created_at: string;
+}
+
+/** 등록된 내 계좌 목록 응답 (GET /accounts) — 주 계좌 우선, 최신 등록순. */
+export interface AccountListResponse {
+  /** 활성 계좌 목록. 등록된 계좌가 없으면 빈 배열(404 아님). */
+  accounts: AccountItem[];
+}
+
+/** 지원 은행 한 건 (백엔드 SupportedBankResponse). 계좌 등록 시 선택 가능한 은행. */
+export interface SupportedBank {
+  /** 은행 코드 (예: "004"). 예금주 조회·계좌 등록 시 식별자로 사용. */
+  bank_code: string;
+  /** 은행명 (예: "KB국민은행"). */
+  bank_name: string;
+}
+
+/** 추가 지원 은행 목록 응답 (GET /accounts/supported-banks) — 이름 가나다순. */
+export interface SupportedBankListResponse {
+  banks: SupportedBank[];
+}
+
+/** 예금주 실명 조회 응답 (GET /accounts/holder). */
+export interface AccountHolderResponse {
+  /** Mock 은행에서 조회된 예금주 실명 (예: "홍길동"). */
+  account_holder_name: string;
+}
+
+/** 계좌 연결+자동이체 인증 요청 body. 실제 요청은 snake_case(Jackson 전역). */
+export interface VerifyAccountRequest {
+  bank_code: string;
+  /** 하이픈 없는 계좌번호 숫자 문자열. */
+  account_number: string;
+  /** 예금주명 — GET /accounts/holder로 확인한 값. */
+  holder_name: string;
+}
+
+/** 계좌 인증 응답 — register 단계에 그대로 넘길 외부(Mock) 은행 토큰. */
+export interface VerifyAccountResponse {
+  account_token: string;
+}
+
+/** 계좌 등록 최종 완료 요청 body. account_token은 verify 응답값. */
+export interface RegisterAccountRequest {
+  bank_code: string;
+  account_number: string;
+  /** verify 단계에서 발급받은 account_token. */
+  account_token: string;
+  holder_name: string;
+}
+
+/** 충전 요청 body. amount는 KRW 십진수 string("300000"). 0 초과. */
+export interface ChargeRequest {
+  amount: string;
+}
+
+/** 충전 실행 응답 (POST /accounts/{id}/charge). 실제 응답은 snake_case. */
+export interface ChargeResponse {
+  /** 충전 거래 식별자(UUID). */
+  public_id: string;
+  /** 출금 계좌 식별자(UUID). */
+  account_public_id: string;
+  /** 충전 금액 — string 소수 4자리. */
+  amount: string;
+  /** 통화 코드(KRW 고정). */
+  currency_code: string;
+  /** 충전 후 지갑 잔액 — string 소수 4자리. */
+  wallet_balance: string;
+  /** 거래 상태(예: "COMPLETED"). */
+  status: string;
+  created_at: string;
+}
+
+/** 통화별 잔액 + 환율 + 원화 환산액 (백엔드 WalletMeResponse.BalanceWithKrwItem). */
+export interface WalletBalanceWithKrwItem {
+  currency_code: string;
+  /** 해당 통화 잔액 (소수 4자리 string). */
+  balance: string;
+  /** "1 외화→KRW" 환율 (소수 4자리 string). KRW는 "1". */
+  exchange_rate: string;
+  /** 해당 통화 원화 환산액 (소수 4자리 string). */
+  balance_in_krw: string;
+}
+
+/** 전자지갑 + 원화 환산 총액 응답 (GET /wallets/me). */
+export interface WalletMeResponse {
+  wallet_public_id: string;
+  status: WalletStatusCode;
+  /** 전체 보유 통화의 원화 환산 합계 (소수 4자리 string, 예: "1888500.0000"). */
+  total_balance_in_krw: string;
+  balances: WalletBalanceWithKrwItem[];
+  /** 잔액·환산 기준 시각 (ISO 8601 UTC Z). */
+  updated_at: string;
+}
+
+/** 환율 위젯의 통화별 1건 (백엔드 ExchangeRateWidgetResponse.RateItem). */
+export interface ExchangeRateItem {
+  currency_code: string;
+  /** 한국어 통화명 (예: "미국 달러"). */
+  currency_name: string;
+  /** 기호 (예: "$"). */
+  currency_symbol: string;
+  /** "1 외화→KRW" 환율 (소수 4자리 string). */
+  exchange_rate: string;
+  /** 전일 대비 등락률 (%). 표시 전용 number. 직전 값 없으면 0. */
+  change_rate: number;
+  /** 환율 기준 시각 (ISO 8601 UTC Z). */
+  updated_at: string;
+}
+
+/** 주요 통화 환율 위젯 응답 (GET /wallets/exchange-rates). */
+export interface ExchangeRateWidgetResponse {
+  /** 기준 통화 — 항상 "KRW" (1 외화→KRW 환산 기준). */
+  base_currency_code: string;
+  rates: ExchangeRateItem[];
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -239,6 +373,102 @@ export const walletApi = {
   getBalances: () => apiClient.get<unknown, WalletBalancesResponse>('/wallets/me/balances'),
 
   /**
+   * 등록된 내 계좌 목록 조회 (200) — 주 계좌 우선, 최신 등록순.
+   *
+   * <p>계좌번호는 마스킹되어(앞 3 + 끝 2) 내려온다. 등록된 계좌가 없어도 404가 아니라
+   * 200 + accounts: [] 빈 배열로 응답하므로, 화면은 길이 0을 "계좌 없음"으로 분기한다.
+   * 사용자는 JWT의 public_id claim으로 식별 — 인증 누락은 AUTH4011(interceptor가 로그인 이동).
+   */
+  getMyAccounts: () => apiClient.get<unknown, AccountListResponse>('/accounts'),
+
+  /**
+   * 추가 지원 은행 목록 조회 (200) — 계좌 등록 시 선택 가능한 활성 국내 은행(이름 가나다순).
+   *
+   * <p>은행 목록은 자주 바뀌지 않는 마스터 데이터 — hook에서 staleTime을 길게(5분) 둔다.
+   * 인증 누락은 AUTH4011(interceptor가 로그인 이동).
+   */
+  getSupportedBanks: () =>
+    apiClient.get<unknown, SupportedBankListResponse>('/accounts/supported-banks'),
+
+  /**
+   * 예금주 실명 조회 (200) — bankCode + accountNumber로 Mock 은행에 실명을 조회한다.
+   *
+   * <p>사용자가 계좌번호 입력 후 "예금주 조회"를 누를 때 호출(온디맨드). 조회 횟수 rate-limit이
+   * 있어(COMMON4291, 429) 자동 호출/재시도하지 않는다 — useMutation으로 명시적 트리거만.
+   *
+   * <p>존재하지 않는 계좌 ACCOUNT4001(404), 형식 오류 COMMON4001(400),
+   * Mock 은행 통신 장애 COMMON5031(503) → 모두 ApiException으로 throw.
+   */
+  getAccountHolder: (bankCode: string, accountNumber: string) =>
+    apiClient.get<unknown, AccountHolderResponse>('/accounts/holder', {
+      params: { bankCode, accountNumber },
+    }),
+
+  /**
+   * 계좌 연결 + 자동이체 인증 요청 (200) — Mock 은행에 인증을 요청하고 account_token을 받는다.
+   *
+   * <p>받은 account_token을 {@link registerAccount}에 그대로 넘겨야 등록이 완료된다.
+   * 인증 실패 ACCOUNT4002(400), 없는 계좌 ACCOUNT4001(404), 횟수초과 ACCOUNT4005(429),
+   * 은행장애 COMMON5031(503) → 모두 ApiException으로 throw.
+   */
+  verifyAccount: (body: VerifyAccountRequest) =>
+    apiClient.post<unknown, VerifyAccountResponse>('/accounts/verify', body),
+
+  /**
+   * 계좌 등록 최종 완료 (201) — verify에서 받은 account_token으로 계좌를 등록한다.
+   *
+   * <p>성공 시 등록된 계좌(AccountResponse, AccountItem과 동일 구조)를 반환.
+   * 목록(getMyAccounts)에 즉시 반영하려면 ['wallet','accounts']를 invalidate한다
+   * (useRegisterAccount hook의 onSuccess가 처리).
+   * 이미 등록된 계좌 ACCOUNT4004(409), 형식/은행코드 오류 COMMON4001(400) → ApiException.
+   */
+  registerAccount: (body: RegisterAccountRequest) =>
+    apiClient.post<unknown, AccountItem>('/accounts', body),
+
+  /**
+   * 충전 금액 검증·실행 (201) — 연결된 계좌(accountId)에서 전자지갑으로 KRW를 충전한다.
+   *
+   * <p>Idempotency-Key 헤더 필수: 동일 키 재요청 시 백엔드가 첫 결과를 그대로 재반환(멱등).
+   * 호출 측은 (계좌, 금액) 단위로 키를 한 번 생성해 네트워크 재시도 시 같은 키를 보낸다.
+   *
+   * <p>응답에 충전 후 잔액(wallet_balance)이 포함된다. 연동 계좌 잔액 부족 ACCOUNT4003(400),
+   * 미인증 계좌 ACCOUNT4006(403), 한도 초과 ACCOUNT4007(422), 지갑 없음 WALLET4001(404)
+   * → 모두 ApiException으로 throw.
+   */
+  chargeAccount: (accountId: string, body: ChargeRequest, idempotencyKey: string) =>
+    apiClient.post<unknown, ChargeResponse>(`/accounts/${accountId}/charge`, body, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    }),
+
+  /**
+   * 내 전자지갑 + 원화 환산 총액 조회 (200) — 보유 통화별 잔액·환율·환산액·전체 합산을 한 번에.
+   *
+   * <p>홈 화면 "지금 나의 원화" 카드에 total_balance_in_krw 표시용. KRW 포함 보유 모든 통화의
+   * "잔액 × KRW 환율" 합계가 백엔드에서 계산돼 string으로 내려온다 (소수 4자리).
+   *
+   * <p>에러: WALLET4001(404, 지갑 없음) / TRANSFER4002(400, 미지원 통화 = 환율 누락) /
+   * AUTH4011(401 — interceptor 처리) / COMMON5000(500, 서버 오류).
+   */
+  getWalletMe: () => apiClient.get<unknown, WalletMeResponse>('/wallets/me'),
+
+  /**
+   * 주요 통화 환율 위젯 조회 (200) — KRW 기준 "1 외화→KRW" 환율 + 등락률.
+   *
+   * <p>홈 화면 "실시간 환율" 가로 카드용. currencyCodes 미지정 시 KRW 제외 전체 지원 통화 반환.
+   *
+   * <p>change_rate는 표시 전용 number (등락률 %). 직전 값 없으면 0.
+   * dev 환경은 Mock 고정값, prod는 Redis cron(exchange-updater) 매일 자정 갱신.
+   *
+   * <p>에러: TRANSFER4002(400, 미지원 통화) / AUTH4011(401 — interceptor 처리) / COMMON5000(500).
+   *
+   * @param currencyCodes 조회할 통화 코드 콤마 구분 (예: "USD,PHP,VND"). 생략 시 KRW 제외 전체.
+   */
+  getExchangeRatesWidget: (currencyCodes?: string) =>
+    apiClient.get<unknown, ExchangeRateWidgetResponse>('/wallets/exchange-rates', {
+      params: currencyCodes ? { currency_codes: currencyCodes } : undefined,
+    }),
+
+  /**
    * 내 거래내역 목록 조회 (200) — 본인이 송신자 또는 수신자인 전 유형 거래를 최근순으로 페이지 조회.
    *
    * <p>INTERNAL_TRANSFER는 transactions 테이블에 송신자 row 1건만 INSERT되고 수신자는
@@ -256,10 +486,7 @@ export const walletApi = {
     }),
 
   // TODO: 다음 사이클에서 추가
-  //   원화 환산 총액: getWalletMe (GET /wallets/me, Kyubo)
-  //   환율 위젯: getExchangeRates (GET /wallets/exchange-rates, Kyubo)
-  //   계좌: registerAccount, deleteAccount, getMyAccounts
-  //   충전: charge
+  //   계좌: deleteAccount (DELETE /accounts/{id}), setPrimary (PATCH /accounts/{id}/primary)
   //   송금: validateMember, validateBank, execute, getReceipt, getRecentRecipients
   //   정기송금: validateScheduled, createScheduled, listScheduled, getHistory
 };
