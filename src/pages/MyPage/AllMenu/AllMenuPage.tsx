@@ -38,7 +38,6 @@ const communityItems: MenuItem[] = [
 const mypageItems: MenuItem[] = [
   { label: '프로필 설정', path: '/mypage/profile' },
   { label: '추가 인증', path: '/mypage/badge' },
-  { label: '알림 설정', path: '/mypage/notifications' },
   { label: '언어 설정', path: '/mypage/language' },
   { label: '구독 관리', path: '/mypage/subscription' },
   { label: '계좌 관리', path: '/mypage/accounts' },
@@ -111,9 +110,6 @@ export default function AllMenuPage() {
             </div>
           </div>
           <div className={styles.headIcons}>
-            <span onClick={() => navigate('/mypage/notifications')} style={{ cursor: 'pointer' }}>
-              🔔
-            </span>
             <span onClick={() => navigate('/mypage')} style={{ cursor: 'pointer' }}>
               ⚙️
             </span>

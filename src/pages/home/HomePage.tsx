@@ -79,9 +79,6 @@ export default function HomePage() {
           <button className={styles.langBtn} onClick={() => navigate('/mypage/language')}>
             🌐 KO ▾
           </button>
-          <button className={styles.iconBtn} onClick={() => navigate('/notifications')}>
-            🔔
-          </button>
           <button className={styles.iconBtn} onClick={() => navigate('/mypage')}>
             👤
           </button>
