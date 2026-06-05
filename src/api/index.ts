@@ -37,6 +37,11 @@ export type {
   WalletMeResponse,
   ExchangeRateItem,
   ExchangeRateWidgetResponse,
+  TransactionTypeCode,
+  TransactionStatusCode,
+  TransactionDirection,
+  TransactionHistoryItem,
+  TransactionListResponse,
 } from './wallet';
 export { documentApi } from './document';
 export type {
