@@ -180,6 +180,23 @@
 .commentMeta {
   font-size: 12px;
   color: #8a97aa;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* 댓글 우측 하단 삭제 — 빨강 글씨(클릭 시 확인 팝업) */
+.commentDelete {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  color: #e11d48;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .commentEmpty {
@@ -202,16 +219,25 @@
   height: 76px;
 }
 
-.commentInputRow {
+.commentInputBar {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 66px; /* BottomNav(66px) 바로 위에 고정 — 목록과 겹치지 않는 불투명 바 */
-  display: flex;
-  gap: 8px;
   padding: 10px 18px;
   background: #fff;
   border-top: 1px solid var(--line);
+}
+
+.commentError {
+  font-size: 12px;
+  color: #e11d48;
+  margin: 0 2px 8px;
+}
+
+.commentInputRow {
+  display: flex;
+  gap: 8px;
 }
 
 .commentInput {
@@ -236,6 +262,11 @@
   font-family: inherit;
   font-size: 14px;
   cursor: pointer;
+}
+
+.commentSubmit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .stateMsg {

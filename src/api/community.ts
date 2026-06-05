@@ -114,6 +114,13 @@ export interface PostCreateRequest {
   content: string;
 }
 
+/** 댓글 작성 요청 body (POST /community/posts/{id}/comments). content 필수. */
+export interface CommentCreateRequest {
+  content: string;
+  /** 대댓글이면 부모 댓글 public_id, 최상위 댓글이면 생략. */
+  parent_comment_public_id?: string;
+}
+
 /** 게시글 수정 요청 body (PATCH /community/posts/{id}). 부분 수정 — 보낸 필드만 변경. */
 export interface PostUpdateRequest {
   category?: string;
@@ -180,6 +187,24 @@ export const communityApi = {
    */
   deletePost: (postId: string) => apiClient.delete<unknown, null>(`/community/posts/${postId}`),
 
+  /**
+   * 댓글 작성 (201) — 성공 시 생성된 댓글(CommentItem)을 반환한다.
+   *
+   * <p>content 필수. 빈 값·형식 오류는 COMMON4001(400), 없는 글 COMMUNITY4001(404) → ApiException.
+   * 인증 필요(AUTH4011). 작성 후 갱신은 ['community','comments',postId] invalidate(useCreateComment hook).
+   */
+  createComment: (postId: string, body: CommentCreateRequest) =>
+    apiClient.post<unknown, CommentItem>(`/community/posts/${postId}/comments`, body),
+
+  /**
+   * 댓글 삭제 (200, data: null). 본인 댓글만 삭제 가능.
+   *
+   * <p>본인 댓글이 아니면 COMMON4031(403), 없는 댓글/글 COMMUNITY4001(404) → ApiException.
+   * 삭제 후 갱신은 ['community','comments',postId] invalidate(useDeleteComment hook).
+   */
+  deleteComment: (postId: string, commentId: string) =>
+    apiClient.delete<unknown, null>(`/community/posts/${postId}/comments/${commentId}`),
+
   // TODO: 다음 사이클에서 추가
-  //   likePost, unlikePost, createComment, deleteComment
+  //   likePost, unlikePost
 };

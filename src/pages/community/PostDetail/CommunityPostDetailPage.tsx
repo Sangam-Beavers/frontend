@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import TopBar from '@/components/navigation/TopBar';
 import { buildCommunityPostEditPath } from '@/constants/routes';
 import { useComments } from '@/hooks/useComments';
+import { useCreateComment } from '@/hooks/useCreateComment';
+import { useDeleteComment } from '@/hooks/useDeleteComment';
 import { useDeletePost } from '@/hooks/useDeletePost';
 import { usePostDetail } from '@/hooks/usePostDetail';
 import { categoryLabel, formatCommunityDate } from '@/utils/communityFeed';
@@ -14,6 +17,8 @@ export default function CommunityPostDetailPage() {
   const { postId = '' } = useParams<{ postId: string }>();
   const [draft, setDraft] = useState<string>('');
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
+  // 삭제 확인 중인 댓글 public_id(오삭제 방지용 인라인 확인).
+  const [confirmCommentId, setConfirmCommentId] = useState<string | null>(null);
 
   const { data: post, isLoading, error } = usePostDetail(postId);
   const {
@@ -26,6 +31,19 @@ export default function CommunityPostDetailPage() {
   const comments = commentsData?.pages.flatMap((page) => page.comments) ?? [];
   const totalComments = commentsData?.pages[0]?.total_elements ?? comments.length;
   const del = useDeletePost();
+  const createComment = useCreateComment(postId);
+  const deleteComment = useDeleteComment(postId);
+
+  const handleSubmitComment = () => {
+    const content = draft.trim();
+    if (content === '' || createComment.isPending) return;
+    createComment.mutate({ content }, { onSuccess: () => setDraft('') });
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    if (deleteComment.isPending) return;
+    deleteComment.mutate(commentId, { onSuccess: () => setConfirmCommentId(null) });
+  };
 
   // 무한 스크롤 — 목록 끝 센티넬이 뷰포트에 들어오면 다음 페이지를 이어 붙인다.
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -168,7 +186,14 @@ export default function CommunityPostDetailPage() {
               </div>
               <div className={styles.commentText}>{comment.content}</div>
               <div className={styles.commentMeta}>
-                {formatCommunityDate(comment.created_at)} &middot; 답글 쓰기
+                <span>{formatCommunityDate(comment.created_at)} &middot; 답글 쓰기</span>
+                <button
+                  type="button"
+                  className={styles.commentDelete}
+                  onClick={() => setConfirmCommentId(comment.public_id)}
+                >
+                  삭제
+                </button>
               </div>
             </div>
           </div>
@@ -183,18 +208,50 @@ export default function CommunityPostDetailPage() {
       {/* 고정된 댓글 입력 바에 마지막 댓글이 가리지 않도록 여백 확보 */}
       <div className={styles.commentListEnd} aria-hidden="true" />
 
-      <div className={styles.commentInputRow}>
-        <input
-          type="text"
-          className={styles.commentInput}
-          placeholder="댓글을 입력하세요"
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-        />
-        <button type="button" className={styles.commentSubmit}>
-          등록
-        </button>
+      <div className={styles.commentInputBar}>
+        {createComment.error && (
+          <div className={styles.commentError}>{communityErrorMessage(createComment.error)}</div>
+        )}
+        <div className={styles.commentInputRow}>
+          <input
+            type="text"
+            className={styles.commentInput}
+            placeholder="댓글을 입력하세요"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => {
+              // 한글 IME 조합 중 Enter는 제출하지 않는다(조합 확정용).
+              if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+                handleSubmitComment();
+              }
+            }}
+          />
+          <button
+            type="button"
+            className={styles.commentSubmit}
+            disabled={draft.trim() === '' || createComment.isPending}
+            onClick={handleSubmitComment}
+          >
+            {createComment.isPending ? '등록 중…' : '등록'}
+          </button>
+        </div>
       </div>
+
+      {confirmCommentId && (
+        <ConfirmDialog
+          title="댓글 삭제"
+          message="이 댓글을 삭제할까요? 되돌릴 수 없어요."
+          confirmLabel="삭제"
+          danger
+          loading={deleteComment.isPending}
+          error={deleteComment.error ? communityErrorMessage(deleteComment.error) : undefined}
+          onConfirm={() => handleDeleteComment(confirmCommentId)}
+          onCancel={() => {
+            setConfirmCommentId(null);
+            deleteComment.reset();
+          }}
+        />
+      )}
     </>
   );
 }
