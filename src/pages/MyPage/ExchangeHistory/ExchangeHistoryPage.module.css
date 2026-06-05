@@ -12,10 +12,23 @@
   justify-content: space-between;
   padding: 14px;
   border-bottom: 1px solid #eef4ff;
+  width: 100%;
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
 }
 
 .item:last-child {
   border-bottom: none;
+}
+
+.item:hover {
+  background: #f8fbff;
 }
 
 .itemMain {
@@ -39,4 +52,123 @@
   font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
+}
+
+.stateCard {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.pageBtn {
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 360px;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.16);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.modalTitle {
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+.modalBody {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.modalRow span {
+  color: var(--muted);
+}
+
+.modalIdRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #eef4ff;
+}
+
+.modalIdRow span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.modalId {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: #333;
+  word-break: break-all;
 }
