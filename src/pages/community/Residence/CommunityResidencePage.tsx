@@ -2,9 +2,9 @@ import { useState } from 'react';
 import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
+import Pagination from '@/components/community/Pagination';
 import TopBar from '@/components/navigation/TopBar';
-import { useDebouncedKeyword } from '@/hooks/useDebouncedKeyword';
-import { usePosts } from '@/hooks/usePosts';
+import { usePagedPosts } from '@/hooks/usePagedPosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityResidencePage.module.css';
 
@@ -23,12 +23,10 @@ const TEMPERATURES: TemperatureChip[] = [
 
 export default function CommunityResidencePage() {
   const [showSearch, setShowSearch] = useState(false);
-  const { searchQuery, setSearchQuery, keyword } = useDebouncedKeyword();
-  const { data, isLoading, error } = usePosts({
-    category: 'RESIDENCE',
-    keyword: keyword || undefined,
-  });
+  const { data, isLoading, error, page, goToPage, searchQuery, setSearchQuery, keyword } =
+    usePagedPosts({ category: 'RESIDENCE' });
   const posts = data?.posts ?? [];
+  const totalPages = data?.total_pages ?? 0;
 
   return (
     <>
@@ -69,7 +67,12 @@ export default function CommunityResidencePage() {
       ) : error ? (
         <div className={styles.empty}>게시글을 불러오지 못했어요.</div>
       ) : posts.length > 0 ? (
-        posts.map((item) => <FeedPost key={item.public_id} post={toFeedPostItem(item)} />)
+        <>
+          {posts.map((item) => (
+            <FeedPost key={item.public_id} post={toFeedPostItem(item)} />
+          ))}
+          <Pagination page={page} totalPages={totalPages} onChange={goToPage} />
+        </>
       ) : (
         <div className={styles.empty}>
           {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
