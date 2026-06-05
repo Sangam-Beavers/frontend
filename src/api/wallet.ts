@@ -71,6 +71,15 @@ export interface ExchangeResponse {
   exchanged_at: string;
 }
 
+/** 환전 내역 목록 응답 — 페이지 메타 + ExchangeResponse 배열 (백엔드 ExchangeListResponse §10). */
+export interface ExchangeListResponse {
+  exchanges: ExchangeResponse[];
+  page: number;
+  size: number;
+  total_elements: number;
+  total_pages: number;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -122,11 +131,32 @@ export const walletApi = {
       headers: { 'Idempotency-Key': idempotencyKey },
     }),
 
+  /**
+   * 환전 내역 목록 조회 (200) — 본인의 환전·재환전 완료 내역을 최근순으로 페이지 조회.
+   *
+   * <p>응답에 페이지 메타(page/size/total_elements/total_pages)와 exchanges 배열이 함께 온다.
+   * 각 exchange 객체가 단건 상세와 동일 구조라 모달 표시 시 별도 호출 없이 그대로 쓸 수 있다.
+   * 페이지 0부터 시작. size 기본 20, 최대 100 (백엔드 @Min/@Max 검증).
+   */
+  getExchanges: (page = 0, size = 20) =>
+    apiClient.get<unknown, ExchangeListResponse>('/exchanges', { params: { page, size } }),
+
+  /**
+   * 환전 내역 단건 조회 (200) — 특정 환전 내역을 public_id로 조회한다.
+   *
+   * <p>본인 것만 조회 가능 — 남의 public_id를 직접 요청하면 COMMON4031(권한 없음).
+   * 존재하지 않으면 EXCHANGE4001. 인증 누락은 AUTH4011.
+   *
+   * <p>현재 화면은 목록 응답에 이미 단건 정보가 다 있어 모달에서 추가 호출 없이 사용한다.
+   * 본 함수는 향후 직접 URL 접근(예: /mypage/exchange-history/:publicId) 도입 시 사용 예정.
+   */
+  getExchange: (publicId: string) =>
+    apiClient.get<unknown, ExchangeResponse>(`/exchanges/${publicId}`),
+
   // TODO: 다음 사이클에서 추가
   //   잔액: getBalance
   //   계좌: registerAccount, deleteAccount, getMyAccounts
   //   충전: charge
   //   송금: validateMember, validateBank, execute, getReceipt, getRecentRecipients
   //   정기송금: validateScheduled, createScheduled, listScheduled, getHistory
-  //   환전 내역(이슈 B): getExchanges(page, size), getExchange(publicId)
 };

@@ -19,5 +19,6 @@ export type {
   ExchangeQuoteResponse,
   ExchangeExecuteRequest,
   ExchangeResponse,
+  ExchangeListResponse,
 } from './wallet';
 export { documentApi } from './document';
