@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ApiException } from '@/api';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import TopBar from '@/components/navigation/TopBar';
 import { buildCommunityPostEditPath } from '@/constants/routes';
@@ -8,6 +9,7 @@ import { useCreateComment } from '@/hooks/useCreateComment';
 import { useDeleteComment } from '@/hooks/useDeleteComment';
 import { useDeletePost } from '@/hooks/useDeletePost';
 import { usePostDetail } from '@/hooks/usePostDetail';
+import { useToggleLike } from '@/hooks/useToggleLike';
 import { categoryLabel, formatCommunityDate } from '@/utils/communityFeed';
 import { communityErrorMessage } from '@/utils/communityErrorMessage';
 import styles from './CommunityPostDetailPage.module.css';
@@ -33,6 +35,9 @@ export default function CommunityPostDetailPage() {
   const del = useDeletePost();
   const createComment = useCreateComment(postId);
   const deleteComment = useDeleteComment(postId);
+  const toggleLike = useToggleLike(postId);
+  // 좋아요 로컬 상태 — 토글 응답(liked/like_count)으로 갱신. null이면 서버 상세 값 사용.
+  const [likeState, setLikeState] = useState<{ liked: boolean; like_count: number } | null>(null);
 
   const handleSubmitComment = () => {
     const submitted = draft;
@@ -93,6 +98,26 @@ export default function CommunityPostDetailPage() {
     );
   }
 
+  // 로컬 토글 상태 우선, 없으면 서버 상세 값(is_liked는 백엔드 미제공 시 undefined→false).
+  const liked = likeState?.liked ?? post.is_liked ?? false;
+  const likeCount = likeState?.like_count ?? post.like_count;
+
+  const handleToggleLike = () => {
+    if (toggleLike.isPending) return;
+    toggleLike.mutate(!liked, {
+      onSuccess: (res) => setLikeState({ liked: res.liked, like_count: res.like_count }),
+      onError: (err) => {
+        // 이미 좋아요한 글(409 COMMON4091) → 좋아요 상태로 보정. 카운트는 상세 재조회로 갱신된다.
+        if (err instanceof ApiException && err.code === 'COMMON4091') {
+          setLikeState((prev) => ({
+            liked: true,
+            like_count: prev?.like_count ?? post.like_count,
+          }));
+        }
+      },
+    });
+  };
+
   return (
     <>
       <TopBar title="게시글" />
@@ -121,8 +146,14 @@ export default function CommunityPostDetailPage() {
         <button type="button" className={styles.secondary}>
           번역 보기
         </button>
-        <button type="button" className={styles.secondary}>
-          좋아요 {post.like_count}
+        <button
+          type="button"
+          className={`${styles.secondary} ${liked ? styles.likeActive : ''}`}
+          aria-pressed={liked}
+          disabled={toggleLike.isPending}
+          onClick={handleToggleLike}
+        >
+          {liked ? '♥' : '♡'} 좋아요 {likeCount}
         </button>
       </div>
 

@@ -82,9 +82,23 @@ export interface PostDetailResponse {
   /** 요청자가 작성자인지 — 수정·삭제 노출 판단. 비로그인/타인은 false. */
   is_author: boolean;
   like_count: number;
+  /**
+   * 요청자가 이 글을 좋아요했는지 — 하트 초기 상태용.
+   * 백엔드 미제공 시 undefined → 화면은 "미관여(♡)"로 간주하고, 첫 클릭의 409(이미 좋아요)로 보정한다.
+   */
+  is_liked?: boolean;
   comment_count: number;
   created_at: string;
   updated_at: string;
+}
+
+/** 좋아요 저장/취소 응답 (POST·DELETE /community/posts/{id}/likes). */
+export interface PostLikeResponse {
+  post_public_id: string;
+  /** 갱신된 좋아요 수. */
+  like_count: number;
+  /** 요청자의 현재 좋아요 여부 (저장=true, 취소=false). */
+  liked: boolean;
 }
 
 /** 댓글 한 건 (백엔드 CommentResponse). */
@@ -207,6 +221,21 @@ export const communityApi = {
   deleteComment: (postId: string, commentId: string) =>
     apiClient.delete<unknown, null>(`/community/posts/${postId}/comments/${commentId}`),
 
-  // TODO: 다음 사이클에서 추가
-  //   likePost, unlikePost
+  /**
+   * 관심글 저장(좋아요) (201) — like_count +1. 갱신된 like_count·liked(=true)를 반환한다.
+   *
+   * <p>이미 좋아요한 글이면 COMMON4091(409), 없거나 삭제된 글 COMMUNITY4001(404) → ApiException.
+   * 인증 필요(AUTH4011).
+   */
+  likePost: (postId: string) =>
+    apiClient.post<unknown, PostLikeResponse>(`/community/posts/${postId}/likes`),
+
+  /**
+   * 관심글 취소(좋아요 취소) (200) — like_count -1. 갱신된 like_count·liked(=false)를 반환한다.
+   *
+   * <p>안 누른 글을 취소하면 멱등 no-op(200, 변화 없음). 없는 글 COMMUNITY4001(404) → ApiException.
+   * 인증 필요(AUTH4011).
+   */
+  unlikePost: (postId: string) =>
+    apiClient.delete<unknown, PostLikeResponse>(`/community/posts/${postId}/likes`),
 };

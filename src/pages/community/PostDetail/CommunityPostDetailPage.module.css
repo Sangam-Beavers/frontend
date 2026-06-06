@@ -110,6 +110,18 @@
   cursor: pointer;
 }
 
+/* 좋아요 활성(♥) — 누른 상태 표시. .secondary 위에 색만 덮어쓴다. */
+.likeActive {
+  color: #e11d48;
+  border-color: #fecaca;
+  background: #fff5f6;
+}
+
+.secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .section {
   font-size: 17px;
   font-weight: 900;
