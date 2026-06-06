@@ -38,6 +38,8 @@ export default function CommunityPostDetailPage() {
   const toggleLike = useToggleLike(postId);
   // 좋아요 로컬 상태 — 토글 응답(liked/like_count)으로 갱신. null이면 서버 상세 값 사용.
   const [likeState, setLikeState] = useState<{ liked: boolean; like_count: number } | null>(null);
+  // 좋아요 토글 실패 안내(409 제외) — null이면 숨김.
+  const [likeError, setLikeError] = useState<string | null>(null);
 
   const handleSubmitComment = () => {
     const submitted = draft;
@@ -104,16 +106,20 @@ export default function CommunityPostDetailPage() {
 
   const handleToggleLike = () => {
     if (toggleLike.isPending) return;
+    setLikeError(null); // 재시도 시 이전 에러 제거
     toggleLike.mutate(!liked, {
       onSuccess: (res) => setLikeState({ liked: res.liked, like_count: res.like_count }),
       onError: (err) => {
-        // 이미 좋아요한 글(409 COMMON4091) → 좋아요 상태로 보정. 카운트는 상세 재조회로 갱신된다.
+        // 이미 좋아요한 글(409 COMMON4091) → 좋아요 상태로 보정(에러 아님). 카운트는 상세 재조회로 갱신.
         if (err instanceof ApiException && err.code === 'COMMON4091') {
           setLikeState((prev) => ({
             liked: true,
             like_count: prev?.like_count ?? post.like_count,
           }));
+          return;
         }
+        // 그 외(네트워크·삭제된 글 등) — 조용히 넘기지 않고 안내한다.
+        setLikeError(communityErrorMessage(err));
       },
     });
   };
@@ -156,6 +162,8 @@ export default function CommunityPostDetailPage() {
           {liked ? '♥' : '♡'} 좋아요 {likeCount}
         </button>
       </div>
+
+      {likeError && <div className={styles.likeError}>{likeError}</div>}
 
       {/* 작성자에게만 노출 — is_author 기준(백엔드도 403으로 재검증). */}
       {post.is_author && (

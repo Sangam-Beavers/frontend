@@ -22,6 +22,7 @@ export const ROUTES = {
   COMMUNITY_VISA: '/community/visa',
   COMMUNITY_COUNTRY: '/community/country',
   COMMUNITY_FREE: '/community/free',
+  COMMUNITY_LIKED: '/community/liked',
   COMMUNITY_WRITE: '/community/write',
   COMMUNITY_POST_DETAIL: '/community/posts/:postId',
   COMMUNITY_POST_EDIT: '/community/posts/:postId/edit',

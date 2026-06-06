@@ -101,6 +101,31 @@ export interface PostLikeResponse {
   liked: boolean;
 }
 
+/** 관심글 목록 한 건 (LikedPostSummaryResponse) — 게시글 요약 + 좋아요 누른 시각. */
+export interface LikedPostSummaryItem extends PostSummaryItem {
+  /** 좋아요 누른 시각 (ISO 8601 UTC Z). */
+  liked_at: string;
+}
+
+/** 관심글 목록 응답 (GET /community/posts/liked) — 페이지 메타 포함. */
+export interface LikedPostListResponse {
+  posts: LikedPostSummaryItem[];
+  /** 현재 페이지 (0부터). */
+  page: number;
+  size: number;
+  total_elements: number;
+  total_pages: number;
+}
+
+/** 관심글 목록 쿼리 파라미터 (전부 선택). */
+export interface LikedPostListParams {
+  /** 정렬 — latest(좋아요 누른 시각순, 기본) / popular(좋아요 수순). */
+  sort?: string;
+  /** 0부터. */
+  page?: number;
+  size?: number;
+}
+
 /** 댓글 한 건 (백엔드 CommentResponse). */
 export interface CommentItem {
   public_id: string;
@@ -238,4 +263,13 @@ export const communityApi = {
    */
   unlikePost: (postId: string) =>
     apiClient.delete<unknown, PostLikeResponse>(`/community/posts/${postId}/likes`),
+
+  /**
+   * 관심글 목록 조회 (200) — 요청자가 좋아요한 게시글을 페이지로 조회한다.
+   *
+   * <p>sort latest(기본, 좋아요 누른 시각순)·popular(좋아요 수순). 각 항목에 liked_at 포함,
+   * 삭제된 글은 제외. 잘못된 sort/page/size는 COMMON4001(400) → ApiException. 인증 필요(AUTH4011).
+   */
+  getLikedPosts: (params?: LikedPostListParams) =>
+    apiClient.get<unknown, LikedPostListResponse>('/community/posts/liked', { params }),
 };

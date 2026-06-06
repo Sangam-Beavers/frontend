@@ -117,6 +117,13 @@
   background: #fff5f6;
 }
 
+/* 좋아요 토글 실패 안내(409 제외). */
+.likeError {
+  font-size: 12px;
+  color: #e11d48;
+  margin: -2px 0 8px;
+}
+
 .secondary:disabled {
   opacity: 0.6;
   cursor: not-allowed;

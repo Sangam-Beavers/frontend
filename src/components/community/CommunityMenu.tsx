@@ -12,8 +12,8 @@ interface CommunityMenuProps {
 /**
  * 커뮤니티 공용 메뉴 — 카테고리 탭 바로 아래(설명/배너 위)에 항상 노출되는 3버튼 바.
  *
- * <p>검색(바 토글) · 글쓰기(작성 화면) · 내 관심글. 전체/카테고리 7개 화면이 공통으로 사용해
- * 글쓰기·검색·관심글 진입을 일원화한다. 내 관심글은 liked API 미연동이라 현재 placeholder다.
+ * <p>검색(바 토글) · 글쓰기(작성 화면) · 내 관심글(좋아요한 글 목록). 전체/카테고리 7개 화면이
+ * 공통으로 사용해 글쓰기·검색·관심글 진입을 일원화한다.
  */
 export default function CommunityMenu({
   onToggleSearch,
@@ -43,11 +43,9 @@ export default function CommunityMenu({
       <button
         type="button"
         className={styles.item}
-        onClick={() => {
-          /* TODO: liked(내 관심글) API 연동 후 목록 화면으로 이동. */
-        }}
+        onClick={() => navigate(ROUTES.COMMUNITY_LIKED)}
       >
-        <span className={styles.icon}>♥</span>내 관심글
+        <span className={styles.icon}>❤️</span>내 관심글
       </button>
     </div>
   );

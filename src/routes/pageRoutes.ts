@@ -10,6 +10,7 @@ import CommunityCountryPage from '@/pages/community/Country/CommunityCountryPage
 import CommunityFreePage from '@/pages/community/Free/CommunityFreePage';
 import CommunityJobPage from '@/pages/community/Job/CommunityJobPage';
 import CommunityLifePage from '@/pages/community/Life/CommunityLifePage';
+import CommunityLikedPage from '@/pages/community/Liked/CommunityLikedPage';
 import CommunityVisaPage from '@/pages/community/Visa/CommunityVisaPage';
 import CommunityPage from '@/pages/community/Main/CommunityPage';
 import CommunityPostDetailPage from '@/pages/community/PostDetail/CommunityPostDetailPage';
@@ -82,6 +83,7 @@ export const mainRoutes: PageRoute[] = [
   { path: ROUTES.COMMUNITY_VISA, Component: CommunityVisaPage },
   { path: ROUTES.COMMUNITY_COUNTRY, Component: CommunityCountryPage },
   { path: ROUTES.COMMUNITY_FREE, Component: CommunityFreePage },
+  { path: ROUTES.COMMUNITY_LIKED, Component: CommunityLikedPage },
   { path: ROUTES.COMMUNITY_WRITE, Component: CommunityWritePage },
   { path: ROUTES.COMMUNITY_POST_EDIT, Component: CommunityWritePage },
   { path: ROUTES.COMMUNITY_POST_DETAIL, Component: CommunityPostDetailPage },
