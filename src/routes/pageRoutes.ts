@@ -10,6 +10,7 @@ import CommunityCountryPage from '@/pages/community/Country/CommunityCountryPage
 import CommunityFreePage from '@/pages/community/Free/CommunityFreePage';
 import CommunityJobPage from '@/pages/community/Job/CommunityJobPage';
 import CommunityLifePage from '@/pages/community/Life/CommunityLifePage';
+import CommunityLikedPage from '@/pages/community/Liked/CommunityLikedPage';
 import CommunityVisaPage from '@/pages/community/Visa/CommunityVisaPage';
 import CommunityPage from '@/pages/community/Main/CommunityPage';
 import CommunityPostDetailPage from '@/pages/community/PostDetail/CommunityPostDetailPage';
@@ -22,7 +23,6 @@ import DocAnalysisResultPage from '@/pages/docAnalysis/Result/DocAnalysisResultP
 import DocAnalysisSelectPage from '@/pages/docAnalysis/Select/DocAnalysisSelectPage';
 import CurrencySettingsPage from '@/pages/home/CurrencySettings/CurrencySettingsPage';
 import HomePage from '@/pages/home/HomePage';
-import NotificationsPage from '@/pages/home/Notifications/NotificationsPage';
 import AccountManagePage from '@/pages/MyPage/AccountManage/AccountManagePage';
 import AllMenuPage from '@/pages/MyPage/AllMenu/AllMenuPage';
 import AdditionalCertPage from '@/pages/MyPage/AdditionalCert/AdditionalCertPage';
@@ -31,7 +31,6 @@ import DocAnalysisHistoryPage from '@/pages/MyPage/DocAnalysisHistory/DocAnalysi
 import ExchangeHistoryPage from '@/pages/MyPage/ExchangeHistory/ExchangeHistoryPage';
 import LanguageSettingsPage from '@/pages/MyPage/Language/LanguageSettingsPage';
 import MyPage from '@/pages/MyPage/MyPage';
-import NotificationSettingsPage from '@/pages/MyPage/Notifications/NotificationSettingsPage';
 import ProfileEditPage from '@/pages/MyPage/Profile/ProfileEditPage';
 import SubscriptionPage from '@/pages/MyPage/Subscription/SubscriptionPage';
 import WalletHistoryPage from '@/pages/MyPage/WalletHistory/WalletHistoryPage';
@@ -76,7 +75,6 @@ export const mainRoutes: PageRoute[] = [
   { path: ROUTES.HOME, Component: HomePage },
   { path: ROUTES.HOME_CURRENCY_SETTINGS, Component: CurrencySettingsPage },
   { path: ROUTES.ALL_MENU, Component: AllMenuPage },
-  { path: ROUTES.NOTIFICATIONS, Component: NotificationsPage },
 
   { path: ROUTES.COMMUNITY, Component: CommunityPage },
   { path: ROUTES.COMMUNITY_RESIDENCE, Component: CommunityResidencePage },
@@ -85,6 +83,7 @@ export const mainRoutes: PageRoute[] = [
   { path: ROUTES.COMMUNITY_VISA, Component: CommunityVisaPage },
   { path: ROUTES.COMMUNITY_COUNTRY, Component: CommunityCountryPage },
   { path: ROUTES.COMMUNITY_FREE, Component: CommunityFreePage },
+  { path: ROUTES.COMMUNITY_LIKED, Component: CommunityLikedPage },
   { path: ROUTES.COMMUNITY_WRITE, Component: CommunityWritePage },
   { path: ROUTES.COMMUNITY_POST_EDIT, Component: CommunityWritePage },
   { path: ROUTES.COMMUNITY_POST_DETAIL, Component: CommunityPostDetailPage },
@@ -94,7 +93,6 @@ export const mainRoutes: PageRoute[] = [
   { path: ROUTES.MYPAGE_BADGE, Component: AdditionalCertPage },
   { path: ROUTES.MYPAGE_BADGE_COMPLETE, Component: AdditionalCertCompletePage },
   { path: ROUTES.MYPAGE_ACCOUNTS, Component: AccountManagePage },
-  { path: ROUTES.MYPAGE_NOTIFICATIONS, Component: NotificationSettingsPage },
   { path: ROUTES.MYPAGE_LANGUAGE, Component: LanguageSettingsPage },
   { path: ROUTES.MYPAGE_SUBSCRIPTION, Component: SubscriptionPage },
   { path: ROUTES.MYPAGE_WALLET_HISTORY, Component: WalletHistoryPage },

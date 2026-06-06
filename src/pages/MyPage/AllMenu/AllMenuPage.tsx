@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startLogout } from '@/auth/logout';
+import { ROUTES } from '@/constants/routes';
+import { useMyProfile } from '@/hooks/useMyProfile';
+import { COMMUNITY_TABS } from '@/types/community';
 import styles from './AllMenuPage.module.css';
 
 const LEFT_NAV = ['전체', '금융', '문서 분석', '커뮤니티', '마이페이지', '고객센터'] as const;
@@ -26,19 +29,21 @@ const docItems: MenuItem[] = [
   { label: '문서 분석 내역', path: '/mypage/doc-analysis-history' },
 ];
 
+// 카테고리는 커뮤니티 탭(COMMUNITY_TABS, SSOT)에서 파생 — 라벨/경로가 항상 탭과 일치한다.
+// '전체'는 메뉴 맥락에 맞게 '커뮤니티 홈'으로 노출하고, 액션(내 관심글·글쓰기)을 덧붙인다.
 const communityItems: MenuItem[] = [
-  { label: '커뮤니티 홈', path: '/community' },
-  { label: '거주', path: '/community/residence' },
-  { label: '생활 정보', path: '/community/life' },
-  { label: '구인구직', path: '/community/job' },
-  { label: '자유 게시판', path: '/community/free' },
-  { label: '글쓰기', path: '/community/write' },
+  { label: '커뮤니티 홈', path: ROUTES.COMMUNITY },
+  ...COMMUNITY_TABS.filter((tab) => tab.category !== 'all').map((tab) => ({
+    label: tab.label,
+    path: tab.path,
+  })),
+  { label: '내 관심글', path: ROUTES.COMMUNITY_LIKED },
+  { label: '글쓰기', path: ROUTES.COMMUNITY_WRITE },
 ];
 
 const mypageItems: MenuItem[] = [
   { label: '프로필 설정', path: '/mypage/profile' },
   { label: '추가 인증', path: '/mypage/badge' },
-  { label: '알림 설정', path: '/mypage/notifications' },
   { label: '언어 설정', path: '/mypage/language' },
   { label: '구독 관리', path: '/mypage/subscription' },
   { label: '계좌 관리', path: '/mypage/accounts' },
@@ -80,8 +85,26 @@ const QUICK_LINKS: MenuItem[] = [
   { label: 'Language', path: '/mypage/language' },
 ];
 
+// BCP 47 언어 코드 → 한국어 라벨(프로필 메타 표시용). 매핑 없는 코드는 원본 코드 노출.
+const LANGUAGE_LABEL: Record<string, string> = {
+  ko: '한국어',
+  en: '영어',
+  vi: '베트남어',
+  zh: '중국어',
+  th: '태국어',
+  id: '인도네시아어',
+  tl: '필리핀어',
+};
+
 export default function AllMenuPage() {
   const navigate = useNavigate();
+  // 헤더 프로필 — 실제 로그인 사용자(GET /members/me). 마이페이지와 동일 소스.
+  const { data: profile, isLoading } = useMyProfile();
+  const nickname = profile?.nickname ?? '';
+  const avatarInitial = nickname.charAt(0).toUpperCase() || '?';
+  const languageLabel = profile?.language
+    ? (LANGUAGE_LABEL[profile.language] ?? profile.language)
+    : '';
   const [activeNav, setActiveNav] = useState<NavKey>('전체');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -101,19 +124,16 @@ export default function AllMenuPage() {
             onClick={() => navigate('/mypage')}
             style={{ cursor: 'pointer' }}
           >
-            <div className={styles.avatar}>G</div>
+            <div className={styles.avatar}>{avatarInitial}</div>
             <div>
               <div className={styles.username}>
-                global_bridge_neighbor
-                <span className={styles.badge}>프리미엄</span>
+                {isLoading ? '불러오는 중…' : nickname || '사용자'}
+                {profile?.is_verified && <span className={styles.badge}>인증</span>}
               </div>
-              <div className={styles.userMeta}>베트남어 · Tiếng Việt</div>
+              <div className={styles.userMeta}>{languageLabel}</div>
             </div>
           </div>
           <div className={styles.headIcons}>
-            <span onClick={() => navigate('/mypage/notifications')} style={{ cursor: 'pointer' }}>
-              🔔
-            </span>
             <span onClick={() => navigate('/mypage')} style={{ cursor: 'pointer' }}>
               ⚙️
             </span>

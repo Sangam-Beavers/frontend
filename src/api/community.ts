@@ -79,10 +79,51 @@ export interface PostDetailResponse {
   author_nickname: string;
   /** 작성자 인증 배지 여부. */
   author_is_verified: boolean;
+  /** 요청자가 작성자인지 — 수정·삭제 노출 판단. 비로그인/타인은 false. */
+  is_author: boolean;
   like_count: number;
+  /**
+   * 요청자가 이 글을 좋아요했는지 — 하트 초기 상태용.
+   * 백엔드 미제공 시 undefined → 화면은 "미관여(♡)"로 간주하고, 첫 클릭의 409(이미 좋아요)로 보정한다.
+   */
+  is_liked?: boolean;
   comment_count: number;
   created_at: string;
   updated_at: string;
+}
+
+/** 좋아요 저장/취소 응답 (POST·DELETE /community/posts/{id}/likes). */
+export interface PostLikeResponse {
+  post_public_id: string;
+  /** 갱신된 좋아요 수. */
+  like_count: number;
+  /** 요청자의 현재 좋아요 여부 (저장=true, 취소=false). */
+  liked: boolean;
+}
+
+/** 관심글 목록 한 건 (LikedPostSummaryResponse) — 게시글 요약 + 좋아요 누른 시각. */
+export interface LikedPostSummaryItem extends PostSummaryItem {
+  /** 좋아요 누른 시각 (ISO 8601 UTC Z). */
+  liked_at: string;
+}
+
+/** 관심글 목록 응답 (GET /community/posts/liked) — 페이지 메타 포함. */
+export interface LikedPostListResponse {
+  posts: LikedPostSummaryItem[];
+  /** 현재 페이지 (0부터). */
+  page: number;
+  size: number;
+  total_elements: number;
+  total_pages: number;
+}
+
+/** 관심글 목록 쿼리 파라미터 (전부 선택). */
+export interface LikedPostListParams {
+  /** 정렬 — latest(좋아요 누른 시각순, 기본) / popular(좋아요 수순). */
+  sort?: string;
+  /** 0부터. */
+  page?: number;
+  size?: number;
 }
 
 /** 댓글 한 건 (백엔드 CommentResponse). */
@@ -94,6 +135,8 @@ export interface CommentItem {
   content: string;
   author_nickname: string;
   author_is_verified: boolean;
+  /** 요청자가 작성자인지 — 댓글 삭제 노출 판단. 비로그인/타인은 false. */
+  is_author: boolean;
   created_at: string;
 }
 
@@ -111,6 +154,11 @@ export interface PostCreateRequest {
   /** 카테고리 — 백엔드 enum 대문자 (예: "JOB", "LIFE_INFO"). */
   category: string;
   title: string;
+  content: string;
+}
+
+/** 댓글 작성 요청 body (POST /community/posts/{id}/comments). content 필수. 대댓글 미지원. */
+export interface CommentCreateRequest {
   content: string;
 }
 
@@ -180,6 +228,48 @@ export const communityApi = {
    */
   deletePost: (postId: string) => apiClient.delete<unknown, null>(`/community/posts/${postId}`),
 
-  // TODO: 다음 사이클에서 추가
-  //   likePost, unlikePost, createComment, deleteComment
+  /**
+   * 댓글 작성 (201) — 성공 시 생성된 댓글(CommentItem)을 반환한다.
+   *
+   * <p>content 필수. 빈 값·형식 오류는 COMMON4001(400), 없는 글 COMMUNITY4001(404) → ApiException.
+   * 인증 필요(AUTH4011). 작성 후 갱신은 ['community','comments',postId] invalidate(useCreateComment hook).
+   */
+  createComment: (postId: string, body: CommentCreateRequest) =>
+    apiClient.post<unknown, CommentItem>(`/community/posts/${postId}/comments`, body),
+
+  /**
+   * 댓글 삭제 (200, data: null). 본인 댓글만 삭제 가능.
+   *
+   * <p>본인 댓글이 아니면 COMMON4031(403), 없는 댓글/글 COMMUNITY4001(404) → ApiException.
+   * 삭제 후 갱신은 ['community','comments',postId] invalidate(useDeleteComment hook).
+   */
+  deleteComment: (postId: string, commentId: string) =>
+    apiClient.delete<unknown, null>(`/community/posts/${postId}/comments/${commentId}`),
+
+  /**
+   * 관심글 저장(좋아요) (201) — like_count +1. 갱신된 like_count·liked(=true)를 반환한다.
+   *
+   * <p>이미 좋아요한 글이면 COMMON4091(409), 없거나 삭제된 글 COMMUNITY4001(404) → ApiException.
+   * 인증 필요(AUTH4011).
+   */
+  likePost: (postId: string) =>
+    apiClient.post<unknown, PostLikeResponse>(`/community/posts/${postId}/likes`),
+
+  /**
+   * 관심글 취소(좋아요 취소) (200) — like_count -1. 갱신된 like_count·liked(=false)를 반환한다.
+   *
+   * <p>안 누른 글을 취소하면 멱등 no-op(200, 변화 없음). 없는 글 COMMUNITY4001(404) → ApiException.
+   * 인증 필요(AUTH4011).
+   */
+  unlikePost: (postId: string) =>
+    apiClient.delete<unknown, PostLikeResponse>(`/community/posts/${postId}/likes`),
+
+  /**
+   * 관심글 목록 조회 (200) — 요청자가 좋아요한 게시글을 페이지로 조회한다.
+   *
+   * <p>sort latest(기본, 좋아요 누른 시각순)·popular(좋아요 수순). 각 항목에 liked_at 포함,
+   * 삭제된 글은 제외. 잘못된 sort/page/size는 COMMON4001(400) → ApiException. 인증 필요(AUTH4011).
+   */
+  getLikedPosts: (params?: LikedPostListParams) =>
+    apiClient.get<unknown, LikedPostListResponse>('/community/posts/liked', { params }),
 };

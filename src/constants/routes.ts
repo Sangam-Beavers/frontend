@@ -12,7 +12,6 @@ export const ROUTES = {
   // ===== Main: bottom-tab destinations =====
   HOME: '/',
   ALL_MENU: '/menu',
-  NOTIFICATIONS: '/notifications',
   HOME_CURRENCY_SETTINGS: '/home/currency-settings',
 
   // ===== Main: Community =====
@@ -23,6 +22,7 @@ export const ROUTES = {
   COMMUNITY_VISA: '/community/visa',
   COMMUNITY_COUNTRY: '/community/country',
   COMMUNITY_FREE: '/community/free',
+  COMMUNITY_LIKED: '/community/liked',
   COMMUNITY_WRITE: '/community/write',
   COMMUNITY_POST_DETAIL: '/community/posts/:postId',
   COMMUNITY_POST_EDIT: '/community/posts/:postId/edit',
@@ -33,7 +33,6 @@ export const ROUTES = {
   MYPAGE_BADGE: '/mypage/badge',
   MYPAGE_BADGE_COMPLETE: '/mypage/badge/complete',
   MYPAGE_ACCOUNTS: '/mypage/accounts',
-  MYPAGE_NOTIFICATIONS: '/mypage/notifications',
   MYPAGE_LANGUAGE: '/mypage/language',
   MYPAGE_SUBSCRIPTION: '/mypage/subscription',
   MYPAGE_WALLET_HISTORY: '/mypage/wallet-history',

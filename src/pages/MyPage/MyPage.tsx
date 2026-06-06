@@ -13,7 +13,6 @@ const MY_ACTIVITY = [
 
 const SETTINGS = [
   { label: '추가 인증', badge: '완료' as const, path: '/mypage/badge' },
-  { label: '알림 설정', badge: null, path: '/mypage/notifications' },
   { label: '언어 설정', badge: null, path: '/mypage/language' },
 ];
 

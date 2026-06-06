@@ -25,6 +25,22 @@ export function formatCommunityDate(iso: string): string {
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}. ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+/**
+ * ISO 8601(UTC) 문자열 → 짧은 상대 시간("방금 전"/"N분 전"/"N시간 전"/"N일 전").
+ * 7일을 넘으면 "YYYY.MM.DD"(날짜만). 파싱 실패 시 원본 반환. 목록 메타처럼 좁은 영역용.
+ */
+export function formatRelativeTime(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diffSec < 60) return '방금 전';
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}분 전`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}시간 전`;
+  if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}일 전`;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
+}
+
 const TONES: AvatarTone[] = ['best', 'good', 'mid', 'warn', 'bad', 'purple'];
 
 /**

@@ -16,7 +16,9 @@ export default function MobileScreen({
 
   return (
     <div className={styles.screen}>
-      <div className={contentClass}>{children}</div>
+      <div className={contentClass} data-scroll-root>
+        {children}
+      </div>
       {bottomSlot}
     </div>
   );
