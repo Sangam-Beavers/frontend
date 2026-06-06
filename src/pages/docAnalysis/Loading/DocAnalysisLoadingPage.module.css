@@ -49,9 +49,37 @@
   flex-shrink: 0;
 }
 
+/* 완료 — 기본 파란 점에 체크 표시(TSX에서 ✓ 렌더) */
+.dotDone {
+  background: var(--blue);
+}
+
+/* 진행 중 — 펄스 링으로 "지금 여기" 강조 */
+.dotActive {
+  background: var(--blue);
+  animation: pulse 1.6s ease-out infinite;
+}
+
+/* 실패 — 진행 중이던 단계를 빨간색으로 */
+.dotFailed {
+  background: #e0455a;
+}
+
 .dotOff {
   background: #d7e4ff;
   color: #6b7b92;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(7, 91, 255, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 9px rgba(7, 91, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(7, 91, 255, 0);
+  }
 }
 
 .stepLabel {
@@ -60,8 +88,18 @@
   font-weight: 700;
 }
 
-.stepActive {
+.stepDone {
   color: var(--ink);
+  font-weight: 800;
+}
+
+.stepActive {
+  color: var(--blue);
+  font-weight: 900;
+}
+
+.stepFailed {
+  color: #d63b50;
   font-weight: 900;
 }
 
