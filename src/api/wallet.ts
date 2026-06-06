@@ -331,6 +331,14 @@ export interface RecentRecipientsResponse {
   receivers: RecentRecipientItem[];
 }
 
+/** 앱 사용자 유효성 검증 응답 (백엔드 ValidateMemberResponse).
+ *  receiver_public_id는 송금 실행 API 호출 시 사용 — 검증 성공 시 state에 보관. */
+export interface ValidateMemberResponse {
+  receiver_public_id: string;
+  nickname: string;
+  is_verified: boolean;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -545,6 +553,22 @@ export const walletApi = {
    */
   getRecentInternalRecipients: () =>
     apiClient.get<unknown, RecentRecipientsResponse>('/transfers/recent-recipients/members'),
+
+  /**
+   * 앱 사용자 유효성 검증 (200) — 이메일로 받는 사람 존재/식별.
+   *
+   * <p>송금 화면에서 사용자가 받는 사람 이메일 입력 후 "확인" 누를 때 호출.
+   * 성공 시 receiver_public_id 받아 송금 실행 API에 식별자로 사용.
+   *
+   * <p>에러: COMMON4001(400, 이메일 형식 위반) / MEMBER4001(가능성, 존재하지 않는 회원) /
+   * AUTH4011(401 — interceptor 처리).
+   *
+   * <p>경로 주의: 노션 표는 POST /receivers/search로 잘못 표기됐었음 → 실제는 GET /validate-member.
+   */
+  validateMember: (email: string) =>
+    apiClient.get<unknown, ValidateMemberResponse>('/transfers/validate-member', {
+      params: { email },
+    }),
 
   /**
    * 내 거래내역 목록 조회 (200) — 본인이 송신자 또는 수신자인 전 유형 거래를 최근순으로 페이지 조회.
