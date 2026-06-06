@@ -14,6 +14,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { create } from 'zustand';
+import { fetchChatHistory } from '@/api/chat';
 
 export type ChatRole = 'user' | 'assistant';
 
@@ -41,9 +42,16 @@ interface ChatState {
   isStreaming: boolean;
   /** 진행 중인 SSE 취소용. 시트 닫기/페이지 이동 시 abort. */
   abortController: AbortController | null;
+  /**
+   * 서버 이력 복원 완료 여부 — 같은 문서에서 중복 조회 방지.
+   * 서버(DynamoDB)가 대화의 SSOT라 session_id는 영속화하지 않는다(스레드 정체성 = user+document).
+   */
+  historyLoaded: boolean;
 
   // ── 액션 ──────────────────────────────────────────
   open: (documentPublicId: string, initialPrompt?: string) => void;
+  /** 서버에 저장된 이전 대화를 불러와 시드. open()이 내부에서 호출 — 실패해도 채팅은 빈 상태로 진행. */
+  loadHistory: (documentPublicId: string) => Promise<void>;
   close: () => void;
   setInitialPrompt: (text: string) => void;
   appendMessage: (msg: ChatMessage) => void;
@@ -63,6 +71,7 @@ const INITIAL_STATE = {
   sessionId: null as string | null,
   isStreaming: false,
   abortController: null as AbortController | null,
+  historyLoaded: false,
 };
 
 /**
@@ -87,9 +96,29 @@ export const useChatStore = create<ChatState>((set, get) => ({
         documentPublicId,
         initialPrompt,
       });
-      return;
+    } else {
+      set({ isOpen: true, documentPublicId, initialPrompt });
     }
-    set({ isOpen: true, documentPublicId, initialPrompt });
+    // 서버 이력 복원(재방문 복원) — fire-and-forget. 실패해도 채팅은 빈 상태로 진행.
+    void get().loadHistory(documentPublicId);
+  },
+
+  loadHistory: async (documentPublicId) => {
+    const s = get();
+    // 이미 복원했거나 이번 세션에서 대화가 시작됐으면 덮어쓰지 않는다.
+    if (s.historyLoaded || s.messages.length > 0) return;
+    try {
+      const history = await fetchChatHistory(documentPublicId);
+      // await 사이에 사용자가 메시지를 보냈거나 다른 문서로 바뀌었으면 무시(레이스 방지).
+      const now = get();
+      if (now.messages.length > 0 || now.documentPublicId !== documentPublicId) return;
+      set({
+        messages: history.messages.map((m) => createMessage(m.role, m.content)),
+        historyLoaded: true,
+      });
+    } catch {
+      // 이력 조회 실패는 채팅을 막지 않는다 — 다음 open()에서 재시도된다.
+    }
   },
 
   close: () => {

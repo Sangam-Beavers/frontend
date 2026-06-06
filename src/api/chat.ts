@@ -13,12 +13,42 @@
 // ─────────────────────────────────────────────────────────────
 
 import { getAccessToken } from '@/auth/tokenStore';
-import { ApiException, type ApiError } from './client';
+import { apiClient, ApiException, type ApiError } from './client';
 
 export interface ChatRequest {
   message: string;
   session_id?: string;
   user_lang: string;
+}
+
+// ─── 대화 이력 조회 (재방문 복원) ───
+// 백엔드 계약: GET /api/v1/documents/{publicId}/chat/history?limit=&cursor=
+// 일반 JSON 응답이라 axios(apiClient) 사용 — envelope은 interceptor가 풀어준다.
+// 이력 데이터는 계정 B DynamoDB에 있고 백엔드는 권한검증 + Lambda 릴레이만 한다(ai-chatbot-mcp.md §6-2).
+
+export interface ChatHistoryMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
+}
+
+export interface ChatHistoryResponse {
+  messages: ChatHistoryMessage[];
+  next_cursor: string | null;
+}
+
+/**
+ * 챗봇 대화 이력 조회 — 채팅 시트 마운트 시 1회 호출해 이전 대화를 복원(시드)한다.
+ * 이력이 없으면 messages 빈 배열(에러 아님). 분석요약 합성 턴은 내려오지 않는다.
+ */
+export async function fetchChatHistory(
+  documentPublicId: string,
+  params?: { limit?: number; cursor?: string }
+): Promise<ChatHistoryResponse> {
+  return apiClient.get<unknown, ChatHistoryResponse>(
+    `/documents/${documentPublicId}/chat/history`,
+    { params }
+  );
 }
 
 export interface ChatStreamCallbacks {
