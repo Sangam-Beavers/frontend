@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startLogout } from '@/auth/logout';
+import { ROUTES } from '@/constants/routes';
 import { useMyProfile } from '@/hooks/useMyProfile';
+import { COMMUNITY_TABS } from '@/types/community';
 import styles from './AllMenuPage.module.css';
 
 const LEFT_NAV = ['전체', '금융', '문서 분석', '커뮤니티', '마이페이지', '고객센터'] as const;
@@ -27,13 +29,16 @@ const docItems: MenuItem[] = [
   { label: '문서 분석 내역', path: '/mypage/doc-analysis-history' },
 ];
 
+// 카테고리는 커뮤니티 탭(COMMUNITY_TABS, SSOT)에서 파생 — 라벨/경로가 항상 탭과 일치한다.
+// '전체'는 메뉴 맥락에 맞게 '커뮤니티 홈'으로 노출하고, 액션(내 관심글·글쓰기)을 덧붙인다.
 const communityItems: MenuItem[] = [
-  { label: '커뮤니티 홈', path: '/community' },
-  { label: '거주', path: '/community/residence' },
-  { label: '생활 정보', path: '/community/life' },
-  { label: '구인구직', path: '/community/job' },
-  { label: '자유 게시판', path: '/community/free' },
-  { label: '글쓰기', path: '/community/write' },
+  { label: '커뮤니티 홈', path: ROUTES.COMMUNITY },
+  ...COMMUNITY_TABS.filter((tab) => tab.category !== 'all').map((tab) => ({
+    label: tab.label,
+    path: tab.path,
+  })),
+  { label: '내 관심글', path: ROUTES.COMMUNITY_LIKED },
+  { label: '글쓰기', path: ROUTES.COMMUNITY_WRITE },
 ];
 
 const mypageItems: MenuItem[] = [
