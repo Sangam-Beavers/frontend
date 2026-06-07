@@ -379,6 +379,30 @@ export interface ScheduledTransferListResponse {
   total_pages: number;
 }
 
+/** 최근 송금한 외부 계좌 한 건 (백엔드 RecentAccountsResponse.AccountItem). */
+export interface RecentRemittanceAccountItem {
+  /** 은행 코드 (예: "KOOKMIN"). */
+  bank_code: string;
+  /** 은행명 (예: "국민은행"). */
+  bank_name: string;
+  /** 마스킹된 계좌번호 (앞 3 + 별표 + 뒤 2). */
+  account_number: string;
+  /** 수취인명 (송금 시점 transactions.receiver_name snapshot). */
+  account_holder: string;
+  /** 가장 최근 송금의 통화 코드 (KRW/USD/PHP/VND 중 1). */
+  currency_code: string;
+  /** 가장 최근 송금 금액 (string 소수 4자리, 예: "200000.0000"). */
+  last_amount: string;
+  /** 가장 최근 송금 시각 (ISO 8601 UTC Z). */
+  last_transferred_at: string;
+}
+
+/** 최근 송금 계좌 목록 응답 (GET /transfers/recent-accounts).
+ *  계좌별 최신 송금 1건씩, 최근순. 이력 없으면 빈 배열. */
+export interface RecentRemittanceAccountsResponse {
+  accounts: RecentRemittanceAccountItem[];
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -624,6 +648,22 @@ export const walletApi = {
   getScheduledTransfers: (status?: ScheduledTransferStatus, page = 0, size = 20) =>
     apiClient.get<unknown, ScheduledTransferListResponse>('/transfers/scheduled', {
       params: status ? { status, page, size } : { page, size },
+    }),
+
+  /**
+   * 최근 송금한 계좌 조회 (200) — TransferBank 화면 "최근 송금한 계좌" 섹션용.
+   *
+   * <p>내가 과거에 타인 계좌로 보낸 송금의 최신 1건씩 계좌별로 묶어 최근순으로 반환.
+   * 송금 이력 없거나 외부 송금만 한 적이 없으면 빈 배열.
+   *
+   * <p>에러: COMMON4001(400, size 1~50 범위 위반) / AUTH4011(401, interceptor 처리)
+   * / WALLET4001(404, 지갑 없음 — UI에서 섹션 숨김 처리).
+   *
+   * @param size 조회 건수 (1~50, 기본 10)
+   */
+  getRecentRemittanceAccounts: (size?: number) =>
+    apiClient.get<unknown, RecentRemittanceAccountsResponse>('/transfers/recent-accounts', {
+      params: size !== undefined ? { size } : undefined,
     }),
 
   /**
