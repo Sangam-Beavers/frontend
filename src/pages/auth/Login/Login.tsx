@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 import { startLogin } from '@/auth/login'; // ① 로그인 버튼이 부를 함수
 
@@ -12,6 +13,7 @@ const LANG_OPTIONS = [
 ];
 
 function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [lang, setLang] = useState('KO');
   // 이메일/비번 입력칸은 제거했다.
@@ -31,7 +33,7 @@ function Login() {
               className="auth-lang-pill"
               value={lang}
               onChange={(e) => setLang(e.target.value)}
-              aria-label="언어 선택"
+              aria-label={t('auth.login.langSelect')}
             >
               {LANG_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -46,21 +48,21 @@ function Login() {
               <div>GB</div>
             </div>
             <h2>
-              외국인 노동자를 위한
+              {t('auth.login.heroTitleLine1')}
               <br />
-              안전한 금융 커뮤니티
+              {t('auth.login.heroTitleLine2')}
             </h2>
-            <p>송금·환전·문서 분석·생활 정보를 한 곳에서 관리하세요.</p>
+            <p>{t('auth.login.heroDescription')}</p>
           </div>
 
           {/* ① 로그인 버튼: 누르면 인증 페이지로 이동해 로그인 진행 */}
           <button type="button" className="auth-primary" onClick={() => startLogin()}>
-            이메일로 로그인
+            {t('auth.login.emailLoginButton')}
           </button>
 
           <div className="auth-divider">
             <span />
-            <em>또는</em>
+            <em>{t('auth.login.or')}</em>
             <span />
           </div>
 
@@ -70,13 +72,13 @@ function Login() {
             onClick={() => navigate('/google-signup-info')}
           >
             <span className="auth-google-mark">G</span>
-            Google로 계속하기
+            {t('auth.login.googleLoginButton')}
           </button>
 
           <div className="auth-signup">
-            계정이 없나요?{' '}
+            {t('auth.login.noAccount')}{' '}
             <Link to="/signup">
-              <button type="button">회원가입</button>
+              <button type="button">{t('auth.login.signupButton')}</button>
             </Link>
           </div>
         </div>

@@ -13,11 +13,13 @@
 
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 import { ApiException, memberApi } from '@/api';
 import { ROUTES } from '@/constants/routes';
 
 function ResetPassword() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
@@ -33,11 +35,11 @@ function ResetPassword() {
     setError(null);
 
     if (!password.trim()) {
-      setError('새 비밀번호를 입력해주세요.');
+      setError(t('auth.resetPassword.errorPasswordRequired'));
       return;
     }
     if (password !== confirm) {
-      setError('비밀번호가 서로 일치하지 않습니다.');
+      setError(t('auth.resetPassword.errorPasswordMismatch'));
       return;
     }
 
@@ -51,12 +53,12 @@ function ResetPassword() {
       if (e instanceof ApiException) {
         if (e.code === 'MEMBER4004') {
           // 토큰 만료(30분)·위조·재사용 — 다시 요청하도록 안내
-          setError('링크가 만료되었거나 올바르지 않습니다. 비밀번호 찾기에서 다시 요청해주세요.');
+          setError(t('auth.resetPassword.errorTokenInvalid'));
         } else {
           setError(e.message);
         }
       } else {
-        setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        setError(t('auth.resetPassword.errorNetwork'));
       }
     } finally {
       setSubmitting(false);
@@ -72,11 +74,11 @@ function ResetPassword() {
               type="button"
               className="auth-icon"
               onClick={() => navigate(ROUTES.LOGIN)}
-              aria-label="로그인으로"
+              aria-label={t('auth.resetPassword.backToLoginLabel')}
             >
               ‹
             </button>
-            <div className="auth-title">비밀번호 재설정</div>
+            <div className="auth-title">{t('auth.resetPassword.title')}</div>
             <div className="auth-icon empty" aria-hidden />
           </div>
 
@@ -84,9 +86,9 @@ function ResetPassword() {
           {!token ? (
             <>
               <div className="auth-card info">
-                <div className="auth-card-title">잘못된 접근입니다</div>
+                <div className="auth-card-title">{t('auth.resetPassword.invalidAccessTitle')}</div>
                 <div className="auth-card-text">
-                  비밀번호 재설정은 메일로 받은 링크를 통해서만 가능합니다.
+                  {t('auth.resetPassword.invalidAccessDescription')}
                 </div>
               </div>
               <button
@@ -94,55 +96,59 @@ function ResetPassword() {
                 className="auth-primary"
                 onClick={() => navigate(ROUTES.PASSWORD_RECOVERY)}
               >
-                재설정 링크 다시 받기
+                {t('auth.resetPassword.requestLinkAgain')}
               </button>
             </>
           ) : done ? (
             /* 변경 완료 */
             <>
               <div className="auth-card ok">
-                <div className="auth-card-title">비밀번호가 변경되었습니다</div>
-                <div className="auth-card-text">새 비밀번호로 다시 로그인해주세요.</div>
+                <div className="auth-card-title">{t('auth.resetPassword.doneTitle')}</div>
+                <div className="auth-card-text">{t('auth.resetPassword.doneDescription')}</div>
               </div>
               <button type="button" className="auth-primary" onClick={() => navigate(ROUTES.LOGIN)}>
-                로그인하러 가기
+                {t('auth.resetPassword.goToLogin')}
               </button>
             </>
           ) : (
             /* 새 비밀번호 입력 폼 */
             <>
               <div className="auth-card info">
-                <div className="auth-card-title">새 비밀번호 설정</div>
-                <div className="auth-card-text">사용할 새 비밀번호를 입력해주세요.</div>
+                <div className="auth-card-title">{t('auth.resetPassword.formTitle')}</div>
+                <div className="auth-card-text">{t('auth.resetPassword.formDescription')}</div>
               </div>
 
               <form onSubmit={handleSubmit}>
                 <div className="auth-field">
-                  <label htmlFor="reset-password">새 비밀번호</label>
+                  <label htmlFor="reset-password">{t('auth.resetPassword.newPasswordLabel')}</label>
                   <input
                     id="reset-password"
                     type="password"
                     className="auth-input"
-                    placeholder="새 비밀번호"
+                    placeholder={t('auth.resetPassword.newPasswordPlaceholder')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
 
                 <div className="auth-field">
-                  <label htmlFor="reset-password-confirm">새 비밀번호 확인</label>
+                  <label htmlFor="reset-password-confirm">
+                    {t('auth.resetPassword.confirmPasswordLabel')}
+                  </label>
                   <input
                     id="reset-password-confirm"
                     type="password"
                     className="auth-input"
-                    placeholder="한 번 더 입력"
+                    placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                   />
                 </div>
 
                 <button type="submit" className="auth-primary" disabled={submitting}>
-                  {submitting ? '변경 중...' : '비밀번호 변경'}
+                  {submitting
+                    ? t('auth.resetPassword.submitting')
+                    : t('auth.resetPassword.submitButton')}
                 </button>
               </form>
 
@@ -157,7 +163,7 @@ function ResetPassword() {
                 className="auth-ghost"
                 onClick={() => navigate(ROUTES.PASSWORD_RECOVERY)}
               >
-                재설정 링크 다시 받기
+                {t('auth.resetPassword.requestLinkAgain')}
               </button>
             </>
           )}

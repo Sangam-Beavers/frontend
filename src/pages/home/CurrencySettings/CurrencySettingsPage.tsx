@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import { HOME_ALL_CURRENCIES_MOCK } from '@/mocks/homeMock';
 import styles from './CurrencySettingsPage.module.css';
@@ -17,6 +18,7 @@ function loadSaved(): string[] {
 }
 
 export default function CurrencySettingsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>(loadSaved);
 
@@ -36,9 +38,9 @@ export default function CurrencySettingsPage() {
   return (
     <>
       <div className={styles.content}>
-        <TopBar title="표시 통화 설정" onBack={() => navigate(-1)} />
+        <TopBar title={t('currencySettings.title')} onBack={() => navigate(-1)} />
 
-        <p className={styles.desc}>홈 화면에 표시할 통화를 최대 2개 선택하세요.</p>
+        <p className={styles.desc}>{t('currencySettings.description')}</p>
 
         <div className={styles.list}>
           {HOME_ALL_CURRENCIES_MOCK.map((cur) => {
@@ -52,7 +54,9 @@ export default function CurrencySettingsPage() {
               >
                 <div className={styles.itemInfo}>
                   <div className={styles.itemCode}>{cur.code}</div>
-                  <div className={styles.itemLabel}>{cur.label}</div>
+                  <div className={styles.itemLabel}>
+                    {t(`home.currencies.${cur.code}`, { defaultValue: cur.label })}
+                  </div>
                 </div>
                 <div className={`${styles.checkbox} ${checked ? styles.checkboxChecked : ''}`}>
                   {checked && '✓'}
@@ -70,7 +74,7 @@ export default function CurrencySettingsPage() {
           disabled={selected.length === 0}
           onClick={save}
         >
-          저장 ({selected.length}/{MAX_SELECT})
+          {t('currencySettings.save', { selected: selected.length, max: MAX_SELECT })}
         </button>
       </div>
     </>

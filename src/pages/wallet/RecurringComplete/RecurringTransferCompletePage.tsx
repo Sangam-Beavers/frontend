@@ -1,30 +1,34 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import styles from './RecurringTransferCompletePage.module.css';
 
 export default function RecurringTransferCompletePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
     <>
-      <TopBar title="정기 송금 완료" showBack={false} />
+      <TopBar title={t('recurring.complete.title')} showBack={false} />
 
       <div className={styles.checkOnly}>✓</div>
 
       <div className={styles.card}>
-        <div className={styles.cardTitle}>정기 송금이 진행되었습니다</div>
+        <div className={styles.cardTitle}>{t('recurring.complete.cardTitle')}</div>
         <div className={styles.cardText}>
-          Linh에게 VND ₫1,200,000
+          {t('recurring.complete.summaryRecipient', { name: 'Linh', amount: 'VND ₫1,200,000' })}
           <br />
-          매월 25일 정기 송금 · 처리 완료
+          {t('recurring.complete.summarySchedule', {
+            schedule: t('recurring.complete.fallbackSchedule', { defaultValue: '매월 25일' }),
+          })}
         </div>
       </div>
 
       <button type="button" className={styles.primary} onClick={() => navigate('/recurring')}>
-        정기 송금 내역 보기
+        {t('recurring.complete.viewList')}
       </button>
       <button type="button" className={styles.ghost} onClick={() => navigate('/')}>
-        홈으로 돌아가기
+        {t('recurring.complete.backHome')}
       </button>
     </>
   );

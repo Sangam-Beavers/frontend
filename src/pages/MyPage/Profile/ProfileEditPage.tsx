@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import { memberApi } from '@/api/member';
@@ -28,6 +29,7 @@ const LANGUAGE_LABEL_TO_CODE: Record<string, string> = Object.fromEntries(
 );
 
 export default function ProfileEditPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: profile } = useMyProfile();
   const update = useUpdateMyProfile();
@@ -78,7 +80,7 @@ export default function ProfileEditPage() {
     const trimmedNickname = nickname.trim();
     const trimmedBio = bio.trim();
     if (!trimmedNickname) {
-      setSubmitError('닉네임을 입력해주세요.');
+      setSubmitError(t('mypage2.profile.errors.nicknameRequired'));
       return;
     }
     const languageCode = LANGUAGE_LABEL_TO_CODE[language] ?? 'ko';
@@ -95,13 +97,13 @@ export default function ProfileEditPage() {
           if (err instanceof ApiException) {
             if (err.code === 'MEMBER4003') {
               setNicknameStatus('fail');
-              setSubmitError('이미 사용 중인 닉네임입니다.');
+              setSubmitError(t('mypage2.profile.errors.nicknameTaken'));
               return;
             }
-            setSubmitError(err.message || '저장에 실패했습니다.');
+            setSubmitError(err.message || t('mypage2.profile.errors.saveFailed'));
             return;
           }
-          setSubmitError('저장에 실패했습니다.');
+          setSubmitError(t('mypage2.profile.errors.saveFailed'));
         },
       }
     );
@@ -110,20 +112,20 @@ export default function ProfileEditPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="프로필 편집" onBack={() => navigate(-1)} />
+        <TopBar title={t('mypage2.profile.title')} onBack={() => navigate(-1)} />
 
         {/* Avatar */}
         <div className={styles.avatarWrap}>
           <div className={styles.avatar}>{avatarInitial}</div>
         </div>
         <button type="button" className={styles.secondaryBtn} disabled>
-          프로필 사진 변경
+          {t('mypage2.profile.changePhoto')}
         </button>
 
         {/* Nickname */}
         <div className={styles.field}>
           <label className={styles.label} htmlFor="nickname">
-            닉네임
+            {t('mypage2.profile.nicknameLabel')}
           </label>
           <div className={styles.inputRow}>
             <input
@@ -137,19 +139,21 @@ export default function ProfileEditPage() {
               }}
             />
             <button type="button" className={styles.inlineBtn} onClick={checkNickname}>
-              중복확인
+              {t('mypage2.profile.checkDuplicate')}
             </button>
           </div>
-          {nicknameStatus === 'ok' && <p className={styles.fieldOk}>✓ 사용 가능한 닉네임입니다</p>}
+          {nicknameStatus === 'ok' && (
+            <p className={styles.fieldOk}>{t('mypage2.profile.nicknameOk')}</p>
+          )}
           {nicknameStatus === 'fail' && (
-            <p className={styles.fieldFail}>✗ 이미 사용 중인 닉네임입니다</p>
+            <p className={styles.fieldFail}>{t('mypage2.profile.nicknameFail')}</p>
           )}
         </div>
 
         {/* Language */}
         <div className={styles.field}>
           <label className={styles.label} htmlFor="language">
-            주 사용 언어
+            {t('mypage2.profile.languageLabel')}
           </label>
           <select
             id="language"
@@ -168,7 +172,7 @@ export default function ProfileEditPage() {
         {/* Bio */}
         <div className={styles.field}>
           <label className={styles.label} htmlFor="bio">
-            자기소개
+            {t('mypage2.profile.bioLabel')}
           </label>
           <textarea
             id="bio"
@@ -192,7 +196,7 @@ export default function ProfileEditPage() {
           onClick={handleSave}
           disabled={update.isPending}
         >
-          {update.isPending ? '저장 중...' : '저장'}
+          {update.isPending ? t('mypage2.profile.saving') : t('mypage2.profile.save')}
         </button>
       </div>
     </>

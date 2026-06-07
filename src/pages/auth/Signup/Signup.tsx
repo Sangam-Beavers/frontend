@@ -13,6 +13,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 
 import { ApiException, memberApi } from '@/api';
@@ -39,6 +40,7 @@ function CheckboxRow({ label, checked, onChange }: CheckboxRowProps) {
 type DupCheck = 'idle' | 'checking' | 'available' | 'taken';
 
 function Signup() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     email: '',
@@ -72,7 +74,7 @@ function Signup() {
   const handleCheckEmail = async () => {
     const email = form.email.trim();
     if (!email) {
-      setError('이메일을 먼저 입력해주세요.');
+      setError(t('auth.signup.errorEmailRequired'));
       return;
     }
     setError(null);
@@ -86,7 +88,7 @@ function Signup() {
       setError(
         e instanceof ApiException && e.code !== 'NETWORK_ERROR'
           ? e.message
-          : '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+          : t('auth.signup.errorNetwork')
       );
     }
   };
@@ -95,7 +97,7 @@ function Signup() {
   const handleCheckNickname = async () => {
     const nickname = form.nickname.trim();
     if (!nickname) {
-      setError('닉네임을 먼저 입력해주세요.');
+      setError(t('auth.signup.errorNicknameRequired'));
       return;
     }
     setError(null);
@@ -108,7 +110,7 @@ function Signup() {
       setError(
         e instanceof ApiException && e.code !== 'NETWORK_ERROR'
           ? e.message
-          : '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+          : t('auth.signup.errorNetwork')
       );
     }
   };
@@ -123,15 +125,15 @@ function Signup() {
     const nickname = form.nickname.trim();
 
     if (!email || !form.password || !name || !nickname || !form.nationality || !form.language) {
-      setError('모든 항목을 입력해주세요.');
+      setError(t('auth.signup.errorAllFieldsRequired'));
       return;
     }
     if (form.password !== form.passwordConfirm) {
-      setError('비밀번호가 서로 일치하지 않습니다.');
+      setError(t('auth.signup.errorPasswordMismatch'));
       return;
     }
     if (!form.agreeTerms || !form.agreePrivacy) {
-      setError('이용약관과 개인정보 처리방침에 동의해주세요.');
+      setError(t('auth.signup.errorAgreementRequired'));
       return;
     }
 
@@ -149,19 +151,19 @@ function Signup() {
     } catch (err) {
       if (err instanceof ApiException) {
         if (err.code === 'MEMBER4002') {
-          setError('이미 사용 중인 이메일입니다.');
+          setError(t('auth.signup.errorEmailTaken'));
           setEmailCheck('taken');
         } else if (err.code === 'MEMBER4003') {
-          setError('이미 사용 중인 닉네임입니다.');
+          setError(t('auth.signup.errorNicknameTaken'));
           setNicknameCheck('taken');
         } else if (err.code === 'NETWORK_ERROR') {
-          setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+          setError(t('auth.signup.errorNetwork'));
         } else {
           // COMMON4001(형식 오류) 등 — 백엔드 메시지 표시
-          setError(err.message || '가입을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+          setError(err.message || t('auth.signup.errorSubmit'));
         }
       } else {
-        setError('가입을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        setError(t('auth.signup.errorSubmit'));
       }
     } finally {
       setSubmitting(false);
@@ -176,17 +178,17 @@ function Signup() {
           <div className="auth-content">
             <div className="auth-top">
               <div className="auth-icon empty" aria-hidden />
-              <div className="auth-title">회원가입</div>
+              <div className="auth-title">{t('auth.signup.title')}</div>
               <div className="auth-icon empty" aria-hidden />
             </div>
 
             <div className="auth-card ok">
-              <div className="auth-card-title">가입이 완료되었습니다 🎉</div>
-              <div className="auth-card-text">가입한 이메일과 비밀번호로 로그인해주세요.</div>
+              <div className="auth-card-title">{t('auth.signup.doneTitle')}</div>
+              <div className="auth-card-text">{t('auth.signup.doneDescription')}</div>
             </div>
 
             <button type="button" className="auth-primary" onClick={() => navigate(ROUTES.LOGIN)}>
-              로그인하러 가기
+              {t('auth.signup.goToLogin')}
             </button>
           </div>
         </div>
@@ -203,24 +205,24 @@ function Signup() {
               type="button"
               className="auth-icon"
               onClick={() => navigate(-1)}
-              aria-label="뒤로 가기"
+              aria-label={t('auth.signup.backButton')}
             >
               ‹
             </button>
-            <div className="auth-title">회원가입</div>
-            <button type="button" className="auth-icon" aria-label="언어 선택">
+            <div className="auth-title">{t('auth.signup.title')}</div>
+            <button type="button" className="auth-icon" aria-label={t('auth.signup.langSelect')}>
               🌐
             </button>
           </div>
 
           <form onSubmit={handleSubmit}>
             <div className="auth-field">
-              <label htmlFor="signup-email">이메일</label>
+              <label htmlFor="signup-email">{t('auth.signup.emailLabel')}</label>
               <div className="auth-input-row">
                 <input
                   id="signup-email"
                   type="email"
-                  placeholder="email@example.com"
+                  placeholder={t('auth.signup.emailPlaceholder')}
                   value={form.email}
                   onChange={set('email')}
                 />
@@ -230,19 +232,21 @@ function Signup() {
                   onClick={handleCheckEmail}
                   disabled={emailCheck === 'checking'}
                 >
-                  {emailCheck === 'checking' ? '확인 중...' : '중복확인'}
+                  {emailCheck === 'checking'
+                    ? t('auth.signup.checking')
+                    : t('auth.signup.checkDuplicate')}
                 </button>
               </div>
               {emailCheck === 'available' && (
-                <div className="auth-hint ok">사용할 수 있는 이메일입니다.</div>
+                <div className="auth-hint ok">{t('auth.signup.emailAvailable')}</div>
               )}
               {emailCheck === 'taken' && (
-                <div className="auth-hint error">이미 사용 중인 이메일입니다.</div>
+                <div className="auth-hint error">{t('auth.signup.emailTaken')}</div>
               )}
             </div>
 
             <div className="auth-field">
-              <label htmlFor="signup-password">비밀번호</label>
+              <label htmlFor="signup-password">{t('auth.signup.passwordLabel')}</label>
               <input
                 id="signup-password"
                 type="password"
@@ -254,7 +258,9 @@ function Signup() {
             </div>
 
             <div className="auth-field">
-              <label htmlFor="signup-password-confirm">비밀번호 확인</label>
+              <label htmlFor="signup-password-confirm">
+                {t('auth.signup.passwordConfirmLabel')}
+              </label>
               <input
                 id="signup-password-confirm"
                 type="password"
@@ -266,7 +272,7 @@ function Signup() {
             </div>
 
             <div className="auth-field">
-              <label htmlFor="signup-name">이름</label>
+              <label htmlFor="signup-name">{t('auth.signup.nameLabel')}</label>
               <input
                 id="signup-name"
                 type="text"
@@ -278,7 +284,7 @@ function Signup() {
             </div>
 
             <div className="auth-field">
-              <label htmlFor="signup-nickname">닉네임</label>
+              <label htmlFor="signup-nickname">{t('auth.signup.nicknameLabel')}</label>
               <div className="auth-input-row">
                 <input
                   id="signup-nickname"
@@ -293,27 +299,29 @@ function Signup() {
                   onClick={handleCheckNickname}
                   disabled={nicknameCheck === 'checking'}
                 >
-                  {nicknameCheck === 'checking' ? '확인 중...' : '중복확인'}
+                  {nicknameCheck === 'checking'
+                    ? t('auth.signup.checking')
+                    : t('auth.signup.checkDuplicate')}
                 </button>
               </div>
               {nicknameCheck === 'available' && (
-                <div className="auth-hint ok">사용할 수 있는 닉네임입니다.</div>
+                <div className="auth-hint ok">{t('auth.signup.nicknameAvailable')}</div>
               )}
               {nicknameCheck === 'taken' && (
-                <div className="auth-hint error">이미 사용 중인 닉네임입니다.</div>
+                <div className="auth-hint error">{t('auth.signup.nicknameTaken')}</div>
               )}
             </div>
 
             <div className="auth-grid2">
               <div className="auth-field">
-                <label htmlFor="signup-nationality">국적</label>
+                <label htmlFor="signup-nationality">{t('auth.signup.nationalityLabel')}</label>
                 <select
                   id="signup-nationality"
                   className="auth-select"
                   value={form.nationality}
                   onChange={set('nationality')}
                 >
-                  <option value="">선택 ▾</option>
+                  <option value="">{t('auth.signup.selectOption')}</option>
                   {NATIONALITIES.map((n) => (
                     <option key={n} value={n}>
                       {n}
@@ -323,14 +331,14 @@ function Signup() {
               </div>
 
               <div className="auth-field">
-                <label htmlFor="signup-language">주 사용 언어</label>
+                <label htmlFor="signup-language">{t('auth.signup.languageLabel')}</label>
                 <select
                   id="signup-language"
                   className="auth-select"
                   value={form.language}
                   onChange={set('language')}
                 >
-                  <option value="">선택 ▾</option>
+                  <option value="">{t('auth.signup.selectOption')}</option>
                   {LANGUAGES.map((l) => (
                     <option key={l} value={l}>
                       {l}
@@ -341,12 +349,12 @@ function Signup() {
             </div>
 
             <CheckboxRow
-              label="서비스 이용약관 동의"
+              label={t('auth.signup.agreeTerms')}
               checked={form.agreeTerms}
               onChange={() => toggle('agreeTerms')}
             />
             <CheckboxRow
-              label="개인정보 처리방침 동의"
+              label={t('auth.signup.agreePrivacy')}
               checked={form.agreePrivacy}
               onChange={() => toggle('agreePrivacy')}
             />
@@ -358,7 +366,7 @@ function Signup() {
             )}
 
             <button type="submit" className="auth-primary" disabled={submitting}>
-              {submitting ? '가입 중...' : '이메일로 가입하기'}
+              {submitting ? t('auth.signup.submitting') : t('auth.signup.submitButton')}
             </button>
           </form>
         </div>

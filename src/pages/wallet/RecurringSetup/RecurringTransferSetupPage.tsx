@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { RECENT_USERS_MOCK, type RecentUser } from '@/mocks/transferMock';
@@ -6,7 +7,8 @@ import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurr
 import styles from './RecurringTransferSetupPage.module.css';
 
 const RECENT_USERS = RECENT_USERS_MOCK.result;
-const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
+// 요일은 ISO key — display는 i18n.
+const WEEKDAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 const MONTH_DAYS = Array.from({ length: 28 }, (_, i) => i + 1);
 
 const TONE_CLASS: Record<string, string> = {
@@ -18,6 +20,7 @@ const TONE_CLASS: Record<string, string> = {
 };
 
 export default function RecurringTransferSetupPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     data: currenciesData,
@@ -51,20 +54,34 @@ export default function RecurringTransferSetupPage() {
     setRecipientOpen(false);
   }
 
+  const weekdayLabels: Record<(typeof WEEKDAY_KEYS)[number], string> = {
+    mon: t('recurring.setup.weekdayMon'),
+    tue: t('recurring.setup.weekdayTue'),
+    wed: t('recurring.setup.weekdayWed'),
+    thu: t('recurring.setup.weekdayThu'),
+    fri: t('recurring.setup.weekdayFri'),
+    sat: t('recurring.setup.weekdaySat'),
+    sun: t('recurring.setup.weekdaySun'),
+  };
+
   return (
     <div className={styles.contentPad}>
-      <TopBar title="정기 송금 설정" />
+      <TopBar title={t('recurring.setup.title')} />
 
       {/* 송금 대상 */}
       <div className={styles.field}>
-        <label htmlFor="recipient">송금 대상</label>
+        <label htmlFor="recipient">{t('recurring.setup.recipientLabel')}</label>
         <button
           id="recipient"
           type="button"
           className={styles.select}
           onClick={() => setRecipientOpen((prev) => !prev)}
         >
-          <span>{recipient ? `${recipient.name} · 앱 사용자` : '대상 선택'}</span>
+          <span>
+            {recipient
+              ? t('recurring.setup.recipientPicked', { name: recipient.name })
+              : t('recurring.setup.recipientPlaceholder')}
+          </span>
           <span aria-hidden>{recipientOpen ? '▴' : '▾'}</span>
         </button>
         {recipientOpen && (
@@ -90,7 +107,7 @@ export default function RecurringTransferSetupPage() {
 
       {/* 송금 통화 / 금액 */}
       <div className={styles.field}>
-        <label>송금 통화 / 금액</label>
+        <label>{t('recurring.setup.amountLabel')}</label>
         <div className={styles.amountRow}>
           <select
             className={styles.selectNative}
@@ -98,8 +115,10 @@ export default function RecurringTransferSetupPage() {
             onChange={(e) => setCurrency(e.target.value)}
             disabled={currenciesLoading || hasCurrenciesError || currencies.length === 0}
           >
-            {currenciesLoading && <option value="">불러오는 중...</option>}
-            {hasCurrenciesError && <option value="">통화 불러오기 실패</option>}
+            {currenciesLoading && (
+              <option value="">{t('recurring.setup.currenciesLoading')}</option>
+            )}
+            {hasCurrenciesError && <option value="">{t('recurring.setup.currenciesError')}</option>}
             {!currenciesLoading &&
               !hasCurrenciesError &&
               currencies.map((c) => (
@@ -110,7 +129,7 @@ export default function RecurringTransferSetupPage() {
           </select>
           {hasCurrenciesError && (
             <button type="button" className={styles.retryBtn} onClick={() => refetchCurrencies()}>
-              다시 시도
+              {t('recurring.setup.retry')}
             </button>
           )}
           <input
@@ -126,7 +145,7 @@ export default function RecurringTransferSetupPage() {
 
       {/* 송금 일정 */}
       <div className={styles.field}>
-        <label>송금 일정</label>
+        <label>{t('recurring.setup.scheduleLabel')}</label>
         <select
           className={styles.selectNative}
           value={scheduleType}
@@ -135,10 +154,10 @@ export default function RecurringTransferSetupPage() {
             setScheduleDay('');
           }}
         >
-          <option value="">일정 선택</option>
-          <option value="매일">매일</option>
-          <option value="매주">매주</option>
-          <option value="매월">매월</option>
+          <option value="">{t('recurring.setup.schedulePlaceholder')}</option>
+          <option value="매일">{t('recurring.setup.scheduleDaily')}</option>
+          <option value="매주">{t('recurring.setup.scheduleWeekly')}</option>
+          <option value="매월">{t('recurring.setup.scheduleMonthly')}</option>
         </select>
         {scheduleType === '매주' && (
           <div className={styles.subField}>
@@ -147,10 +166,10 @@ export default function RecurringTransferSetupPage() {
               value={scheduleDay}
               onChange={(e) => setScheduleDay(e.target.value)}
             >
-              <option value="">요일 선택</option>
-              {WEEKDAYS.map((d) => (
-                <option key={d} value={d}>
-                  {d}요일
+              <option value="">{t('recurring.setup.weekdayPlaceholder')}</option>
+              {WEEKDAY_KEYS.map((key) => (
+                <option key={key} value={key}>
+                  {weekdayLabels[key]}
                 </option>
               ))}
             </select>
@@ -163,10 +182,10 @@ export default function RecurringTransferSetupPage() {
               value={scheduleDay}
               onChange={(e) => setScheduleDay(e.target.value)}
             >
-              <option value="">날짜 선택</option>
+              <option value="">{t('recurring.setup.datePlaceholder')}</option>
               {MONTH_DAYS.map((d) => (
                 <option key={d} value={String(d)}>
-                  {d}일
+                  {t('recurring.setup.dayOfMonth', { day: d })}
                 </option>
               ))}
             </select>
@@ -176,7 +195,7 @@ export default function RecurringTransferSetupPage() {
 
       {/* 시작일 */}
       <div className={styles.field}>
-        <label htmlFor="start-date">시작일</label>
+        <label htmlFor="start-date">{t('recurring.setup.startDateLabel')}</label>
         <input
           id="start-date"
           type="date"
@@ -188,7 +207,7 @@ export default function RecurringTransferSetupPage() {
 
       {/* 종료 조건 */}
       <div className={styles.field}>
-        <label>종료 조건</label>
+        <label>{t('recurring.setup.endLabel')}</label>
         <select
           className={styles.selectNative}
           value={endType}
@@ -198,10 +217,10 @@ export default function RecurringTransferSetupPage() {
             setEndDate('');
           }}
         >
-          <option value="">종료 조건 선택</option>
-          <option value="무기한">해지 전까지 반복</option>
-          <option value="횟수">횟수 제한</option>
-          <option value="날짜">날짜 지정</option>
+          <option value="">{t('recurring.setup.endPlaceholder')}</option>
+          <option value="무기한">{t('recurring.setup.endNever')}</option>
+          <option value="횟수">{t('recurring.setup.endCount')}</option>
+          <option value="날짜">{t('recurring.setup.endDate')}</option>
         </select>
         {endType === '횟수' && (
           <div className={styles.subField}>
@@ -209,7 +228,7 @@ export default function RecurringTransferSetupPage() {
               type="text"
               inputMode="numeric"
               className={styles.input}
-              placeholder="반복 횟수 입력 (예: 12)"
+              placeholder={t('recurring.setup.endCountPlaceholder')}
               value={endCount}
               onChange={(e) => setEndCount(e.target.value.replace(/[^0-9]/g, ''))}
             />
@@ -228,10 +247,8 @@ export default function RecurringTransferSetupPage() {
       </div>
 
       <div className={`${styles.card} ${styles.cardWarn}`}>
-        <div className={styles.cardTitle}>정기 송금 안내</div>
-        <div className={styles.cardText}>
-          송금일 전 알림이 발송되며, 잔액 부족 시 송금이 실패할 수 있습니다.
-        </div>
+        <div className={styles.cardTitle}>{t('recurring.setup.noticeTitle')}</div>
+        <div className={styles.cardText}>{t('recurring.setup.noticeText')}</div>
       </div>
 
       <div className={styles.primaryFixed}>
@@ -241,7 +258,7 @@ export default function RecurringTransferSetupPage() {
           disabled={!canSubmit}
           onClick={() => navigate('/recurring/complete')}
         >
-          정기 송금 설정하기
+          {t('recurring.setup.submit')}
         </button>
       </div>
     </div>

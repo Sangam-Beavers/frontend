@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import Toast, { type ToastVariant } from '@/components/common/Toast';
@@ -26,9 +27,12 @@ import styles from './AccountManagePage.module.css';
  *
  * <p>이슈 #108 — 계좌가 0건이면 단순 "등록된 계좌 없음" 대신 "계좌를 연동해주세요" 안내 카드 + 계좌 추가 CTA.
  * 전자지갑 1계정 1개 보장(BE #152)은 백엔드에서 처리하므로 프론트는 계좌 유무만 분기.
+ *
+ * <p>이슈 #153 — 모든 텍스트 i18n 키화.
  */
 export default function AccountManagePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data, isLoading, error } = useMyAccounts();
   const accounts = data?.accounts ?? [];
 
@@ -49,7 +53,7 @@ export default function AccountManagePage() {
     deleteAccount.mutate(confirmId, {
       onSuccess: () => {
         setConfirmId(null);
-        showToast('계좌가 해제되었습니다.', 'success');
+        showToast(t('account.releaseSuccess'), 'success');
       },
       onError: (e) => {
         // 다이얼로그를 닫지 않고 error prop으로 안에서 표시.
@@ -60,7 +64,7 @@ export default function AccountManagePage() {
 
   const handleSetPrimary = (accountId: string) => {
     setPrimary.mutate(accountId, {
-      onSuccess: () => showToast('주 계좌로 지정되었습니다.', 'success'),
+      onSuccess: () => showToast(t('account.setPrimarySuccess'), 'success'),
       onError: (e) => showToast(accountErrorMessage(e), 'error'),
     });
   };
@@ -73,19 +77,14 @@ export default function AccountManagePage() {
 
   return (
     <>
-      <TopBar title="계좌 관리" onBack={() => navigate(-1)} />
+      <TopBar title={t('account.title')} onBack={() => navigate(-1)} />
 
-      {isLoading && <div className={styles.state}>계좌를 불러오는 중…</div>}
-      {error && (
-        <div className={styles.state}>계좌를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>
-      )}
+      {isLoading && <div className={styles.state}>{t('account.loading')}</div>}
+      {error && <div className={styles.state}>{t('account.loadError')}</div>}
       {!isLoading && !error && accounts.length === 0 && (
         <div className={styles.card}>
-          <div className={styles.cardTitle}>계좌를 연동해주세요</div>
-          <div className={styles.cardText}>
-            전자지갑은 개설되었지만 아직 연동된 계좌가 없습니다. 계좌를 연동하면 충전·송금을 시작할
-            수 있어요.
-          </div>
+          <div className={styles.cardTitle}>{t('account.emptyTitle')}</div>
+          <div className={styles.cardText}>{t('account.emptyBody')}</div>
         </div>
       )}
 
@@ -104,14 +103,14 @@ export default function AccountManagePage() {
                     <div className={styles.itemTitle}>
                       {acc.bank_name}
                       {acc.is_primary && (
-                        <span className={styles.primaryBadge} aria-label="주 계좌">
-                          ★ 주 계좌
+                        <span className={styles.primaryBadge} aria-label={t('account.primary')}>
+                          {t('account.primaryBadge')}
                         </span>
                       )}
                     </div>
                     <div className={styles.itemMeta}>{acc.account_number_masked}</div>
                   </div>
-                  <span className={styles.pill}>연결됨</span>
+                  <span className={styles.pill}>{t('account.connected')}</span>
                 </div>
 
                 <div className={styles.itemActions}>
@@ -122,7 +121,7 @@ export default function AccountManagePage() {
                       disabled={isPrimaryPending || setPrimary.isPending}
                       onClick={() => handleSetPrimary(acc.account_public_id)}
                     >
-                      {isPrimaryPending ? '지정 중…' : '주 계좌로 지정'}
+                      {isPrimaryPending ? t('account.setPrimaryPending') : t('account.setPrimary')}
                     </button>
                   )}
                   <button
@@ -131,7 +130,7 @@ export default function AccountManagePage() {
                     disabled={isDeletePending}
                     onClick={() => setConfirmId(acc.account_public_id)}
                   >
-                    계좌 해제
+                    {t('account.release')}
                   </button>
                 </div>
               </div>
@@ -145,15 +144,18 @@ export default function AccountManagePage() {
         className={styles.primaryBtn}
         onClick={() => navigate(ROUTES.CHARGE_ADD_ACCOUNT)}
       >
-        계좌 추가
+        {t('account.addAccount')}
       </button>
 
       {target && (
         <ConfirmDialog
-          title="계좌 연결 해제"
-          message={`${target.bank_name} ${target.account_number_masked} 계좌를 해제하시겠습니까? 주 계좌를 해제하면 남은 계좌 중 가장 최근 등록한 계좌가 자동으로 주 계좌가 됩니다.`}
-          confirmLabel="해제"
-          cancelLabel="취소"
+          title={t('account.releaseConfirmTitle')}
+          message={t('account.releaseConfirmMessage', {
+            bank: target.bank_name,
+            number: target.account_number_masked,
+          })}
+          confirmLabel={t('account.releaseConfirmLabel')}
+          cancelLabel={t('common.cancel')}
           danger
           loading={deleteAccount.isPending}
           error={deleteDialogError}

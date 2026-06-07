@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import styles from './TransferReceiptPage.module.css';
 
@@ -14,43 +15,45 @@ interface ReceiptState {
   processingTime?: string;
 }
 
-const FALLBACK: Required<ReceiptState> = {
-  txId: 'GB-20260521-00082',
-  dateTime: '2026.05.21 11:24',
-  sender: '김소영',
-  recipient: 'Linh',
-  method: '앱 내 이체',
-  currency: 'VND',
-  amount: '₫1,200,000',
-  fee: '없음',
-  processingTime: '82ms',
-};
-
 export default function TransferReceiptPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const location = useLocation();
+
+  const FALLBACK: Required<ReceiptState> = {
+    txId: 'GB-20260521-00082',
+    dateTime: '2026.05.21 11:24',
+    sender: t('transfer.receipt.fallbackSender', { defaultValue: '김소영' }),
+    recipient: 'Linh',
+    method: t('transfer.receipt.fallbackMethod', { defaultValue: '앱 내 이체' }),
+    currency: 'VND',
+    amount: '₫1,200,000',
+    fee: t('transfer.receipt.fallbackFee', { defaultValue: '없음' }),
+    processingTime: '82ms',
+  };
+
   const data: Required<ReceiptState> = { ...FALLBACK, ...(location.state as ReceiptState) };
 
   const rows: [string, string, boolean?][] = [
-    ['거래번호', data.txId],
-    ['송금일시', data.dateTime],
-    ['보낸 사람', data.sender],
-    ['받는 사람', data.recipient],
-    ['송금 방식', data.method],
-    ['송금 통화', data.currency],
-    ['송금 금액', data.amount],
-    ['수수료', data.fee],
-    ['처리 시간', data.processingTime],
-    ['상태', '완료', true],
+    [t('transfer.receipt.txId'), data.txId],
+    [t('transfer.receipt.dateTime'), data.dateTime],
+    [t('transfer.receipt.sender'), data.sender],
+    [t('transfer.receipt.recipient'), data.recipient],
+    [t('transfer.receipt.method'), data.method],
+    [t('transfer.receipt.currency'), data.currency],
+    [t('transfer.receipt.amount'), data.amount],
+    [t('transfer.receipt.fee'), data.fee],
+    [t('transfer.receipt.processingTime'), data.processingTime],
+    [t('transfer.receipt.status'), t('transfer.receipt.statusDone'), true],
   ];
 
   return (
     <>
       <TopBar
-        title="송금 확인증"
+        title={t('transfer.receipt.title')}
         onBack={() => navigate(-1)}
         rightAction={
-          <button className={styles.iconBtn} aria-label="더보기">
+          <button className={styles.iconBtn} aria-label={t('transfer.receipt.more')}>
             ⋯
           </button>
         }
@@ -59,8 +62,8 @@ export default function TransferReceiptPage() {
       <div className={styles.receipt}>
         <div className={styles.receiptHead}>
           <div className={styles.stamp}>✓</div>
-          <div className={styles.receiptTitle}>송금 완료 확인증</div>
-          <div className={styles.receiptSub}>Global Bridge 전자지갑 송금 내역</div>
+          <div className={styles.receiptTitle}>{t('transfer.receipt.receiptTitle')}</div>
+          <div className={styles.receiptSub}>{t('transfer.receipt.receiptSub')}</div>
         </div>
 
         {rows.map(([label, value, isBlue]) => (
@@ -72,24 +75,22 @@ export default function TransferReceiptPage() {
       </div>
 
       <div className={styles.qrCard}>
-        <div className={styles.qr} aria-label="QR 코드" />
+        <div className={styles.qr} aria-label={t('transfer.receipt.qrAria')} />
         <div className={styles.qrInfo}>
-          <div className={styles.qrTitle}>확인용 QR</div>
-          <div className={styles.qrDesc}>
-            송금 확인증 진위 확인 또는 공유 시 사용할 수 있습니다.
-          </div>
+          <div className={styles.qrTitle}>{t('transfer.receipt.qrTitle')}</div>
+          <div className={styles.qrDesc}>{t('transfer.receipt.qrDesc')}</div>
         </div>
       </div>
 
       <div className={styles.btnCol}>
         <button type="button" className={styles.primaryBtn}>
-          이미지로 저장하기
+          {t('transfer.receipt.saveImage')}
         </button>
         <button type="button" className={styles.secondaryBtn}>
-          PDF로 저장하기
+          {t('transfer.receipt.savePdf')}
         </button>
         <button type="button" className={styles.ghostBtn} onClick={() => navigate('/')}>
-          홈으로 돌아가기
+          {t('transfer.receipt.goHome')}
         </button>
       </div>
     </>

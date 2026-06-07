@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { useMyAccounts } from '@/hooks/useMyAccounts';
@@ -21,6 +22,7 @@ function recentKey(acc: RecentRemittanceAccountItem): string {
 
 export default function TransferBankPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data, isLoading, error } = useMyAccounts();
   const accounts = data?.accounts ?? [];
 
@@ -49,7 +51,7 @@ export default function TransferBankPage() {
     if (selected.kind === 'my') {
       const a = selected.account;
       return {
-        recipientName: '내 계좌',
+        recipientName: t('transfer.bank.myAccount'),
         recipientInitial: a.bank_name?.[0] ?? '',
         recipientMeta: `${a.bank_name} ${a.account_number_masked}`,
         recipientKind: 'account' as const,
@@ -71,35 +73,35 @@ export default function TransferBankPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="타행 송금" onBack={() => navigate('/transfer')} />
+        <TopBar title={t('transfer.bank.title')} onBack={() => navigate('/transfer')} />
 
         {/* ─── 최근 송금한 계좌 (신규 #140) ─── */}
         {!recentHidden && (
           <>
-            <div className={styles.section}>최근 송금한 계좌</div>
+            <div className={styles.section}>{t('transfer.bank.recentSection')}</div>
             <div className={styles.list}>
               {recentLoading && (
                 <div className={styles.item}>
                   <div className={styles.itemMain}>
-                    <div className={styles.itemMeta}>불러오는 중…</div>
+                    <div className={styles.itemMeta}>{t('transfer.bank.loading')}</div>
                   </div>
                 </div>
               )}
               {!recentLoading && recentError && (
                 <div className={styles.emptyState}>
-                  <div className={styles.emptyText}>최근 송금 계좌를 불러오지 못했어요.</div>
+                  <div className={styles.emptyText}>{t('transfer.bank.recentLoadError')}</div>
                   <button
                     type="button"
                     className={styles.registerBtn}
                     onClick={() => refetchRecent()}
                   >
-                    다시 시도
+                    {t('transfer.bank.retry')}
                   </button>
                 </div>
               )}
               {!recentLoading && !recentError && recentAccounts.length === 0 && (
                 <div className={styles.emptyState}>
-                  <div className={styles.emptyText}>최근 송금한 계좌가 없어요.</div>
+                  <div className={styles.emptyText}>{t('transfer.bank.recentEmpty')}</div>
                 </div>
               )}
               {!recentLoading &&
@@ -130,32 +132,32 @@ export default function TransferBankPage() {
         )}
 
         {/* ─── 등록된 내 계좌 (기존 흐름) ─── */}
-        <div className={styles.section}>등록된 내 계좌</div>
+        <div className={styles.section}>{t('transfer.bank.mySection')}</div>
 
         <div className={styles.list}>
           {isLoading && (
             <div className={styles.item}>
               <div className={styles.itemMain}>
-                <div className={styles.itemMeta}>계좌를 불러오는 중…</div>
+                <div className={styles.itemMeta}>{t('transfer.bank.accountsLoading')}</div>
               </div>
             </div>
           )}
           {error && (
             <div className={styles.item}>
               <div className={styles.itemMain}>
-                <div className={styles.itemMeta}>계좌를 불러오지 못했어요.</div>
+                <div className={styles.itemMeta}>{t('transfer.bank.accountsLoadError')}</div>
               </div>
             </div>
           )}
           {!isLoading && !error && accounts.length === 0 && (
             <div className={styles.emptyState}>
-              <div className={styles.emptyText}>등록된 계좌가 없어요.</div>
+              <div className={styles.emptyText}>{t('transfer.bank.myEmpty')}</div>
               <button
                 type="button"
                 className={styles.registerBtn}
                 onClick={() => navigate('/charge/add-account')}
               >
-                계좌 등록하기
+                {t('transfer.bank.registerAccount')}
               </button>
             </div>
           )}
@@ -173,7 +175,7 @@ export default function TransferBankPage() {
                   <div className={styles.itemTitle}>{acc.bank_name}</div>
                   <div className={styles.itemMeta}>
                     {acc.account_number_masked}
-                    {acc.is_primary ? ' · 주 계좌' : ''}
+                    {acc.is_primary ? ` · ${t('transfer.bank.primaryBadge')}` : ''}
                   </div>
                 </div>
                 {isSelected && <span className={styles.checkMark}>✓</span>}
@@ -187,8 +189,8 @@ export default function TransferBankPage() {
               onClick={() => navigate('/charge/add-account')}
             >
               <div className={styles.itemMain}>
-                <div className={styles.itemTitle}>계좌 추가</div>
-                <div className={styles.itemMeta}>내 계좌를 새로 등록합니다</div>
+                <div className={styles.itemTitle}>{t('transfer.bank.addAccount')}</div>
+                <div className={styles.itemMeta}>{t('transfer.bank.addAccountDesc')}</div>
               </div>
               <span className={styles.addIcon}>＋</span>
             </button>
@@ -197,7 +199,7 @@ export default function TransferBankPage() {
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="transfer-amount">
-            송금할 금액
+            {t('transfer.bank.amountLabel')}
           </label>
           <input
             id="transfer-amount"
@@ -222,7 +224,7 @@ export default function TransferBankPage() {
             navigate('/transfer/confirm', { state });
           }}
         >
-          다음
+          {t('transfer.bank.next')}
         </button>
       </div>
     </>

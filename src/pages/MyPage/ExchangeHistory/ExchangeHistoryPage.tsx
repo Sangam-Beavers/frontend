@@ -14,6 +14,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ApiException, type ExchangeResponse } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { useExchangeHistory } from '@/hooks/useExchangeHistory';
@@ -59,6 +60,7 @@ function formatDateTime(iso: string): string {
 }
 
 export default function ExchangeHistoryPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<ExchangeResponse | null>(null);
   const { data, isLoading, isFetching, error } = useExchangeHistory(page, PAGE_SIZE);
@@ -79,23 +81,23 @@ export default function ExchangeHistoryPage() {
 
   const errorMessage =
     error instanceof ApiException
-      ? error.message || '환전 내역을 불러오지 못했습니다.'
+      ? error.message || t('mypage2.exchangeHistory.loadError')
       : error
-        ? '환전 내역을 불러오지 못했습니다.'
+        ? t('mypage2.exchangeHistory.loadError')
         : null;
 
   return (
     <>
-      <TopBar title="환전 내역" />
+      <TopBar title={t('mypage2.exchangeHistory.title')} />
 
       {isLoading ? (
-        <div className={styles.stateCard}>불러오는 중...</div>
+        <div className={styles.stateCard}>{t('mypage2.exchangeHistory.loading')}</div>
       ) : errorMessage ? (
         <div className={styles.stateCard} role="alert">
           {errorMessage}
         </div>
       ) : items.length === 0 ? (
-        <div className={styles.stateCard}>환전 내역이 없습니다.</div>
+        <div className={styles.stateCard}>{t('mypage2.exchangeHistory.empty')}</div>
       ) : (
         <>
           <div className={styles.list}>
@@ -104,8 +106,10 @@ export default function ExchangeHistoryPage() {
               const meta = `${formatAmount(tx.from_currency_code, tx.amount)} → ${formatAmount(
                 tx.to_currency_code,
                 tx.receive_amount
-              )} · 환율 ${Number(tx.exchange_rate).toLocaleString()}${
-                tx.exchange_type === 'RE_EXCHANGE' ? ' · 재환전' : ''
+              )} · ${t('mypage2.exchangeHistory.rate')} ${Number(tx.exchange_rate).toLocaleString()}${
+                tx.exchange_type === 'RE_EXCHANGE'
+                  ? ` · ${t('mypage2.exchangeHistory.reExchange')}`
+                  : ''
               }`;
               return (
                 <button
@@ -132,10 +136,14 @@ export default function ExchangeHistoryPage() {
                 disabled={page === 0 || isFetching}
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
               >
-                이전
+                {t('mypage2.exchangeHistory.prev')}
               </button>
               <span className={styles.pageInfo}>
-                {page + 1} / {totalPages} (총 {totalElements}건)
+                {t('mypage2.exchangeHistory.pageInfo', {
+                  current: page + 1,
+                  total: totalPages,
+                  count: totalElements,
+                })}
               </span>
               <button
                 type="button"
@@ -143,7 +151,7 @@ export default function ExchangeHistoryPage() {
                 disabled={page >= totalPages - 1 || isFetching}
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               >
-                다음
+                {t('mypage2.exchangeHistory.next')}
               </button>
             </div>
           )}
@@ -157,54 +165,56 @@ export default function ExchangeHistoryPage() {
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-label="환전 상세"
+            aria-label={t('mypage2.exchangeHistory.detailTitle')}
           >
             <div className={styles.modalHeader}>
               <span className={styles.modalTitle}>
-                {selected.exchange_type === 'RE_EXCHANGE' ? '재환전 상세' : '환전 상세'}
+                {selected.exchange_type === 'RE_EXCHANGE'
+                  ? t('mypage2.exchangeHistory.reExchangeDetailTitle')
+                  : t('mypage2.exchangeHistory.detailTitle')}
               </span>
               <button
                 type="button"
                 className={styles.modalClose}
                 onClick={() => setSelected(null)}
-                aria-label="닫기"
+                aria-label={t('mypage2.exchangeHistory.close')}
               >
                 ×
               </button>
             </div>
             <div className={styles.modalBody}>
               <div className={styles.modalRow}>
-                <span>출금</span>
+                <span>{t('mypage2.exchangeHistory.withdrawal')}</span>
                 <b>
                   {formatAmount(selected.from_currency_code, selected.amount)}{' '}
                   {selected.from_currency_code}
                 </b>
               </div>
               <div className={styles.modalRow}>
-                <span>입금</span>
+                <span>{t('mypage2.exchangeHistory.deposit')}</span>
                 <b>
                   {formatAmount(selected.to_currency_code, selected.receive_amount)}{' '}
                   {selected.to_currency_code}
                 </b>
               </div>
               <div className={styles.modalRow}>
-                <span>적용 환율</span>
+                <span>{t('mypage2.exchangeHistory.appliedRate')}</span>
                 <b>1 = ₩{Number(selected.exchange_rate).toLocaleString()}</b>
               </div>
               <div className={styles.modalRow}>
-                <span>수수료</span>
+                <span>{t('mypage2.exchangeHistory.fee')}</span>
                 <b>₩{Number(selected.fee).toLocaleString()}</b>
               </div>
               <div className={styles.modalRow}>
-                <span>상태</span>
+                <span>{t('mypage2.exchangeHistory.status')}</span>
                 <b>{selected.status}</b>
               </div>
               <div className={styles.modalRow}>
-                <span>일시</span>
+                <span>{t('mypage2.exchangeHistory.dateTime')}</span>
                 <b>{formatDateTime(selected.exchanged_at)}</b>
               </div>
               <div className={styles.modalIdRow}>
-                <span>거래 ID</span>
+                <span>{t('mypage2.exchangeHistory.txId')}</span>
                 <code className={styles.modalId}>{selected.public_id}</code>
               </div>
             </div>

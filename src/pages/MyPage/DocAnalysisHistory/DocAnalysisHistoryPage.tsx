@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { useDocuments } from '@/hooks/useDocuments';
@@ -8,6 +9,7 @@ import styles from './DocAnalysisHistoryPage.module.css';
 const FREE_VISIBLE_COUNT = 3;
 
 export default function DocAnalysisHistoryPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   // document_submissions + document_results join 목록 (최근순).
   // 실패(FAILED) 내역은 서버 status 필터(api-spec §4)로 숨기고 최근 3건만 노출.
@@ -20,34 +22,32 @@ export default function DocAnalysisHistoryPage() {
 
   return (
     <>
-      <TopBar title="문서 분석 내역" />
+      <TopBar title={t('mypage2.docHistory.title')} />
 
       <div className={styles.card}>
-        <div className={styles.cardTitle}>무료 사용자는 최근 3개까지</div>
-        <div className={styles.cardText}>구독하면 최대 10개까지 볼 수 있습니다.</div>
+        <div className={styles.cardTitle}>{t('mypage2.docHistory.cardTitle')}</div>
+        <div className={styles.cardText}>{t('mypage2.docHistory.cardText')}</div>
       </div>
 
       <div className={styles.list}>
         {isPending && (
           <div className={styles.item}>
             <div className={styles.itemMain}>
-              <div className={styles.itemMeta}>내역을 불러오는 중…</div>
+              <div className={styles.itemMeta}>{t('mypage2.docHistory.loading')}</div>
             </div>
           </div>
         )}
         {error && (
           <div className={styles.item} role="alert">
             <div className={styles.itemMain}>
-              <div className={styles.itemMeta}>
-                내역을 불러오지 못했어요. 잠시 후 다시 시도해주세요.
-              </div>
+              <div className={styles.itemMeta}>{t('mypage2.docHistory.loadError')}</div>
             </div>
           </div>
         )}
         {!isPending && !error && entries.length === 0 && (
           <div className={styles.item}>
             <div className={styles.itemMain}>
-              <div className={styles.itemMeta}>아직 분석한 문서가 없어요.</div>
+              <div className={styles.itemMeta}>{t('mypage2.docHistory.empty')}</div>
             </div>
           </div>
         )}
@@ -72,7 +72,7 @@ export default function DocAnalysisHistoryPage() {
                   {entry.file_name} · {docStatusLabel(entry)} · {docDateLabel(entry.created_at)}
                 </div>
               </div>
-              {completed && <span className={styles.pill}>보기</span>}
+              {completed && <span className={styles.pill}>{t('mypage2.docHistory.view')}</span>}
             </button>
           );
         })}
@@ -83,7 +83,7 @@ export default function DocAnalysisHistoryPage() {
         className={styles.primary}
         onClick={() => navigate('/doc-analysis/payment')}
       >
-        구독하기
+        {t('mypage2.docHistory.subscribe')}
       </button>
     </>
   );

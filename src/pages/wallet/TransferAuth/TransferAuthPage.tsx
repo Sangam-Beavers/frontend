@@ -12,6 +12,7 @@
 
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ApiException, walletApi } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { ROUTES } from '@/constants/routes';
@@ -34,6 +35,7 @@ const FALLBACK: AuthState = {
 
 export default function TransferAuthPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const location = useLocation();
   const state = (location.state as AuthState) ?? FALLBACK;
   const [pin, setPin] = useState('');
@@ -65,17 +67,17 @@ export default function TransferAuthPage() {
         }
         if (e.code === 'TRANSFER4007') {
           // 불일치 — 백엔드 메시지에 남은 횟수 안내가 있으면 그대로 보여준다
-          setError(e.message || 'PIN이 일치하지 않습니다. 다시 입력해주세요.');
+          setError(e.message || t('transfer.auth.errorPinMismatch'));
           setPin('');
         } else if (e.code === 'TRANSFER4008') {
-          setError(e.message || 'PIN을 5회 잘못 입력했습니다. 10분 후 다시 시도해주세요.');
+          setError(e.message || t('transfer.auth.errorPinLocked'));
         } else if (e.code === 'NETWORK_ERROR') {
-          setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+          setError(t('transfer.auth.errorNetwork'));
         } else {
-          setError(e.message || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+          setError(e.message || t('transfer.auth.errorRequest'));
         }
       } else {
-        setError('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        setError(t('transfer.auth.errorRequest'));
       }
     } finally {
       setVerifying(false);
@@ -85,16 +87,16 @@ export default function TransferAuthPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="송금 PIN 확인" onBack={() => navigate(-1)} />
+        <TopBar title={t('transfer.auth.title')} onBack={() => navigate(-1)} />
 
         <div className={`${styles.card} ${styles.cardWarn}`}>
-          <div className={styles.cardTitle}>송금 전 이중 인증</div>
-          <div className={styles.cardText}>안전한 거래를 위해 송금 PIN 6자리를 입력해주세요.</div>
+          <div className={styles.cardTitle}>{t('transfer.auth.warningTitle')}</div>
+          <div className={styles.cardText}>{t('transfer.auth.warningText')}</div>
         </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="auth-pin">
-            송금 PIN (숫자 6자리)
+            {t('transfer.auth.pinLabel')}
           </label>
           <input
             id="auth-pin"
@@ -103,7 +105,7 @@ export default function TransferAuthPage() {
             autoComplete="off"
             maxLength={6}
             className={styles.input}
-            placeholder="6자리 숫자"
+            placeholder={t('transfer.auth.pinPlaceholder')}
             value={pin}
             onChange={(e) => setPin(sanitizePinInput(e.target.value))}
           />
@@ -117,17 +119,17 @@ export default function TransferAuthPage() {
 
         <div className={styles.card}>
           <div className={styles.row}>
-            <span>받는 사람</span>
+            <span>{t('transfer.auth.recipient')}</span>
             <b>{state.recipientName}</b>
           </div>
           {state.recipientMeta && (
             <div className={styles.row}>
-              <span>받는 계좌</span>
+              <span>{t('transfer.auth.recipientAccount')}</span>
               <b>{state.recipientMeta}</b>
             </div>
           )}
           <div className={styles.row}>
-            <span>송금 금액</span>
+            <span>{t('transfer.auth.amount')}</span>
             <b>
               {state.currency} {state.amount}
             </b>
@@ -142,10 +144,10 @@ export default function TransferAuthPage() {
           disabled={pin.length !== 6 || verifying}
           onClick={handleVerify}
         >
-          {verifying ? '확인 중...' : '인증 후 송금하기'}
+          {verifying ? t('transfer.auth.verifying') : t('transfer.auth.submit')}
         </button>
         <button type="button" className={styles.ghostBtn} onClick={() => navigate(-1)}>
-          이전으로 돌아가기
+          {t('transfer.auth.back')}
         </button>
       </div>
     </>

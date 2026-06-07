@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import { ROUTES } from '@/constants/routes';
 import { balanceOf, useBalances } from '@/hooks/useBalances';
@@ -10,6 +11,11 @@ import { HOME_ALL_CURRENCIES_MOCK, HOME_NOTIFICATIONS_MOCK } from '@/mocks/homeM
 import type { CurrencyOption } from '@/types/home';
 import styles from './HomePage.module.css';
 
+// 알림 카드는 mock 데이터지만 표시 라벨은 i18n 키로 매핑한다(이슈 #153).
+const NOTIFICATION_KEYS: Record<string, { titleKey: string; descKey: string }> = {
+  fraud: { titleKey: 'home.notifications.fraudTitle', descKey: 'home.notifications.fraudDesc' },
+  legal: { titleKey: 'home.notifications.legalTitle', descKey: 'home.notifications.legalDesc' },
+};
 const NOTIFICATIONS = HOME_NOTIFICATIONS_MOCK.result;
 const STORAGE_KEY = 'homeCurrencies';
 
@@ -51,6 +57,7 @@ function loadCurrencies(): CurrencyOption[] {
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [currencies, setCurrencies] = useState<CurrencyOption[]>(loadCurrencies);
   const { data: balances, isLoading: balancesLoading, error: balancesError } = useBalances();
   // 이슈 #108 — 신분증 미인증 사용자는 전자지갑 카드 자체를 잠그고 인증 안내로 교체한다.
@@ -73,16 +80,19 @@ export default function HomePage() {
       : balanceOf(balances, 'KRW');
   const mainAmount = balancesLoading ? '—' : formatBalance('KRW', krwBalance);
 
+  // 현재 언어 코드 (i18n 기준). 헤더의 언어 셀렉터에 표시.
+  const currentLangCode = (i18n.language || 'ko').toUpperCase().slice(0, 2);
+
   return (
     <>
       <header className={styles.header}>
         <div className={styles.brand}>
           <div className={styles.logoBox} />
-          Global Bridge
+          {t('home.appName')}
         </div>
         <div className={styles.headerActions}>
           <button className={styles.langBtn} onClick={() => navigate('/mypage/language')}>
-            🌐 KO ▾
+            🌐 {currentLangCode} ▾
           </button>
           <button className={styles.iconBtn} onClick={() => navigate('/mypage')}>
             👤
@@ -93,16 +103,18 @@ export default function HomePage() {
       {isVerified ? (
         <div className={styles.wallet}>
           <div className={styles.walletRow}>
-            <span>전자지갑</span>
-            <span>메인 통화 KRW · 변경</span>
+            <span>{t('home.wallet')}</span>
+            <span>
+              {t('home.mainCurrency')} KRW · {t('home.change')}
+            </span>
           </div>
           <div className={styles.amount}>{mainAmount}</div>
           <div
             className={styles.walletRowClickable}
             onClick={() => navigate('/home/currency-settings')}
           >
-            <span>선택 표시 통화 {currencies.length}개</span>
-            <span>설정 ›</span>
+            <span>{t('home.showingNCurrencies', { count: currencies.length })}</span>
+            <span>{t('home.settings')} ›</span>
           </div>
           <div className={styles.currencyGrid}>
             {currencies.map((currency) => {
@@ -119,36 +131,33 @@ export default function HomePage() {
           </div>
           <div className={styles.walletActions}>
             <button className={styles.walletBtn} onClick={() => navigate('/charge')}>
-              가져오기
+              {t('home.import')}
             </button>
             <button className={styles.walletBtn} onClick={() => navigate('/transfer')}>
-              보내기
+              {t('home.send')}
             </button>
             <button className={styles.walletBtn} onClick={() => navigate('/exchange')}>
-              환전하기
+              {t('home.exchange')}
             </button>
           </div>
-          <p className={styles.walletFooter}>Global Bridge 전자지갑</p>
+          <p className={styles.walletFooter}>{t('home.walletSubtitle')}</p>
         </div>
       ) : (
         // 이슈 #108 — 신분증 미인증 사용자: 전자지갑 카드를 인증 안내로 교체.
         // 환율 위젯·문서분석 등 비금융 기능은 그대로 사용 가능.
         <div className={styles.wallet}>
           <div className={styles.walletRow}>
-            <span>전자지갑</span>
-            <span>잠금</span>
+            <span>{t('home.wallet')}</span>
+            <span>{t('home.locked')}</span>
           </div>
-          <div className={styles.lockedTitle}>신분증을 인증해주세요</div>
-          <p className={styles.lockedText}>
-            전자지갑 사용을 위해 신분증 본인 인증이 필요해요. 인증을 완료하면 충전·송금·환전을 바로
-            시작할 수 있습니다.
-          </p>
+          <div className={styles.lockedTitle}>{t('home.lockedTitle')}</div>
+          <p className={styles.lockedText}>{t('home.lockedBody')}</p>
           <div className={styles.lockedActions}>
             <button className={styles.walletBtn} onClick={() => navigate(ROUTES.MYPAGE_BADGE)}>
-              신분증 인증하기
+              {t('home.lockedCta')}
             </button>
           </div>
-          <p className={styles.walletFooter}>Global Bridge 전자지갑</p>
+          <p className={styles.walletFooter}>{t('home.walletSubtitle')}</p>
         </div>
       )}
 
@@ -156,9 +165,9 @@ export default function HomePage() {
           이슈 #108 — 미인증이면 마스킹(가드된 영역이라도 표시 가짜값 방지).
           인증 후엔 실 API 값 표시: 로딩 중 '—' / WALLET4001(지갑 없음) 시 ₩0 fallback. */}
       <div className={styles.card}>
-        <div className={styles.cardTitle}>지금 나의 원화</div>
+        <div className={styles.cardTitle}>{t('home.myKrwTitle')}</div>
         <div className={styles.cardText}>
-          {isVerified ? '모든 통화를 현재 환율로 바꾸면' : '인증 후 표시됩니다'}
+          {isVerified ? t('home.myKrwSub') : t('home.unverifiedHint')}
         </div>
         <div className={styles.totalAmount}>
           {!isVerified
@@ -174,19 +183,19 @@ export default function HomePage() {
       {/* 실시간 환율 (GET /wallets/exchange-rates) — KRW 기준 "1 외화→KRW" + 등락률.
           로딩 중 빈 자리, dev 환경은 Mock 고정값이라 등락률 0으로 내려옴. */}
       <div className={styles.section}>
-        실시간 환율
+        {t('home.ratesTitle')}
         <span
           className={styles.pill}
           onClick={() => navigate('/exchange/rates')}
           style={{ cursor: 'pointer' }}
         >
-          전체보기
+          {t('home.ratesViewAll')}
         </span>
       </div>
       <div className={styles.scrollRow}>
         {ratesLoading ? (
           <div className={styles.rateCard}>
-            <span className={styles.rateLabel}>불러오는 중...</span>
+            <span className={styles.rateLabel}>{t('home.ratesLoading')}</span>
           </div>
         ) : (
           (ratesData?.rates ?? []).map((rate) => {
@@ -204,7 +213,11 @@ export default function HomePage() {
                 style={{ cursor: 'pointer' }}
               >
                 <span className={styles.rateLabel}>
-                  {rate.currency_name} {rate.currency_code}
+                  {/* 통화명은 i18n으로 매핑(이슈 #153). 매핑 없으면 백엔드 응답값 fallback. */}
+                  {t(`home.currencies.${rate.currency_code}`, {
+                    defaultValue: rate.currency_name,
+                  })}{' '}
+                  {rate.currency_code}
                 </span>
                 <b className={styles.rateValue}>{rateLabel}</b>
                 <span className={`${styles.rateChange} ${isUp ? styles.rateUp : styles.rateDown}`}>
@@ -216,21 +229,30 @@ export default function HomePage() {
         )}
       </div>
 
-      <div className={styles.section}>알림</div>
+      <div className={styles.section}>{t('home.alerts')}</div>
       <div className={styles.scrollRow}>
-        {NOTIFICATIONS.map((notif) => (
-          <div
-            key={notif.id}
-            className={`${styles.card} ${styles.notifCard}`}
-            onClick={() =>
-              navigate(notif.id === 'legal' ? '/doc-analysis' : '/mypage/wallet-history')
-            }
-            style={{ cursor: 'pointer' }}
-          >
-            <div className={styles.cardTitle}>{notif.title}</div>
-            <div className={styles.cardText}>{notif.description}</div>
-          </div>
-        ))}
+        {NOTIFICATIONS.map((notif) => {
+          // 알림 mock의 title/description은 한국어 — i18n 키로 매핑(이슈 #153).
+          // 매핑 없으면 mock 원본을 fallback으로 표시.
+          const keyMap = NOTIFICATION_KEYS[notif.id];
+          const title = keyMap ? t(keyMap.titleKey, { defaultValue: notif.title }) : notif.title;
+          const description = keyMap
+            ? t(keyMap.descKey, { defaultValue: notif.description })
+            : notif.description;
+          return (
+            <div
+              key={notif.id}
+              className={`${styles.card} ${styles.notifCard}`}
+              onClick={() =>
+                navigate(notif.id === 'legal' ? '/doc-analysis' : '/mypage/wallet-history')
+              }
+              style={{ cursor: 'pointer' }}
+            >
+              <div className={styles.cardTitle}>{title}</div>
+              <div className={styles.cardText}>{description}</div>
+            </div>
+          );
+        })}
       </div>
     </>
   );

@@ -10,11 +10,13 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 import { ApiException, memberApi } from '@/api';
 import { ROUTES } from '@/constants/routes';
 
 function PasswordRecovery() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
@@ -28,7 +30,7 @@ function PasswordRecovery() {
     // 앞뒤 공백 제거한 값을 검증·전송에 모두 사용한다(공백 포함 원본을 보내면 서버 @Email 검증에 걸림).
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
-      setError('이메일을 입력해주세요.');
+      setError(t('auth.passwordRecovery.errorEmailRequired'));
       return;
     }
 
@@ -43,7 +45,7 @@ function PasswordRecovery() {
         // COMMON4001 = 이메일 형식 오류 등
         setError(e.message);
       } else {
-        setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        setError(t('auth.passwordRecovery.errorNetwork'));
       }
     } finally {
       setSending(false);
@@ -59,45 +61,43 @@ function PasswordRecovery() {
               type="button"
               className="auth-icon"
               onClick={() => navigate(-1)}
-              aria-label="뒤로 가기"
+              aria-label={t('auth.passwordRecovery.backButton')}
             >
               ‹
             </button>
-            <div className="auth-title">비밀번호 찾기</div>
+            <div className="auth-title">{t('auth.passwordRecovery.title')}</div>
             <div className="auth-icon empty" aria-hidden />
           </div>
 
           <div className="auth-card info">
-            <div className="auth-card-title">이메일로 재설정</div>
-            <div className="auth-card-text">
-              가입한 이메일 주소를 입력하면 비밀번호 재설정 링크를 보내드립니다.
-            </div>
+            <div className="auth-card-title">{t('auth.passwordRecovery.infoTitle')}</div>
+            <div className="auth-card-text">{t('auth.passwordRecovery.infoDescription')}</div>
           </div>
 
           <form onSubmit={handleSubmit}>
             <div className="auth-field">
-              <label htmlFor="recovery-email">이메일</label>
+              <label htmlFor="recovery-email">{t('auth.passwordRecovery.emailLabel')}</label>
               <input
                 id="recovery-email"
                 type="email"
                 className="auth-input"
-                placeholder="email@example.com"
+                placeholder={t('auth.passwordRecovery.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
             <button type="submit" className="auth-primary" disabled={sending}>
-              {sending ? '전송 중...' : '재설정 링크 보내기'}
+              {sending
+                ? t('auth.passwordRecovery.sending')
+                : t('auth.passwordRecovery.submitButton')}
             </button>
           </form>
 
           {sent && (
             <div className="auth-card ok">
-              <div className="auth-card-title">이메일을 확인해주세요</div>
-              <div className="auth-card-text">
-                비밀번호 재설정 링크가 발송되었습니다. 링크는 30분간 유효합니다.
-              </div>
+              <div className="auth-card-title">{t('auth.passwordRecovery.sentTitle')}</div>
+              <div className="auth-card-text">{t('auth.passwordRecovery.sentDescription')}</div>
             </div>
           )}
 
@@ -108,7 +108,7 @@ function PasswordRecovery() {
           )}
 
           <button type="button" className="auth-ghost" onClick={() => navigate(ROUTES.LOGIN)}>
-            로그인 화면으로 돌아가기
+            {t('auth.passwordRecovery.backToLogin')}
           </button>
         </div>
       </div>
