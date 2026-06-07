@@ -403,6 +403,30 @@ export interface RecentRemittanceAccountsResponse {
   accounts: RecentRemittanceAccountItem[];
 }
 
+/** 송금 종류 — 백엔드 TransactionType enum과 일치. */
+export type TransferKind = 'INTERNAL_TRANSFER' | 'REMITTANCE';
+
+/** 송금 수수료 조회 요청 (POST /transfers/fee). */
+export interface TransferFeeRequest {
+  /** 송금 방식 — INTERNAL_TRANSFER(앱 내, 수수료 0) / REMITTANCE(타행, amount × 0.5%). */
+  transfer_type: TransferKind;
+  /** 송금 통화 코드 (KRW/USD/PHP/VND). */
+  currency_code: string;
+  /** 송금 금액 (string 십진수, 정수 ≤14자리·소수 ≤4자리, 양수). 예: "10000.0000". */
+  amount: string;
+}
+
+/** 송금 수수료 조회 응답 (백엔드 TransferFeeResponse).
+ *  금액은 모두 소수 4자리 string. */
+export interface TransferFeeResponse {
+  /** 수수료. INTERNAL은 "0.0000". */
+  fee: string;
+  /** 수수료 통화 (송금 통화와 동일). */
+  fee_currency_code: string;
+  /** 총 출금 금액 = amount + fee. */
+  total_deduct_amount: string;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -665,6 +689,18 @@ export const walletApi = {
     apiClient.get<unknown, RecentRemittanceAccountsResponse>('/transfers/recent-accounts', {
       params: size !== undefined ? { size } : undefined,
     }),
+
+  /**
+   * 송금 수수료 조회 (200) — TransferConfirm 화면 수수료 표시용.
+   *
+   * <p>입력(송금 종류·통화·금액)으로 수수료를 계산해 반환. DB·외부 호출 없는 순수 계산.
+   * 정책: INTERNAL_TRANSFER=0, REMITTANCE=amount × 0.5% (HALF_UP 4자리).
+   *
+   * <p>에러: COMMON4001(400, body 검증 — 음수/형식) / TRANSFER4002(400, 미지원 통화)
+   * / TRANSFER4003(400, 미지원 송금 유형) / AUTH4011(401, interceptor 처리).
+   */
+  getTransferFee: (body: TransferFeeRequest) =>
+    apiClient.post<unknown, TransferFeeResponse>('/transfers/fee', body),
 
   /**
    * 내 거래내역 목록 조회 (200) — 본인이 송신자 또는 수신자인 전 유형 거래를 최근순으로 페이지 조회.
