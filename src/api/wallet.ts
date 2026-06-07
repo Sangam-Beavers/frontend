@@ -380,22 +380,39 @@ export interface ValidateMemberResponse {
 export type TransferTypeCode = 'INTERNAL_TRANSFER' | 'REMITTANCE';
 
 /**
- * 정기 송금 대상 유효성 검증 요청 (POST /transfers/scheduled/validate).
+ * 정기 송금 공통 필드 — discriminated union의 base.
  *
- * INTERNAL_TRANSFER는 receiver_public_id 필수, REMITTANCE는 bank_account_public_id 필수.
  * 1·2단계는 same-currency 강제 — currency_code !== receive_currency_code면 is_valid=false + reason.
  */
-export interface ValidateScheduledRequest {
-  transfer_type: TransferTypeCode;
-  /** INTERNAL_TRANSFER 필수 — 수신자 회원 UUID. */
-  receiver_public_id?: string;
-  /** REMITTANCE 필수 — 수신 은행 계좌 UUID. */
-  bank_account_public_id?: string;
+interface ScheduledTransferCommonFields {
   /** 회차당 송금액 — string 십진수, 양수. */
   amount: string;
   currency_code: string;
   receive_currency_code: string;
 }
+
+/**
+ * 정기 송금 대상 유효성 검증 요청 (POST /transfers/scheduled/validate).
+ *
+ * transfer_type별로 필수 식별자가 다른 점을 타입으로 강제 (CodeRabbit 리뷰 반영):
+ * - INTERNAL_TRANSFER → receiver_public_id 필수, bank_account_public_id 금지
+ * - REMITTANCE        → bank_account_public_id 필수, receiver_public_id 금지
+ *
+ * 잘못된 조합이 컴파일 단계에서 차단되므로 호출부 런타임 400(COMMON4001)을 사전 방지한다.
+ */
+export type ValidateScheduledRequest =
+  | ({
+      transfer_type: 'INTERNAL_TRANSFER';
+      /** INTERNAL_TRANSFER 필수 — 수신자 회원 UUID. */
+      receiver_public_id: string;
+      bank_account_public_id?: never;
+    } & ScheduledTransferCommonFields)
+  | ({
+      transfer_type: 'REMITTANCE';
+      /** REMITTANCE 필수 — 수신 은행 계좌 UUID. */
+      bank_account_public_id: string;
+      receiver_public_id?: never;
+    } & ScheduledTransferCommonFields);
 
 /** 검증 결과 — 통과 여부 + 미통과 사유(통과면 null). */
 export interface ValidateScheduledResponse {
@@ -403,15 +420,19 @@ export interface ValidateScheduledResponse {
   reason: string | null;
 }
 
-/** 정기 송금 반복 주기 + 실행일 의미 — MONTHLY는 1~31, WEEKLY는 1(월)~7(일) ISO. */
-export interface CreateScheduledTransferRequest extends ValidateScheduledRequest {
+/**
+ * 정기 송금 설정 요청 (POST /transfers/scheduled).
+ * ValidateScheduledRequest의 union을 보존하면서 빈도/일자/메모를 더한다.
+ * MONTHLY는 1~31, WEEKLY는 1(월)~7(일) ISO.
+ */
+export type CreateScheduledTransferRequest = ValidateScheduledRequest & {
   /** 반복 주기 (WEEKLY / MONTHLY). */
   frequency: ScheduledTransferFrequency;
   /** 실행 기준일 (MONTHLY=1~31, WEEKLY=1~7 ISO). */
   schedule_day: number;
   /** 메모(선택, 최대 255자). */
   memo?: string | null;
-}
+};
 
 /** 정기 송금 설정 응답 (201) — 등록된 정기 송금 한 건의 스냅샷. */
 export interface ScheduledTransferResponse {

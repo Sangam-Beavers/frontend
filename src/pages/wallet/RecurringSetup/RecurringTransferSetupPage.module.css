@@ -232,6 +232,8 @@
 .recentCard {
   min-width: 100px;
   flex-shrink: 0;
+  appearance: none;
+  font-family: inherit;
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 14px 10px;
@@ -243,6 +245,14 @@
 }
 .recentCard:active {
   background: var(--soft);
+}
+
+/* 키보드 접근성 — :focus-visible로 마우스 사용자 영향 없이 키보드 포커스만 강조 (CodeRabbit). */
+.recentCard:focus-visible,
+.inputAction:focus-visible,
+.retryBtn:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 /* 큰 아바타 (최근 송금 칩 + 검증 카드) — 기존 .avatar (32px)와 별도 */

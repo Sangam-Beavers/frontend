@@ -237,14 +237,15 @@ export default function RecurringTransferSetupPage() {
       ) : (
         <div className={styles.scrollRow}>
           {recentRecipients.map((user) => (
-            <div
+            <button
               key={user.identifier}
+              type="button"
               className={styles.recentCard}
               onClick={() => handleRecentSelect(user)}
             >
               <div className={`${styles.avatarBig} ${AVATAR_CLASS[user.tone]}`}>{user.initial}</div>
               <div className={styles.recentName}>{user.name}</div>
-            </div>
+            </button>
           ))}
         </div>
       )}
