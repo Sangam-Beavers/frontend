@@ -117,6 +117,21 @@ export interface ProfileResponse {
   created_at: string;
 }
 
+/**
+ * PATCH /api/v1/members/me 요청 body (백엔드 ProfileUpdateRequest — api-spec §9).
+ *
+ * 모든 필드 필수(@NotBlank) — 닉네임/언어 빈 값은 400 COMMON4001. 자기소개(bio)만 선택값(빈 문자열 가능).
+ * 부분 수정 의미라도 클라가 변경 안 한 필드는 현재 값을 그대로 다시 보내야 한다(백엔드 SSOT).
+ */
+export interface ProfileUpdateBody {
+  /** 닉네임 (1~50자, NotBlank). 다른 회원이 사용 중이면 409 MEMBER4003. */
+  nickname: string;
+  /** 주 사용 언어 (BCP 47, 1~10자, 예: "ko" / "vi"). NotBlank. */
+  language: string;
+  /** 자기소개 (최대 200자, nullable). 빈 문자열 또는 미입력 가능. */
+  bio: string | null;
+}
+
 // ---------- API 함수 ----------
 
 export const memberApi = {
@@ -148,6 +163,18 @@ export const memberApi = {
    * 에러: 401 AUTH4011 / 404 MEMBER4001 — 호출 측에서 ApiException으로 처리.
    */
   getMyProfile: () => apiClient.get<unknown, ProfileResponse>('/members/me'),
+
+  /**
+   * 내 프로필 수정 — 마이페이지 프로필 편집 (api-spec §9).
+   *
+   * <p>닉네임/주 사용 언어/자기소개를 수정한다. 닉네임 사전 중복 확인은 {@link checkNickname}으로
+   * 별도 호출; 본 API는 저장 시점에 백엔드가 다시 검증한다(다른 사용자가 그 사이 같은 닉네임을 채갔을 수 있음).
+   *
+   * <p>응답은 갱신된 ProfileResponse — 호출 측은 ['member','me'] 캐시를 invalidate해 화면 동기화.
+   * 에러: 400 COMMON4001 / 401 AUTH4011 / 404 MEMBER4001 / 409 MEMBER4003(닉네임 중복) → ApiException.
+   */
+  updateMyProfile: (body: ProfileUpdateBody) =>
+    apiClient.patch<unknown, ProfileResponse>('/members/me', body),
 
   /**
    * 비밀번호 재설정 메일 요청 (가입 이메일로 토큰 링크 발송).
