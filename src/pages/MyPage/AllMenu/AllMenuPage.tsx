@@ -128,7 +128,7 @@ export default function AllMenuPage() {
             <div>
               <div className={styles.username}>
                 {isLoading ? '불러오는 중…' : nickname || '사용자'}
-                {profile?.is_verified && <span className={styles.badge}>인증</span>}
+                {profile?.is_verified && <span className={styles.verifiedBadge}>인증</span>}
               </div>
               <div className={styles.userMeta}>{languageLabel}</div>
             </div>

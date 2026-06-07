@@ -136,7 +136,7 @@ export default function CommunityPostDetailPage() {
           <div className={styles.authorMain}>
             <div className={styles.authorName}>
               {post.author_nickname}
-              {post.author_is_verified && <span className={styles.pill}>인증</span>}
+              {post.author_is_verified && <span className={styles.verifiedPill}>인증</span>}
             </div>
             <div className={styles.authorMeta}>
               {categoryLabel(post.category)} · {formatCommunityDate(post.created_at)}
@@ -212,7 +212,7 @@ export default function CommunityPostDetailPage() {
             <div className={styles.commentBody}>
               <div className={styles.commentName}>
                 {comment.author_nickname}
-                {comment.author_is_verified && <span className={styles.pill}>인증</span>}
+                {comment.author_is_verified && <span className={styles.verifiedPill}>인증</span>}
               </div>
               <div className={styles.commentText}>{comment.content}</div>
               <div className={styles.commentMeta}>
