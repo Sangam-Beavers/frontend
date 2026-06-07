@@ -132,6 +132,12 @@ export interface ProfileUpdateBody {
   bio: string | null;
 }
 
+/** GET/PATCH /api/v1/members/me/language 응답 본문. */
+export interface LanguageResponse {
+  /** BCP 47 코드 (예: "ko"). */
+  language: string;
+}
+
 // ---------- API 함수 ----------
 
 export const memberApi = {
@@ -194,7 +200,35 @@ export const memberApi = {
   resetPassword: (body: ResetPasswordBody) =>
     apiClient.post<unknown, void>('/auth/password/reset', body),
 
-  // TODO: 다음 사이클 — withdraw, updateLanguage 등
+  /**
+   * 내 주 사용 언어 조회 (200) — BCP 47 코드(소문자, 예: `ko`/`en`/`vi`/`fil`).
+   *
+   * <p>인증 필요. JWT public_id claim으로 본인 식별.
+   * 본 응답값은 "선호 언어 메타데이터"이며 실제 화면 다국어 전환(i18n)은 별도 트랙.
+   * 401 AUTH4011 / 404 MEMBER4001 → ApiException.
+   */
+  getLanguage: () => apiClient.get<unknown, LanguageResponse>('/members/me/language'),
+
+  /**
+   * 내 주 사용 언어 변경 (200) — BCP 47 코드 전송, 변경된 코드 반환.
+   *
+   * <p>프론트는 MVP 4개(`ko`/`en`/`vi`/`fil`) 화이트리스트를 `<select>`로 강제.
+   * 백엔드 DB 컬럼은 VARCHAR(10) 자유문자열(확장 여지). 빈 문자열은 400 COMMON4001.
+   * 401 AUTH4011 / 404 MEMBER4001 → ApiException.
+   */
+  updateLanguage: (language: string) =>
+    apiClient.patch<unknown, LanguageResponse>('/members/me/language', { language }),
+
+  /**
+   * 회원 탈퇴 (200) — 로컬 soft-delete(deleted_at) + IdP(Authentik) 비활성화(방식 B).
+   *
+   * <p>탈퇴 후 호출 측은 로컬 토큰 정리 + Authentik end_session 호출(`startLogout`).
+   * IdP 연동 실패 시 500 COMMON5000(로컬 무변경) → ApiException으로 throw돼
+   * 사용자에게 다시 시도 안내. 인증 누락 401 AUTH4011 / 회원 없음 404 MEMBER4001.
+   */
+  withdraw: () => apiClient.delete<unknown, void>('/members/me'),
+
+  // TODO: 다음 사이클 — 프로필 수정(PATCH /members/me) 등
 };
 
 /**
