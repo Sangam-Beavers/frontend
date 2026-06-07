@@ -43,6 +43,8 @@ export type {
   TransactionHistoryItem,
   TransactionListResponse,
   TransferReceiptResponse,
+  TransferExecuteRequest,
+  TransferExecuteResponse,
   TransferTypeCode,
   ValidateScheduledRequest,
   ValidateScheduledResponse,

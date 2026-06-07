@@ -380,6 +380,67 @@ export interface ValidateMemberResponse {
 export type TransferTypeCode = 'INTERNAL_TRANSFER' | 'REMITTANCE';
 
 /**
+ * 송금 실행 요청 공통 필드 — discriminated union의 base (api-spec §6).
+ *
+ * 1·2단계 same-currency 강제 — currency_code !== receive_currency_code면 TRANSFER4005.
+ * 다통화는 3단계로 이연.
+ */
+interface TransferExecuteCommonFields {
+  /** 송금 금액 — string 십진수, 양수, 정수부 ≤14자리·소수점 ≤4자리. */
+  amount: string;
+  currency_code: string;
+  /** 수취 통화 — 1·2단계는 currency_code와 동일해야 함(다르면 TRANSFER4005). */
+  receive_currency_code: string;
+  /** 메모(선택, 최대 255자). */
+  memo?: string | null;
+}
+
+/**
+ * 송금 실행 요청 (POST /api/v1/transfers).
+ *
+ * transfer_type별로 필수 식별자가 다른 점을 타입으로 강제:
+ * - INTERNAL_TRANSFER → receiver_public_id 필수, bank_account_public_id 금지
+ * - REMITTANCE        → bank_account_public_id 필수, receiver_public_id 금지
+ *
+ * 잘못된 조합이 컴파일 단계에서 차단되므로 호출부 런타임 400(COMMON4001)을 사전 방지한다.
+ * (ValidateScheduledRequest와 동일 패턴 — CodeRabbit 리뷰 정합)
+ */
+export type TransferExecuteRequest =
+  | ({
+      transfer_type: 'INTERNAL_TRANSFER';
+      /** INTERNAL_TRANSFER 필수 — 수신자 회원 UUID. */
+      receiver_public_id: string;
+      bank_account_public_id?: never;
+    } & TransferExecuteCommonFields)
+  | ({
+      transfer_type: 'REMITTANCE';
+      /** REMITTANCE 필수 — 수신 은행 계좌 UUID. */
+      bank_account_public_id: string;
+      receiver_public_id?: never;
+    } & TransferExecuteCommonFields);
+
+/**
+ * 송금 실행 응답 (201) — 거래 1건 스냅샷 (백엔드 TransferExecuteResponse, api-spec §6).
+ *
+ * 1단계(same-currency)에서 exchange_rate는 항상 null이며 receive_amount는 amount와 동일.
+ */
+export interface TransferExecuteResponse {
+  public_id: string;
+  transfer_type: TransferTypeCode;
+  amount: string;
+  currency_code: string;
+  fee: string;
+  /** 1·2단계는 항상 null (same-currency). */
+  exchange_rate: string | null;
+  receive_amount: string;
+  receive_currency_code: string;
+  /** COMPLETED (현 단계에서 즉시 완료). */
+  status: string;
+  /** ISO 8601 UTC Z. */
+  created_at: string;
+}
+
+/**
  * 정기 송금 공통 필드 — discriminated union의 base.
  *
  * 1·2단계는 same-currency 강제 — currency_code !== receive_currency_code면 is_valid=false + reason.
@@ -877,6 +938,33 @@ export const walletApi = {
    */
   getTransferFee: (body: TransferFeeRequest) =>
     apiClient.post<unknown, TransferFeeResponse>('/transfers/fee', body),
+
+  /**
+   * 송금 실행 (201) — POST /api/v1/transfers (api-spec §6).
+   *
+   * <p>1·2단계 범위: same-currency 송금만(`currency_code === receive_currency_code`). 다통화는 3단계.
+   * INTERNAL_TRANSFER는 같은 통화 송금만, REMITTANCE는 외부 계좌로 같은 통화 송금.
+   *
+   * <p>TX-PIN 흐름: 직전에 `verifyTransferPin` 성공으로 서버에 단명·단일사용 마커
+   * (`pin:verified:{userPublicId}`, TTL 180초)가 있어야 한다. 마커 없으면 TRANSFER4010(428),
+   * PIN 자체 미설정이면 TRANSFER4009(400).
+   *
+   * <p>Idempotency-Key 헤더 필수: 호출 측은 결제 흐름 진입(TransferConfirm)에서 `crypto.randomUUID()`로
+   * 키를 한 번 고정하고, 뒤로가기·네트워크 재시도에도 같은 키를 그대로 보내야 멱등성이 보장된다.
+   * 동일 키 재요청 시 백엔드가 첫 결과(2xx)를 그대로 재반환(3-layer: Redis 캐시 → DB UNIQUE → race 시 재조회).
+   *
+   * <p>주요 에러 (모두 ApiException으로 throw):
+   * - 400 COMMON4001 — Body 검증 실패
+   * - 400 TRANSFER4002/4003/4004/4005 — 통화/유형/자기송금/통화조합
+   * - 400 TRANSFER4009 / 428 TRANSFER4010 — PIN 관련(TX-PIN)
+   * - 422 WALLET4002 / WALLET4003 — 잔액 부족 / 비활성 지갑
+   * - 429 TRANSFER4006 / TRANSFER4008 — rate-limit / PIN 5회 잠금
+   * - 503 COMMON5031 — 락 경합·Mock 은행 일시 장애(REMITTANCE)
+   */
+  executeTransfer: (body: TransferExecuteRequest, idempotencyKey: string) =>
+    apiClient.post<unknown, TransferExecuteResponse>('/transfers', body, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    }),
 
   /**
    * 송금 확인증 단건 조회 (200) — 완료된 INTERNAL_TRANSFER 또는 REMITTANCE 한 건 (api-spec §7-1).
