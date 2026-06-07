@@ -1,22 +1,34 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/navigation/TopBar';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
+import Toast, { type ToastVariant } from '@/components/common/Toast';
 import { ROUTES } from '@/constants/routes';
 import { useMyAccounts } from '@/hooks/useMyAccounts';
-import type { AccountListResponse } from '@/api/wallet';
+import { useDeleteAccount } from '@/hooks/useDeleteAccount';
+import { useSetPrimaryAccount } from '@/hooks/useSetPrimaryAccount';
+import { accountErrorMessage } from '@/utils/accountErrorMessage';
 import styles from './AccountManagePage.module.css';
 
 /**
  * 계좌 관리 화면.
  *
- * <p>실 API 연동(#102) 후 {@link useMyAccounts}로 서버 목록 표시. 이슈 #108 — 계좌가 0건이면
- * 단순 "등록된 계좌 없음" 대신 "계좌를 연동해주세요" 안내 카드 + 계좌 추가 CTA로 유도한다.
- * 전자지갑 1계정 1개 보장(BE #152)은 백엔드에서 처리하므로 프론트는 계좌 유무만 분기한다.
+ * <p>실 API 연동: 목록 조회({@link useMyAccounts}) + 주 계좌 변경({@link useSetPrimaryAccount})
+ * + 계좌 삭제({@link useDeleteAccount}). 백엔드는 wallet-service AccountController.
+ *
+ * <p>UX (카카오페이/Toss 패턴):
+ * <ul>
+ *   <li>계좌 카드: 은행명·마스킹 계좌번호. 주 계좌엔 별 배지.</li>
+ *   <li>각 카드 아래에 두 액션: "주 계좌로 지정"(주 계좌일 땐 hidden) / "계좌 해제".</li>
+ *   <li>해제는 위험 동작 — {@link ConfirmDialog} 한 번 거친다.</li>
+ *   <li>성공/에러는 {@link Toast}로 짧게 알림. 에러 메시지는 {@link accountErrorMessage}로 매핑.</li>
+ * </ul>
+ *
+ * <p>이슈 #108 — 계좌가 0건이면 단순 "등록된 계좌 없음" 대신 "계좌를 연동해주세요" 안내 카드 + 계좌 추가 CTA.
+ * 전자지갑 1계정 1개 보장(BE #152)은 백엔드에서 처리하므로 프론트는 계좌 유무만 분기.
  */
 export default function AccountManagePage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { data, isLoading, error } = useMyAccounts();
   const accounts = data?.accounts ?? [];
 
@@ -24,16 +36,40 @@ export default function AccountManagePage() {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const target = accounts.find((a) => a.account_public_id === confirmId);
 
-  // TODO: DELETE /accounts/{id}(deleteAccount) 연동 시 useMutation으로 교체하고
-  //   onSuccess에서 invalidateQueries(['wallet','accounts'])로 서버 기준 갱신할 것.
-  //   현재는 캐시에서만 제거(미영속) — 새로고침하면 서버 목록으로 복원된다.
-  const handleDisconnect = () => {
+  // 토스트 상태 — 성공/에러 피드백.
+  const [toast, setToast] = useState<{ msg: string; variant: ToastVariant } | null>(null);
+  const showToast = (msg: string, variant: ToastVariant = 'success') => setToast({ msg, variant });
+
+  const deleteAccount = useDeleteAccount();
+  const setPrimary = useSetPrimaryAccount();
+
+  // ─── 액션 핸들러 ───────────────────────────────────────────
+  const handleConfirmDelete = () => {
     if (!confirmId) return;
-    queryClient.setQueryData<AccountListResponse>(['wallet', 'accounts'], (prev) =>
-      prev ? { accounts: prev.accounts.filter((a) => a.account_public_id !== confirmId) } : prev
-    );
-    setConfirmId(null);
+    deleteAccount.mutate(confirmId, {
+      onSuccess: () => {
+        setConfirmId(null);
+        showToast('계좌가 해제되었습니다.', 'success');
+      },
+      onError: (e) => {
+        // 다이얼로그를 닫지 않고 error prop으로 안에서 표시.
+        showToast(accountErrorMessage(e), 'error');
+      },
+    });
   };
+
+  const handleSetPrimary = (accountId: string) => {
+    setPrimary.mutate(accountId, {
+      onSuccess: () => showToast('주 계좌로 지정되었습니다.', 'success'),
+      onError: (e) => showToast(accountErrorMessage(e), 'error'),
+    });
+  };
+
+  // 다이얼로그 에러는 ConfirmDialog 안에서 표시할 텍스트 — 진행 중인 시도가 실패한 경우만.
+  const deleteDialogError =
+    deleteAccount.isError && deleteAccount.variables === confirmId
+      ? accountErrorMessage(deleteAccount.error)
+      : undefined;
 
   return (
     <>
@@ -55,22 +91,52 @@ export default function AccountManagePage() {
 
       {accounts.length > 0 && (
         <div className={styles.list}>
-          {accounts.map((acc) => (
-            <div
-              key={acc.account_public_id}
-              className={styles.item}
-              onClick={() => setConfirmId(acc.account_public_id)}
-            >
-              <div className={styles.itemMain}>
-                <div className={styles.itemTitle}>{acc.bank_name}</div>
-                <div className={styles.itemMeta}>
-                  {acc.account_number_masked}
-                  {acc.is_primary && ' · 주 계좌'}
+          {accounts.map((acc) => {
+            const isPrimaryPending =
+              setPrimary.isPending && setPrimary.variables === acc.account_public_id;
+            const isDeletePending =
+              deleteAccount.isPending && deleteAccount.variables === acc.account_public_id;
+
+            return (
+              <div key={acc.account_public_id} className={styles.item}>
+                <div className={styles.itemHeader}>
+                  <div className={styles.itemMain}>
+                    <div className={styles.itemTitle}>
+                      {acc.bank_name}
+                      {acc.is_primary && (
+                        <span className={styles.primaryBadge} aria-label="주 계좌">
+                          ★ 주 계좌
+                        </span>
+                      )}
+                    </div>
+                    <div className={styles.itemMeta}>{acc.account_number_masked}</div>
+                  </div>
+                  <span className={styles.pill}>연결됨</span>
+                </div>
+
+                <div className={styles.itemActions}>
+                  {!acc.is_primary && (
+                    <button
+                      type="button"
+                      className={styles.actionGhost}
+                      disabled={isPrimaryPending || setPrimary.isPending}
+                      onClick={() => handleSetPrimary(acc.account_public_id)}
+                    >
+                      {isPrimaryPending ? '지정 중…' : '주 계좌로 지정'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className={styles.actionDanger}
+                    disabled={isDeletePending}
+                    onClick={() => setConfirmId(acc.account_public_id)}
+                  >
+                    계좌 해제
+                  </button>
                 </div>
               </div>
-              <span className={styles.pill}>연결됨</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -83,21 +149,24 @@ export default function AccountManagePage() {
       </button>
 
       {target && (
-        <div className={`${styles.card} ${styles.cardDanger}`}>
-          <div className={styles.cardTitle}>계좌 연결 해제 확인</div>
-          <div className={styles.cardText}>
-            {target.bank_name} {target.account_number_masked} 계좌를 해제하시겠습니까?
-          </div>
-          <div className={styles.btnRow}>
-            <button type="button" className={styles.ghostBtn} onClick={() => setConfirmId(null)}>
-              취소
-            </button>
-            <button type="button" className={styles.dangerBtn} onClick={handleDisconnect}>
-              해제
-            </button>
-          </div>
-        </div>
+        <ConfirmDialog
+          title="계좌 연결 해제"
+          message={`${target.bank_name} ${target.account_number_masked} 계좌를 해제하시겠습니까? 주 계좌를 해제하면 남은 계좌 중 가장 최근 등록한 계좌가 자동으로 주 계좌가 됩니다.`}
+          confirmLabel="해제"
+          cancelLabel="취소"
+          danger
+          loading={deleteAccount.isPending}
+          error={deleteDialogError}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => {
+            if (deleteAccount.isPending) return;
+            setConfirmId(null);
+            deleteAccount.reset(); // 다음에 열 때 이전 에러 표시 안 되도록
+          }}
+        />
       )}
+
+      <Toast message={toast?.msg ?? null} variant={toast?.variant} onClose={() => setToast(null)} />
     </>
   );
 }
