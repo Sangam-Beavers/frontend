@@ -23,9 +23,11 @@ export default function MyPage() {
   const isVerified = verification?.status === 'APPROVED';
 
   // 설정/관리 행은 인증 상태에 따라 배지가 바뀌므로 컴포넌트 안에서 구성한다.
+  // 회원 탈퇴(이슈 #148)는 마지막에 둠 — 위험 동작은 의도적으로 뒤로.
   const SETTINGS: { label: string; badge: string | null; path: string }[] = [
     { label: '추가 인증', badge: isVerified ? '완료' : null, path: '/mypage/badge' },
     { label: '언어 설정', badge: null, path: '/mypage/language' },
+    { label: '회원 탈퇴', badge: null, path: '/mypage/withdraw' },
   ];
 
   const nickname = profile?.nickname ?? '';

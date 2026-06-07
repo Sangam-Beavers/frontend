@@ -34,6 +34,7 @@ import MyPage from '@/pages/MyPage/MyPage';
 import ProfileEditPage from '@/pages/MyPage/Profile/ProfileEditPage';
 import SubscriptionPage from '@/pages/MyPage/Subscription/SubscriptionPage';
 import WalletHistoryPage from '@/pages/MyPage/WalletHistory/WalletHistoryPage';
+import WithdrawPage from '@/pages/MyPage/Withdraw/WithdrawPage';
 import AccountRegisteredPage from '@/pages/wallet/AccountRegistered/AccountRegisteredPage';
 import AddAccountPage from '@/pages/wallet/AddAccount/AddAccountPage';
 import AutoDebitAuthPage from '@/pages/wallet/AutoDebitAuth/AutoDebitAuthPage';
@@ -98,6 +99,7 @@ export const mainRoutes: PageRoute[] = [
   { path: ROUTES.MYPAGE_WALLET_HISTORY, Component: WalletHistoryPage },
   { path: ROUTES.MYPAGE_EXCHANGE_HISTORY, Component: ExchangeHistoryPage },
   { path: ROUTES.MYPAGE_DOC_ANALYSIS_HISTORY, Component: DocAnalysisHistoryPage },
+  { path: ROUTES.MYPAGE_WITHDRAW, Component: WithdrawPage },
 ];
 
 /**
