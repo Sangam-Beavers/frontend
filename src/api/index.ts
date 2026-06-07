@@ -42,6 +42,7 @@ export type {
   TransactionDirection,
   TransactionHistoryItem,
   TransactionListResponse,
+  TransferReceiptResponse,
 } from './wallet';
 export { documentApi } from './document';
 export type {

@@ -81,6 +81,43 @@ export interface ExchangeListResponse {
 }
 
 /**
+ * 송금 확인증 응답 (백엔드 TransferReceiptResponse — api-spec §7-1).
+ *
+ * INTERNAL_TRANSFER / REMITTANCE 두 유형의 완료 송금 한 건의 확인증.
+ * - INTERNAL: `bank_name`/`account_number`는 null (앱 사용자 송금이라 외부 계좌 정보 없음)
+ * - REMITTANCE: `bank_name`/`account_number` 채워짐 (해외 송금 수취 계좌)
+ * - 1·2단계 same-currency: `exchange_rate` null, `receive_amount` === `amount`
+ * - 3단계+ 다통화: `exchange_rate`/`receive_currency_code` 다른 값
+ */
+export interface TransferReceiptResponse {
+  public_id: string;
+  /** 송금인 본명. MemberClient 장애 시 null. */
+  sender_name: string | null;
+  /** 수취인 본명. INTERNAL=수신자 본명(장애 시 null), REMITTANCE=등록 시 예금주(컬럼 추가 전 구 계좌면 null). */
+  receiver_name: string | null;
+  /** 수취 은행명. REMITTANCE만, INTERNAL은 null. */
+  bank_name: string | null;
+  /** 수취 계좌번호(마스킹 앞3+별표+뒤2). REMITTANCE만, INTERNAL은 null. */
+  account_number: string | null;
+  /** 송금 금액 — string 소수 4자리. */
+  amount: string;
+  /** 출금 통화 코드. */
+  currency_code: string;
+  /** 수수료 — string 소수 4자리. */
+  fee: string;
+  /** 적용 환율 — same-currency는 null, 다통화부터 값. */
+  exchange_rate: string | null;
+  /** 수취 금액 — 1·2단계는 amount와 동일. */
+  receive_amount: string;
+  /** 수취 통화 코드. */
+  receive_currency_code: string;
+  /** 거래 상태 (COMPLETED/PENDING/PROCESSING/FAILED/CANCELLED). */
+  status: string;
+  /** 송금 시각 (ISO 8601 UTC Z). */
+  created_at: string;
+}
+
+/**
  * 거래 유형 (백엔드 TransactionType enum SSOT).
  * - CHARGE: 외부 은행계좌에서 전자지갑으로 충전
  * - INTERNAL_TRANSFER: 앱 사용자 간 송금 (송신/수신 모두 해당)
@@ -625,6 +662,20 @@ export const walletApi = {
     apiClient.get<unknown, ScheduledTransferListResponse>('/transfers/scheduled', {
       params: status ? { status, page, size } : { page, size },
     }),
+
+  /**
+   * 송금 확인증 단건 조회 (200) — 완료된 INTERNAL_TRANSFER 또는 REMITTANCE 한 건 (api-spec §7-1).
+   *
+   * <p>본인 검증: 송신자(거래 wallet 주인) 본인만 조회 가능. 본인 아님·미존재·미지원 유형 실패는
+   * 모두 TRANSFER4001로 모호 매핑됨(cross-user 응답 노출 방지 정책). 화면은 단일 에러 메시지로 처리.
+   *
+   * <p>에러: 400 COMMON4001(path 형식) / 401 AUTH4011(interceptor 처리) / TRANSFER4001(본인 아님·미존재·유형)
+   * / 500 COMMON5000 → 모두 ApiException으로 throw.
+   *
+   * @param transferPublicId 송금 거래 식별자(UUID, transactions.public_id)
+   */
+  getReceipt: (transferPublicId: string) =>
+    apiClient.get<unknown, TransferReceiptResponse>(`/transfers/${transferPublicId}/receipt`),
 
   /**
    * 내 거래내역 목록 조회 (200) — 본인이 송신자 또는 수신자인 전 유형 거래를 최근순으로 페이지 조회.

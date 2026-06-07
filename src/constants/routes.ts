@@ -65,7 +65,7 @@ export const ROUTES = {
   TRANSFER_AUTH: '/transfer/auth',
   TRANSFER_PIN_SETUP: '/transfer/pin-setup', // 송금 PIN 최초 등록 (PIN은 새 설계라 와이어프레임에 없음)
   TRANSFER_COMPLETE: '/transfer/complete',
-  TRANSFER_RECEIPT: '/transfer/receipt',
+  TRANSFER_RECEIPT: '/transfer/receipt/:transferPublicId',
 
   // ===== Service: Document analysis =====
   DOC_ANALYSIS: '/doc-analysis',
@@ -81,3 +81,6 @@ export const buildCommunityPostPath = (postId: string): string => `/community/po
 
 export const buildCommunityPostEditPath = (postId: string): string =>
   `/community/posts/${postId}/edit`;
+
+export const buildTransferReceiptPath = (transferPublicId: string): string =>
+  `/transfer/receipt/${transferPublicId}`;
