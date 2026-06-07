@@ -61,6 +61,27 @@
   font-size: 11px;
 }
 
+/* 인증 배지 — 금색 (MyPage/AllMenu .verifiedPill·.verifiedBadge와 동일 톤). */
+.verifiedPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fde68a, #fcd34d);
+  color: #92400e;
+  font-weight: 900;
+  font-size: 11px;
+  border: 1px solid #f59e0b;
+  box-shadow: 0 1px 2px rgba(180, 83, 9, 0.18);
+}
+
+.verifiedPill::before {
+  content: '★';
+  font-size: 10px;
+  color: #b45309;
+}
+
 .title {
   margin: 16px 0 10px;
   font-size: 22px;

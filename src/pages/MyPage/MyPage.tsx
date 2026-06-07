@@ -50,7 +50,7 @@ export default function MyPage() {
             <div className={styles.profileInfo}>
               <div className={styles.profileName}>
                 {isLoading ? '불러오는 중…' : nickname}
-                {isVerified && <span className={styles.pill}>인증</span>}
+                {isVerified && <span className={styles.verifiedPill}>인증</span>}
               </div>
             </div>
           </div>
