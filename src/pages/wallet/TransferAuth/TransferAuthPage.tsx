@@ -71,16 +71,19 @@ export default function TransferAuthPage() {
   // 한 화면 안의 두 단계(검증 → 실행) 둘 다 진행 중이면 버튼 비활성.
   const busy = verifyPin.isPending || executeTransfer.isPending;
 
-  /** 송금 실행 body 조립 — INTERNAL_TRANSFER만 지원. REMITTANCE는 다음 사이클. */
+  /**
+   * 송금 실행 body 조립 — INTERNAL_TRANSFER + REMITTANCE 둘 다 지원.
+   *
+   * 1·2단계 same-currency 강제: currency_code === receive_currency_code. 다통화는 3단계로 이연.
+   * type 미지정(레거시 fallback)은 INTERNAL_TRANSFER로 간주(receiverPublicId 있을 때만 진행).
+   */
   function buildBody(): TransferExecuteRequest | null {
-    // 1단계 same-currency 강제 — currency_code === receive_currency_code.
     const currencyCode = state.currency;
     const receiveCurrencyCode = state.currency;
     const amount = state.amountDecimal ?? parseAmount(state.amount);
     if (!amount) return null;
     const memo = state.memo ?? null;
 
-    // transferType 미지정(레거시 fallback) 시 INTERNAL_TRANSFER로 간주 — receiverPublicId가 있을 때만 진행.
     const type = state.transferType ?? 'INTERNAL_TRANSFER';
     if (type === 'INTERNAL_TRANSFER') {
       if (!state.receiverPublicId) return null;
@@ -93,7 +96,18 @@ export default function TransferAuthPage() {
         memo,
       };
     }
-    // REMITTANCE는 다음 사이클 — 본 PR에서는 차단.
+    // REMITTANCE — 본인 등록 외부 계좌로 송금 (예: 가족이 자기 해외 계좌로 환금).
+    if (type === 'REMITTANCE') {
+      if (!state.bankAccountPublicId) return null;
+      return {
+        transfer_type: 'REMITTANCE',
+        bank_account_public_id: state.bankAccountPublicId,
+        amount,
+        currency_code: currencyCode,
+        receive_currency_code: receiveCurrencyCode,
+        memo,
+      };
+    }
     return null;
   }
 
@@ -137,6 +151,11 @@ export default function TransferAuthPage() {
                     setError('자기 자신에게는 송금할 수 없습니다.');
                   else if (e.code === 'TRANSFER4006')
                     setError('송금 요청 횟수를 초과했습니다. 잠시 후 다시 시도해주세요.');
+                  // REMITTANCE 전용 — Mock 은행 매핑 결과
+                  else if (e.code === 'ACCOUNT4001')
+                    setError('등록되지 않은 계좌입니다. 계좌 정보를 다시 확인해주세요.');
+                  else if (e.code === 'ACCOUNT4006') setError('인증되지 않은 계좌입니다.');
+                  else if (e.code === 'ACCOUNT4003') setError('연동 계좌의 잔액이 부족합니다.');
                   else if (e.code === 'COMMON5031')
                     setError('일시적으로 처리할 수 없습니다. 잠시 후 다시 시도해주세요.');
                   else setError(e.message || '송금에 실패했습니다.');
