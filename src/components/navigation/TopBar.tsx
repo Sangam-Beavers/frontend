@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from './TopBar.module.css';
 
 interface TopBarProps {
@@ -11,6 +12,7 @@ interface TopBarProps {
 
 export default function TopBar({ title, showBack = true, onBack, rightAction }: TopBarProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleBack = () => {
     if (onBack) {
@@ -23,7 +25,7 @@ export default function TopBar({ title, showBack = true, onBack, rightAction }: 
   return (
     <div className={styles.top}>
       {showBack ? (
-        <button className={styles.icon} onClick={handleBack} aria-label="뒤로가기">
+        <button className={styles.icon} onClick={handleBack} aria-label={t('common.back')}>
           ‹
         </button>
       ) : (

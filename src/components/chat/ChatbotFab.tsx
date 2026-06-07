@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useChatStore } from '@/stores/chatStore';
 import styles from './ChatbotFab.module.css';
 
@@ -11,19 +12,20 @@ interface ChatbotFabProps {
  * 누르면 챗봇 바텀시트를 연다(초기 프롬프트 없음 — 사용자가 자유롭게 입력).
  */
 export default function ChatbotFab({ documentPublicId }: ChatbotFabProps) {
+  const { t } = useTranslation();
   const open = useChatStore((s) => s.open);
 
   return (
     <button
       type="button"
       className={styles.fab}
-      aria-label="AI 챗봇 열기"
+      aria-label={t('chat.entryOpenAria')}
       onClick={() => open(documentPublicId)}
     >
       <span className={styles.icon} aria-hidden>
         🤖
       </span>
-      모르겠으면 물어봐요
+      {t('chat.fabLabel', { defaultValue: '모르겠으면 물어봐요' })}
     </button>
   );
 }

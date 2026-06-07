@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { openChatStream } from '@/api/chat';
+import i18n from '@/i18n';
 import { createMessage, useChatStore } from '@/stores/chatStore';
 import ChatInput from './ChatInput';
 import ChatMessageList from './ChatMessageList';
@@ -22,6 +24,7 @@ interface ChatbotSheetProps {
  *   SSE 토큰이 도착할 때마다 마지막 assistant 메시지에 누적한다.
  */
 export default function ChatbotSheet({ suggestedTopics = [] }: ChatbotSheetProps) {
+  const { t } = useTranslation();
   const isOpen = useChatStore((s) => s.isOpen);
   const documentPublicId = useChatStore((s) => s.documentPublicId);
   const initialPrompt = useChatStore((s) => s.initialPrompt);
@@ -86,12 +89,17 @@ export default function ChatbotSheet({ suggestedTopics = [] }: ChatbotSheetProps
   return (
     <>
       <div className={styles.backdrop} onClick={close} />
-      <div className={styles.sheet} role="dialog" aria-modal="true" aria-label="AI 챗봇">
+      <div className={styles.sheet} role="dialog" aria-modal="true" aria-label={t('chat.aria')}>
         <div className={styles.header}>
           <div className={styles.handle} aria-hidden />
           <div className={styles.headerRow}>
-            <div className={styles.title}>AI 챗봇</div>
-            <button type="button" className={styles.closeBtn} onClick={close} aria-label="닫기">
+            <div className={styles.title}>{t('chat.title')}</div>
+            <button
+              type="button"
+              className={styles.closeBtn}
+              onClick={close}
+              aria-label={t('chat.close')}
+            >
               ×
             </button>
           </div>
@@ -126,16 +134,17 @@ export default function ChatbotSheet({ suggestedTopics = [] }: ChatbotSheetProps
  * 코드별 의미는 docs/document-analysis/ai-chatbot-mcp.md 참고.
  */
 function mapErrorToUserMessage(code: string, fallback: string): string {
+  // 함수 외부 호출(SSE 콜백)이라 i18n 인스턴스를 직접 사용 (이슈 #153).
   switch (code) {
     case 'AUTH4011':
-      return '로그인이 만료됐어요. 다시 로그인 해주세요.';
+      return i18n.t('chat.errAuth');
     case 'COMMON4031':
-      return '본인의 분석 결과만 질문할 수 있어요.';
+      return i18n.t('chat.errForbidden');
     case 'DOCUMENT4001':
-      return '분석 문서를 찾을 수 없어요. 새로고침 후 다시 시도해주세요.';
+      return i18n.t('chat.errDocNotFound');
     case 'COMMON4001':
-      return '질문 내용을 확인해주세요.';
+      return i18n.t('chat.errBadInput');
     default:
-      return fallback || '잠시 후 다시 시도해주세요.';
+      return fallback || i18n.t('chat.errGeneric');
   }
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styles from './Pagination.module.css';
 
 interface PaginationProps {
@@ -19,6 +20,7 @@ const WINDOW = 5;
  * 끝에 가까우면 한쪽으로 채운다. 페이지가 1개 이하면 렌더하지 않는다.
  */
 export default function Pagination({ page, totalPages, onChange }: PaginationProps) {
+  const { t } = useTranslation();
   if (totalPages <= 1) return null;
 
   // 현재 페이지를 가운데 두는 [start, end) 윈도우 계산.
@@ -31,12 +33,15 @@ export default function Pagination({ page, totalPages, onChange }: PaginationPro
   const canNext = page < totalPages - 1;
 
   return (
-    <nav className={styles.pagination} aria-label="페이지 이동">
+    <nav
+      className={styles.pagination}
+      aria-label={t('community.paginationAria', { defaultValue: '페이지 이동' })}
+    >
       <button
         type="button"
         className={styles.arrow}
         disabled={!canPrev}
-        aria-label="이전 페이지"
+        aria-label={t('community.prevPage', { defaultValue: '이전 페이지' })}
         onClick={() => onChange(page - 1)}
       >
         ‹
@@ -58,7 +63,7 @@ export default function Pagination({ page, totalPages, onChange }: PaginationPro
         type="button"
         className={styles.arrow}
         disabled={!canNext}
-        aria-label="다음 페이지"
+        aria-label={t('community.nextPage', { defaultValue: '다음 페이지' })}
         onClick={() => onChange(page + 1)}
       >
         ›

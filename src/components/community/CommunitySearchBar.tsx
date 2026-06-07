@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styles from './CommunitySearchBar.module.css';
 
 interface CommunitySearchBarProps {
@@ -10,12 +11,15 @@ interface CommunitySearchBarProps {
 export default function CommunitySearchBar({
   value,
   onChange,
-  placeholder = '이 게시판에서 검색',
+  placeholder,
 }: CommunitySearchBarProps) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder =
+    placeholder ?? t('community.searchPlaceholder', { defaultValue: '이 게시판에서 검색' });
   return (
     <input
       className={styles.search}
-      placeholder={placeholder}
+      placeholder={resolvedPlaceholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       autoFocus
