@@ -207,3 +207,206 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* ─── TransferApp 패턴 도입 (수신자 선택: 최근 송금 + 이메일 검색) ─── */
+
+.section {
+  font-size: 15px;
+  font-weight: 900;
+  margin: 16px 0 8px;
+  color: var(--ink);
+}
+
+/* 수평 스크롤 — 최근 수신자 칩 */
+.scrollRow {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-bottom: 4px;
+}
+.scrollRow::-webkit-scrollbar {
+  display: none;
+}
+
+.recentCard {
+  min-width: 100px;
+  flex-shrink: 0;
+  appearance: none;
+  font-family: inherit;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px 10px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 8px 18px rgba(7, 91, 255, 0.05);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.recentCard:active {
+  background: var(--soft);
+}
+
+/* 키보드 접근성 — :focus-visible로 마우스 사용자 영향 없이 키보드 포커스만 강조 (CodeRabbit). */
+.recentCard:focus-visible,
+.inputAction:focus-visible,
+.retryBtn:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* 큰 아바타 (최근 송금 칩 + 검증 카드) — 기존 .avatar (32px)와 별도 */
+.avatarBig {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef6ff;
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--ink);
+  margin: 0 auto 8px;
+  border: 3px solid var(--line);
+}
+/* avatarBig + tone 조합: border-color로 색을 입힌다 (기존 .avatarBest 등은 background로 32px 작은 아바타용) */
+.recentCard .avatarBig.avatarBest,
+.verifiedCard .avatarBig.avatarBest { border-color: #2563eb; }
+.recentCard .avatarBig.avatarGood,
+.verifiedCard .avatarBig.avatarGood { border-color: #7c3aed; }
+.recentCard .avatarBig.avatarMid,
+.verifiedCard .avatarBig.avatarMid { border-color: #22c55e; }
+.recentCard .avatarBig.avatarWarn,
+.verifiedCard .avatarBig.avatarWarn { border-color: #f59e0b; }
+.recentCard .avatarBig.avatarBad,
+.verifiedCard .avatarBig.avatarBad { border-color: #ef4444; }
+
+.recentName {
+  font-weight: 900;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 800;
+  margin: 0 0 6px 2px;
+}
+
+/* 이메일 입력 + 인라인 확인 버튼 */
+.inputRow {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 0 0 0 14px;
+  box-sizing: border-box;
+}
+.inputRow:focus-within {
+  border-color: var(--blue);
+}
+.inputRow input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ink);
+  padding: 12px 8px 12px 0;
+}
+.inputRow input::placeholder {
+  color: #34445f;
+  opacity: 0.45;
+}
+.inputAction {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-weight: 900;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+.inputAction:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 검증된 수신자 카드 */
+.verifiedCard {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--ok, #e8f5ff);
+  padding: 14px;
+  margin: 12px 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.verifiedCard .avatarBig {
+  margin: 0; /* flex 정렬용 — 가로 배치라 가운데 정렬 불필요 */
+}
+.verifiedInfo {
+  flex: 1;
+}
+.verifiedName {
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+.verifiedMeta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--soft2, #e0eaff);
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 11px;
+}
+
+/* 상태 안내 + 에러 텍스트 */
+.emptyText {
+  padding: 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.errorText {
+  margin-top: 8px;
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 700;
+}
+.retryBtn {
+  margin-left: 8px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--blue);
+}
