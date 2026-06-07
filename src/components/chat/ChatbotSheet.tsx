@@ -63,12 +63,16 @@ export default function ChatbotSheet({ suggestedTopics = [] }: ChatbotSheetProps
     setDraft('');
 
     // 2) SSE 호출 시작. abortController는 store가 들고 있다가 close 시 abort.
+    // user_lang: 사용자가 마이페이지에서 선택한 현재 i18n 언어를 그대로 챗봇 Lambda에 전달 (#159 통합).
+    // base 언어(예: "en-US")가 들어올 수 있으므로 region 서픽스는 잘라서 ko/en/vi/fil 4종으로 정규화.
+    // 백엔드 ChatRequest는 @NotBlank만 검증하고, Lambda system_prompt가 미지원 코드 fallback 처리.
+    const userLang = (i18n.language || 'ko').split('-')[0];
     const controller = openChatStream(
       documentPublicId,
       {
         message: text,
         session_id: sessionId ?? undefined,
-        user_lang: 'ko',
+        user_lang: userLang,
       },
       {
         onToken: (chunk) => appendToLastAssistant(chunk),
