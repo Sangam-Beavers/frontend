@@ -339,6 +339,46 @@ export interface ValidateMemberResponse {
   is_verified: boolean;
 }
 
+/** 정기송금 상태. */
+export type ScheduledTransferStatus = 'ACTIVE' | 'PAUSED' | 'CANCELLED';
+
+/** 정기송금 반복 주기. */
+export type ScheduledTransferFrequency = 'WEEKLY' | 'MONTHLY';
+
+/** 정기송금 목록 한 건 (백엔드 ScheduledTransferListItem). */
+export interface ScheduledTransferItem {
+  /** 정기송금 식별자(UUID). */
+  public_id: string;
+  /** 수취인명 (설정 시 snapshot, nullable). */
+  receiver_name: string | null;
+  /** 회차당 송금액 (string 소수 4자리). */
+  amount: string;
+  /** 출금 통화 코드. */
+  currency_code: string;
+  /** 수취 통화 코드. */
+  receive_currency_code: string;
+  /** 반복 주기 (WEEKLY / MONTHLY). */
+  frequency: ScheduledTransferFrequency;
+  /** 실행 기준일 (MONTHLY=1~31, WEEKLY=1~7 ISO). */
+  schedule_day: number;
+  /** 다음 실행 예정일 (ISO 8601 date, KST 기준, 예: "2026-06-25"). */
+  next_run_date: string;
+  /** 마지막 실행 시각 (ISO 8601 UTC Z). 최초 실행 전이면 null. */
+  last_run_at: string | null;
+  status: ScheduledTransferStatus;
+  /** 정기송금 설정 시각 (ISO 8601 UTC Z). */
+  created_at: string;
+}
+
+/** 정기송금 목록 응답 — 페이지 메타 + 항목 배열 (백엔드 ScheduledTransferListResponse). */
+export interface ScheduledTransferListResponse {
+  scheduled_transfers: ScheduledTransferItem[];
+  page: number;
+  size: number;
+  total_elements: number;
+  total_pages: number;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -568,6 +608,22 @@ export const walletApi = {
   validateMember: (email: string) =>
     apiClient.get<unknown, ValidateMemberResponse>('/transfers/validate-member', {
       params: { email },
+    }),
+
+  /**
+   * 정기송금 목록 조회 (200) — 본인이 설정한 정기송금 페이지 조회.
+   *
+   * <p>RecurringList 화면용. created_at DESC 정렬 (최신 설정 우선).
+   *
+   * <p>status 필터 — ACTIVE/PAUSED/CANCELLED 중 1, 미지정 시 전체. 잘못된 값은 COMMON4001.
+   *
+   * @param status 상태 필터 (선택)
+   * @param page 페이지 번호 (0부터)
+   * @param size 페이지당 건수 (기본 20, 최대 100)
+   */
+  getScheduledTransfers: (status?: ScheduledTransferStatus, page = 0, size = 20) =>
+    apiClient.get<unknown, ScheduledTransferListResponse>('/transfers/scheduled', {
+      params: status ? { status, page, size } : { page, size },
     }),
 
   /**
