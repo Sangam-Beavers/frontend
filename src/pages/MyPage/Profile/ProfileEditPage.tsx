@@ -1,20 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
-import { SETTING_LANGUAGES } from '@/constants/languages';
+import { SETTING_LANGUAGES, LANGUAGE_CODE_TO_LABEL } from '@/constants/languages';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import styles from './ProfileEditPage.module.css';
 
 const LANGUAGES = SETTING_LANGUAGES;
-
-/** 백엔드 BCP 47 코드 → 화면 표시 라벨 매핑. 매핑 못 찾으면 '한국어' fallback. */
-const LANGUAGE_CODE_TO_LABEL: Record<string, string> = {
-  ko: '한국어',
-  zh: '중국어',
-  vi: '베트남어',
-  th: '태국어',
-  en: '영어',
-};
 
 export default function ProfileEditPage() {
   const navigate = useNavigate();

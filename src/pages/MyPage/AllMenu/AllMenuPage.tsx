@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startLogout } from '@/auth/logout';
+import { LANGUAGE_CODE_TO_LABEL } from '@/constants/languages';
 import { ROUTES } from '@/constants/routes';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { COMMUNITY_TABS } from '@/types/community';
@@ -85,16 +86,8 @@ const QUICK_LINKS: MenuItem[] = [
   { label: 'Language', path: '/mypage/language' },
 ];
 
-// BCP 47 언어 코드 → 한국어 라벨(프로필 메타 표시용). 매핑 없는 코드는 원본 코드 노출.
-const LANGUAGE_LABEL: Record<string, string> = {
-  ko: '한국어',
-  en: '영어',
-  vi: '베트남어',
-  zh: '중국어',
-  th: '태국어',
-  id: '인도네시아어',
-  tl: '필리핀어',
-};
+// BCP 47 언어 코드 → 한국어 라벨(프로필 메타 표시용). 공통 constants 재사용.
+// 매핑 없는 코드는 원본 코드 노출(MVP 4개 외).
 
 export default function AllMenuPage() {
   const navigate = useNavigate();
@@ -103,7 +96,7 @@ export default function AllMenuPage() {
   const nickname = profile?.nickname ?? '';
   const avatarInitial = nickname.charAt(0).toUpperCase() || '?';
   const languageLabel = profile?.language
-    ? (LANGUAGE_LABEL[profile.language] ?? profile.language)
+    ? (LANGUAGE_CODE_TO_LABEL[profile.language] ?? profile.language)
     : '';
   const [activeNav, setActiveNav] = useState<NavKey>('전체');
   const [searchQuery, setSearchQuery] = useState('');

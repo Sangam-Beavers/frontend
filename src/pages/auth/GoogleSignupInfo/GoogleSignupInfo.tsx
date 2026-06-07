@@ -97,7 +97,7 @@ function GoogleSignupInfo() {
                 value={form.nationality}
                 onChange={set('nationality')}
               >
-                <option value="">중국 / 베트남 / 태국 / 미국 ▾</option>
+                <option value="">한국 / 미국 / 베트남 / 필리핀 ▾</option>
                 {NATIONALITIES.map((n) => (
                   <option key={n} value={n}>
                     {n}
