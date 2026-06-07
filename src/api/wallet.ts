@@ -888,8 +888,32 @@ export const walletApi = {
       params: { page, size },
     }),
 
+  /**
+   * 주 계좌 변경 (200) — 활성 계좌 중 하나를 주 계좌로 지정한다. 기존 주 계좌는 자동 해제되어
+   * 사용자당 주 계좌가 항상 1개로 유지된다. 이미 주 계좌인 계좌를 다시 지정하면 멱등 성공.
+   *
+   * <p>응답으로 변경된 AccountResponse(is_primary=true)를 반환. 호출 측은 onSuccess에서
+   * ['wallet','accounts']를 invalidate해 목록 정렬(주 계좌 우선)을 서버 기준으로 갱신한다.
+   *
+   * <p>존재하지 않는 계좌(미존재/타인/비활성) ACCOUNT4001(404), 분산락 실패 COMMON5031(503),
+   * 인증 누락 AUTH4011(401, interceptor 처리) → 모두 ApiException으로 throw.
+   */
+  setPrimaryAccount: (accountId: string) =>
+    apiClient.patch<unknown, AccountItem>(`/accounts/${accountId}/primary`),
+
+  /**
+   * 계좌 삭제 (200) — 지정한 계좌를 soft-delete(is_active=false)한다. 주 계좌를 삭제하면
+   * 남은 활성 계좌 중 가장 최근 등록 1건이 자동으로 주 계좌로 승격된다(마지막 1개면 주 계좌
+   * 없는 상태 허용). 응답 data는 null.
+   *
+   * <p>호출 측은 onSuccess에서 ['wallet','accounts']를 invalidate해 목록을 서버 기준으로 갱신.
+   *
+   * <p>존재하지 않는 계좌(미존재/타인/이미 비활성) ACCOUNT4001(404), 분산락 실패 COMMON5031(503),
+   * 인증 누락 AUTH4011(401) → 모두 ApiException으로 throw.
+   */
+  deleteAccount: (accountId: string) => apiClient.delete<unknown, void>(`/accounts/${accountId}`),
+
   // TODO: 다음 사이클에서 추가
-  //   계좌: deleteAccount (DELETE /accounts/{id}), setPrimary (PATCH /accounts/{id}/primary)
   //   송금: validateMember, validateBank, execute, getReceipt, getRecentRecipients
   //   정기송금: validateScheduled, createScheduled, listScheduled, getHistory
 };

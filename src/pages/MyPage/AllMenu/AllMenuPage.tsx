@@ -47,6 +47,7 @@ const mypageItems: MenuItem[] = [
   { label: '언어 설정', path: '/mypage/language' },
   { label: '구독 관리', path: '/mypage/subscription' },
   { label: '계좌 관리', path: '/mypage/accounts' },
+  { label: '회원 탈퇴', path: '/mypage/withdraw' },
 ];
 
 const supportItems: MenuItem[] = [
@@ -128,7 +129,7 @@ export default function AllMenuPage() {
             <div>
               <div className={styles.username}>
                 {isLoading ? '불러오는 중…' : nickname || '사용자'}
-                {profile?.is_verified && <span className={styles.badge}>인증</span>}
+                {profile?.is_verified && <span className={styles.verifiedBadge}>인증</span>}
               </div>
               <div className={styles.userMeta}>{languageLabel}</div>
             </div>
