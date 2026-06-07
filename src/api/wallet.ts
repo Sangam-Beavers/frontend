@@ -331,6 +331,54 @@ export interface RecentRecipientsResponse {
   receivers: RecentRecipientItem[];
 }
 
+/** 앱 사용자 유효성 검증 응답 (백엔드 ValidateMemberResponse).
+ *  receiver_public_id는 송금 실행 API 호출 시 사용 — 검증 성공 시 state에 보관. */
+export interface ValidateMemberResponse {
+  receiver_public_id: string;
+  nickname: string;
+  is_verified: boolean;
+}
+
+/** 정기송금 상태. */
+export type ScheduledTransferStatus = 'ACTIVE' | 'PAUSED' | 'CANCELLED';
+
+/** 정기송금 반복 주기. */
+export type ScheduledTransferFrequency = 'WEEKLY' | 'MONTHLY';
+
+/** 정기송금 목록 한 건 (백엔드 ScheduledTransferListItem). */
+export interface ScheduledTransferItem {
+  /** 정기송금 식별자(UUID). */
+  public_id: string;
+  /** 수취인명 (설정 시 snapshot, nullable). */
+  receiver_name: string | null;
+  /** 회차당 송금액 (string 소수 4자리). */
+  amount: string;
+  /** 출금 통화 코드. */
+  currency_code: string;
+  /** 수취 통화 코드. */
+  receive_currency_code: string;
+  /** 반복 주기 (WEEKLY / MONTHLY). */
+  frequency: ScheduledTransferFrequency;
+  /** 실행 기준일 (MONTHLY=1~31, WEEKLY=1~7 ISO). */
+  schedule_day: number;
+  /** 다음 실행 예정일 (ISO 8601 date, KST 기준, 예: "2026-06-25"). */
+  next_run_date: string;
+  /** 마지막 실행 시각 (ISO 8601 UTC Z). 최초 실행 전이면 null. */
+  last_run_at: string | null;
+  status: ScheduledTransferStatus;
+  /** 정기송금 설정 시각 (ISO 8601 UTC Z). */
+  created_at: string;
+}
+
+/** 정기송금 목록 응답 — 페이지 메타 + 항목 배열 (백엔드 ScheduledTransferListResponse). */
+export interface ScheduledTransferListResponse {
+  scheduled_transfers: ScheduledTransferItem[];
+  page: number;
+  size: number;
+  total_elements: number;
+  total_pages: number;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -545,6 +593,38 @@ export const walletApi = {
    */
   getRecentInternalRecipients: () =>
     apiClient.get<unknown, RecentRecipientsResponse>('/transfers/recent-recipients/members'),
+
+  /**
+   * 앱 사용자 유효성 검증 (200) — 이메일로 받는 사람 존재/식별.
+   *
+   * <p>송금 화면에서 사용자가 받는 사람 이메일 입력 후 "확인" 누를 때 호출.
+   * 성공 시 receiver_public_id 받아 송금 실행 API에 식별자로 사용.
+   *
+   * <p>에러: COMMON4001(400, 이메일 형식 위반) / MEMBER4001(가능성, 존재하지 않는 회원) /
+   * AUTH4011(401 — interceptor 처리).
+   *
+   * <p>경로 주의: 노션 표는 POST /receivers/search로 잘못 표기됐었음 → 실제는 GET /validate-member.
+   */
+  validateMember: (email: string) =>
+    apiClient.get<unknown, ValidateMemberResponse>('/transfers/validate-member', {
+      params: { email },
+    }),
+
+  /**
+   * 정기송금 목록 조회 (200) — 본인이 설정한 정기송금 페이지 조회.
+   *
+   * <p>RecurringList 화면용. created_at DESC 정렬 (최신 설정 우선).
+   *
+   * <p>status 필터 — ACTIVE/PAUSED/CANCELLED 중 1, 미지정 시 전체. 잘못된 값은 COMMON4001.
+   *
+   * @param status 상태 필터 (선택)
+   * @param page 페이지 번호 (0부터)
+   * @param size 페이지당 건수 (기본 20, 최대 100)
+   */
+  getScheduledTransfers: (status?: ScheduledTransferStatus, page = 0, size = 20) =>
+    apiClient.get<unknown, ScheduledTransferListResponse>('/transfers/scheduled', {
+      params: status ? { status, page, size } : { page, size },
+    }),
 
   /**
    * 내 거래내역 목록 조회 (200) — 본인이 송신자 또는 수신자인 전 유형 거래를 최근순으로 페이지 조회.

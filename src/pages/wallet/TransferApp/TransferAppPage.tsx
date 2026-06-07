@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { useRecentInternalRecipients } from '@/hooks/useRecentInternalRecipients';
+import { useValidateMember } from '@/hooks/useValidateMember';
 import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
 import styles from './TransferAppPage.module.css';
 
@@ -62,16 +64,47 @@ export default function TransferAppPage() {
 
   const [recipient, setRecipient] = useState('');
   const [verified, setVerified] = useState<RecipientDisplay | null>(null);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  // 검증 mutation (#131) — 사용자가 "확인" 누를 때 1회 호출.
+  const validateMutation = useValidateMember();
   const [currency, setCurrency] = useState('VND');
   const [amount, setAmount] = useState('');
   const [memo, setMemo] = useState('');
 
   function handleVerify() {
-    // 임시: 최근 수신자 리스트에서 닉네임 매칭. 진짜 검증은 다음 PR(POST /transfers/receivers/search).
-    const found = recentRecipients.find(
-      (u) => u.identifier.toLowerCase() === recipient.toLowerCase()
-    );
-    setVerified(found ?? null);
+    setVerifyError(null);
+    const trimmed = recipient.trim();
+    if (!trimmed) {
+      setVerifyError('이메일을 입력해주세요.');
+      return;
+    }
+    validateMutation.mutate(trimmed, {
+      onSuccess: (res) => {
+        // 응답엔 닉네임/is_verified/receiver_public_id가 들어옴. 화면 모델로 변환.
+        // receiver_public_id는 verified state의 identifier 필드에 저장 — 송금 실행 시 식별자로 사용 예정.
+        setVerified({
+          identifier: res.receiver_public_id,
+          name: res.nickname,
+          initial: res.nickname.charAt(0).toUpperCase() || '?',
+          // 통화는 백엔드 응답에 없음 → 현재 selectedCurrency 유지 (사용자가 따로 선택).
+          currency,
+          tone: 'good',
+        });
+      },
+      onError: (err) => {
+        setVerified(null);
+        if (err instanceof ApiException) {
+          if (err.code === 'COMMON4001') setVerifyError('이메일 형식을 확인해주세요.');
+          else if (err.code === 'MEMBER4001')
+            setVerifyError('해당 이메일의 회원을 찾을 수 없습니다.');
+          else if (err.code === 'NETWORK_ERROR')
+            setVerifyError('네트워크 오류. 잠시 후 다시 시도해주세요.');
+          else setVerifyError(err.message || '확인에 실패했습니다.');
+        } else {
+          setVerifyError('확인에 실패했습니다.');
+        }
+      },
+    });
   }
 
   function handleRecentSelect(user: RecipientDisplay) {
@@ -118,21 +151,32 @@ export default function TransferAppPage() {
         )}
 
         <div className={styles.field}>
-          <label className={styles.label}>받는 사람 닉네임</label>
+          <label className={styles.label}>받는 사람 이메일</label>
           <div className={styles.inputRow}>
             <input
-              type="text"
-              placeholder="닉네임 입력"
+              type="email"
+              placeholder="이메일 입력 (예: user@example.com)"
               value={recipient}
               onChange={(e) => {
                 setRecipient(e.target.value);
                 setVerified(null);
+                setVerifyError(null);
               }}
             />
-            <button type="button" className={styles.inputAction} onClick={handleVerify}>
-              확인
+            <button
+              type="button"
+              className={styles.inputAction}
+              onClick={handleVerify}
+              disabled={validateMutation.isPending}
+            >
+              {validateMutation.isPending ? '확인 중...' : '확인'}
             </button>
           </div>
+          {verifyError && (
+            <div className={styles.errorText} role="alert">
+              {verifyError}
+            </div>
+          )}
         </div>
 
         {verified && (
