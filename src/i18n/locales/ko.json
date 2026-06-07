@@ -756,7 +756,34 @@
       "qrDesc": "송금 확인증 진위 확인 또는 공유 시 사용할 수 있습니다.",
       "saveImage": "이미지로 저장하기",
       "savePdf": "PDF로 저장하기",
-      "goHome": "홈으로 돌아가기"
+      "goHome": "홈으로 돌아가기",
+      "loading": "불러오는 중...",
+      "errNotFound": "송금 확인증을 찾을 수 없습니다.",
+      "errLoadFailed": "확인증을 불러오지 못했습니다.",
+      "titleCompleted": "송금 완료 확인증",
+      "titleOther": "송금 {{status}} 확인증",
+      "subtitle": "Global Bridge 전자지갑 송금 내역",
+      "txNumber": "거래번호",
+      "senderRow": "보낸 사람",
+      "recipientRow": "받는 사람",
+      "methodRow": "송금 방식",
+      "methodInternal": "앱 사용자 송금",
+      "methodRemittance": "해외 계좌 송금",
+      "bankRow": "수취 은행",
+      "accountRow": "수취 계좌",
+      "currencyRow": "송금 통화",
+      "amountRow": "송금 금액",
+      "feeRow": "수수료",
+      "feeNone": "없음",
+      "exchangeRateRow": "적용 환율",
+      "receiveAmountRow": "수취 금액",
+      "receiveCurrencyRow": "수취 통화",
+      "statusRow": "상태",
+      "statusCompleted": "완료",
+      "statusPending": "대기",
+      "statusProcessing": "처리중",
+      "statusFailed": "실패",
+      "statusCancelled": "취소"
     }
   },
   "charge": {
@@ -940,7 +967,8 @@
       "weekdaySun": "일",
       "statusActive": "활성",
       "statusPaused": "일시정지",
-      "statusCanceled": "취소됨"
+      "statusCanceled": "취소됨",
+      "history": "내역"
     },
     "setup": {
       "title": "정기 송금 설정",
@@ -975,7 +1003,34 @@
       "endCountPlaceholder": "반복 횟수 입력",
       "noticeTitle": "정기 송금 안내",
       "noticeText": "송금일 전 알림이 발송되며, 잔액 부족 시 송금이 실패할 수 있습니다.",
-      "submit": "정기 송금 설정하기"
+      "submit": "정기 송금 설정하기",
+      "recentSection": "최근 송금한 대상",
+      "recentLoading": "불러오는 중...",
+      "recentError": "최근 송금 기록을 불러오지 못했어요.",
+      "recentRetry": "다시 시도",
+      "recentEmpty": "아직 송금 기록이 없습니다. 아래에 이메일로 검색하세요.",
+      "emailLabel": "받는 사람 이메일",
+      "emailPlaceholder": "이메일 입력 (예: user@example.com)",
+      "verify": "확인",
+      "verifying": "확인 중...",
+      "verifyErrEmpty": "이메일을 입력해주세요.",
+      "verifyErrFormat": "이메일 형식을 확인해주세요.",
+      "verifyErrNotFound": "해당 이메일의 회원을 찾을 수 없습니다.",
+      "verifyErrGeneric": "확인에 실패했습니다.",
+      "verifiedBadge": "확인됨",
+      "verifiedMethod": "앱 사용자 정기 송금",
+      "scheduleSelect": "일정 선택",
+      "weekly": "매주",
+      "monthly": "매월",
+      "memoLabel": "메모",
+      "memoPlaceholder": "메모 (선택, 최대 255자)",
+      "submitting": "설정 중...",
+      "submitLabel": "정기 송금 설정하기",
+      "errInput": "입력값을 확인해주세요.",
+      "errValidate": "정기 송금 대상 검증에 실패했습니다.",
+      "errCreate": "정기 송금 설정에 실패했습니다.",
+      "errValidateFmt": "검증에 실패했습니다.",
+      "noticeTextNew": "다음 실행 예정일은 등록 시 자동 계산됩니다. 송금일 전 알림이 발송되며, 잔액 부족 시 송금이 실패할 수 있습니다."
     },
     "complete": {
       "title": "정기 송금 완료",
@@ -983,7 +1038,11 @@
       "summaryRecipient": "{{name}}에게 {{amount}}",
       "summarySchedule": "{{schedule}} 정기 송금 · 처리 완료",
       "viewList": "정기 송금 내역 보기",
-      "backHome": "홈으로 돌아가기"
+      "backHome": "홈으로 돌아가기",
+      "recipientFallback": "수신자",
+      "recurringLabel": "정기 송금",
+      "nextRunLabel": "다음 실행",
+      "fallbackText": "정기 송금이 정상적으로 등록되었습니다."
     }
   },
   "doc": {
@@ -1068,28 +1127,28 @@
   },
   "chat": {
     "entryOpenAria": "AI 챗봇 열기",
-    "entryHeadline": "분석 결과 더 궁금하다면?",
-    "entrySub": "AI 챗봇에게 편하게 물어보세요",
+    "entryHeadline": "결과에 대해 더 궁금하세요?",
+    "entrySub": "AI 챗봇에게 물어보세요",
     "aria": "AI 챗봇",
     "title": "AI 챗봇",
     "close": "닫기",
     "introTitle": "무엇이든 물어보세요",
-    "introSub": "이런 걸 도와드릴 수 있어요",
+    "introSub": "법령·환율·커뮤니티·웹 검색을 활용해 답해드려요",
     "hintsLaw": {
-      "h": "법령",
-      "e": "최저임금이 얼마예요?"
+      "h": "법령 안내",
+      "e": "최저임금 위반인지 확인해줘"
     },
     "hintsRate": {
-      "h": "환율",
-      "e": "100만원이 베트남 동으로 얼마예요?"
+      "h": "환율 변환",
+      "e": "내 월급을 베트남 동으로 환산해줘"
     },
     "hintsCommunity": {
-      "h": "커뮤니티",
-      "e": "다른 분들은 어떻게 해결했어요?"
+      "h": "커뮤니티 글",
+      "e": "비슷한 경험 한 사람 있어?"
     },
     "hintsWeb": {
       "h": "웹 검색",
-      "e": "최근 노동법 개정 내용 알려주세요"
+      "e": "올해 외국인 최저임금 얼마야?"
     },
     "suggestedLabel": "이 결과에 대해 바로 묻기",
     "chipMore": "{{title}} 자세히",
@@ -1099,6 +1158,12 @@
     "errForbidden": "본인의 분석 결과만 질문할 수 있어요.",
     "errDocNotFound": "분석 문서를 찾을 수 없어요. 새로고침 후 다시 시도해주세요.",
     "errBadInput": "질문 내용을 확인해주세요.",
-    "errGeneric": "잠시 후 다시 시도해주세요."
+    "errGeneric": "잠시 후 다시 시도해주세요.",
+    "askMore": "더 묻기",
+    "askMorePrompt": "{{title}}에 대해 더 자세히 알려주세요.",
+    "askMorePromptWithMeta": "{{title}}에 대해 더 자세히 알려주세요. {{meta}} 관련해서.",
+    "askMoreAria": "{{title}} AI에게 더 묻기",
+    "typingAria": "응답 생성 중",
+    "fabLabel": "모르겠으면 물어봐요"
   }
 }

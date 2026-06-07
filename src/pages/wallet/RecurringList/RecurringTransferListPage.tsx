@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import type { ScheduledTransferItem } from '@/api/wallet';
 import TopBar from '@/components/navigation/TopBar';
+import { buildRecurringHistoryPath } from '@/constants/routes';
 import { useScheduledTransfers } from '@/hooks/useScheduledTransfers';
 import styles from './RecurringTransferListPage.module.css';
 
@@ -24,7 +25,6 @@ function formatAmount(currencyCode: string, amount: string): string {
   })}`;
 }
 
-// "2026-06-25" (next_run_date는 ISO date) → "2026.06.25" 식 표시
 function formatDate(isoDate: string): string {
   return isoDate.replaceAll('-', '.');
 }
@@ -49,7 +49,6 @@ export default function RecurringTransferListPage() {
     if (item.frequency === 'MONTHLY') {
       return t('recurring.list.monthly', { day: item.schedule_day });
     }
-    // WEEKLY: schedule_day가 1~7(ISO, 1=월)
     const weekday = WEEKDAY_LABEL[item.schedule_day] ?? `${item.schedule_day}`;
     return t('recurring.list.weekly', { weekday });
   }
@@ -59,11 +58,10 @@ export default function RecurringTransferListPage() {
     if (status === 'PAUSED') return t('recurring.list.statusPaused');
     return t('recurring.list.statusCanceled');
   }
+
   const items = data?.scheduled_transfers ?? [];
   const hasApiError = error != null;
 
-  // "다음 예정 송금" 카드 — ACTIVE 항목 중 next_run_date가 가장 빠른 1건.
-  // 백엔드 별도 API 없음. 응답에서 합성.
   const nextScheduled = useMemo(() => {
     const active = items.filter((i) => i.status === 'ACTIVE');
     if (active.length === 0) return null;
@@ -111,7 +109,7 @@ export default function RecurringTransferListPage() {
               key={transfer.public_id}
               type="button"
               className={styles.item}
-              onClick={() => navigate('/recurring/setup')}
+              onClick={() => navigate(buildRecurringHistoryPath(transfer.public_id))}
             >
               <div className={styles.itemMain}>
                 <div className={styles.itemTitle}>
@@ -123,7 +121,7 @@ export default function RecurringTransferListPage() {
                   {formatStatusLabel(transfer.status)}
                 </div>
               </div>
-              <span className={styles.pill}>{t('recurring.list.manage')}</span>
+              <span className={styles.pill}>{t('recurring.list.history')}</span>
             </button>
           ))
         )}
@@ -133,8 +131,6 @@ export default function RecurringTransferListPage() {
         {t('recurring.list.createNew')}
       </button>
 
-      {/* 다음 예정 송금 — ACTIVE 중 가장 빠른 next_run_date 1건 (응답에서 합성).
-          ACTIVE 항목 없으면 카드 숨김. */}
       {nextScheduled && (
         <div className={styles.card}>
           <div className={styles.cardTitle}>{t('recurring.list.nextScheduled')}</div>

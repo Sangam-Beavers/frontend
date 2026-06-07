@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import { buildTransferReceiptPath } from '@/constants/routes';
 import { useTransactions } from '@/hooks/useTransactions';
 import type { WalletTabKey, WalletTransaction } from '@/types/history';
 import { toWalletTransaction } from '@/utils/transactionMapper';
@@ -70,7 +71,8 @@ export default function WalletHistoryPage() {
 
   const handleItemClick = (tx: WalletTransaction) => {
     if (tx.kind === 'send' && tx.receiptInfo) {
-      navigate('/transfer/receipt', { state: tx.receiptInfo });
+      // path param 기반 — 영수증 페이지가 publicId로 API 조회. state 전달 불필요(새로고침 안전).
+      navigate(buildTransferReceiptPath(tx.id));
     }
   };
 

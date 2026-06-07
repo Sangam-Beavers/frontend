@@ -44,6 +44,7 @@ import ExchangeFormPage from '@/pages/wallet/ExchangeForm/ExchangeFormPage';
 import ExchangeReversePage from '@/pages/wallet/ExchangeReverse/ExchangeReversePage';
 import ExchangeSelectPage from '@/pages/wallet/ExchangeSelect/ExchangeSelectPage';
 import RecurringTransferCompletePage from '@/pages/wallet/RecurringComplete/RecurringTransferCompletePage';
+import RecurringTransferHistoryPage from '@/pages/wallet/RecurringHistory/RecurringTransferHistoryPage';
 import RecurringTransferListPage from '@/pages/wallet/RecurringList/RecurringTransferListPage';
 import RecurringTransferSetupPage from '@/pages/wallet/RecurringSetup/RecurringTransferSetupPage';
 import TransferAppPage from '@/pages/wallet/TransferApp/TransferAppPage';
@@ -125,6 +126,7 @@ export const financialServiceRoutes: PageRoute[] = [
   { path: ROUTES.RECURRING, Component: RecurringTransferListPage },
   { path: ROUTES.RECURRING_SETUP, Component: RecurringTransferSetupPage },
   { path: ROUTES.RECURRING_COMPLETE, Component: RecurringTransferCompletePage },
+  { path: ROUTES.RECURRING_HISTORY, Component: RecurringTransferHistoryPage },
 
   { path: ROUTES.TRANSFER, Component: TransferSelectPage },
   { path: ROUTES.TRANSFER_APP, Component: TransferAppPage },

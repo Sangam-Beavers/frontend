@@ -741,7 +741,7 @@
       "receiptTitle": "Transfer completion receipt",
       "receiptSub": "Global Bridge wallet transfer record",
       "txId": "Transaction ID",
-      "dateTime": "Transfer date/time",
+      "dateTime": "Date & time",
       "sender": "Sender",
       "recipient": "Recipient",
       "method": "Transfer method",
@@ -756,7 +756,34 @@
       "qrDesc": "Use it to verify the receipt's authenticity or share it.",
       "saveImage": "Save as image",
       "savePdf": "Save as PDF",
-      "goHome": "Go to home"
+      "goHome": "Back to home",
+      "loading": "Loading…",
+      "errNotFound": "Transfer receipt not found.",
+      "errLoadFailed": "Failed to load receipt.",
+      "titleCompleted": "Transfer receipt",
+      "titleOther": "Transfer ({{status}})",
+      "subtitle": "Global Bridge wallet transfer",
+      "txNumber": "Transaction ID",
+      "senderRow": "Sender",
+      "recipientRow": "Recipient",
+      "methodRow": "Method",
+      "methodInternal": "In-app transfer",
+      "methodRemittance": "International remittance",
+      "bankRow": "Receiving bank",
+      "accountRow": "Receiving account",
+      "currencyRow": "Currency",
+      "amountRow": "Amount",
+      "feeRow": "Fee",
+      "feeNone": "None",
+      "exchangeRateRow": "Exchange rate",
+      "receiveAmountRow": "Received amount",
+      "receiveCurrencyRow": "Received currency",
+      "statusRow": "Status",
+      "statusCompleted": "Completed",
+      "statusPending": "Pending",
+      "statusProcessing": "Processing",
+      "statusFailed": "Failed",
+      "statusCancelled": "Cancelled"
     }
   },
   "charge": {
@@ -940,7 +967,8 @@
       "weekdaySun": "Sun",
       "statusActive": "Active",
       "statusPaused": "Paused",
-      "statusCanceled": "Canceled"
+      "statusCanceled": "Canceled",
+      "history": "History"
     },
     "setup": {
       "title": "Setup recurring",
@@ -975,7 +1003,34 @@
       "endCountPlaceholder": "Enter count",
       "noticeTitle": "Notice",
       "noticeText": "Notifications sent before transfer; may fail if balance insufficient.",
-      "submit": "Setup recurring"
+      "submit": "Setup recurring",
+      "recentSection": "Recent recipients",
+      "recentLoading": "Loading…",
+      "recentError": "Couldn't load recent transfers.",
+      "recentRetry": "Try again",
+      "recentEmpty": "No transfer history yet. Search by email below.",
+      "emailLabel": "Recipient's email",
+      "emailPlaceholder": "Enter email (e.g. user@example.com)",
+      "verify": "Verify",
+      "verifying": "Verifying…",
+      "verifyErrEmpty": "Please enter an email.",
+      "verifyErrFormat": "Please check the email format.",
+      "verifyErrNotFound": "No member found with that email.",
+      "verifyErrGeneric": "Verification failed.",
+      "verifiedBadge": "Verified",
+      "verifiedMethod": "In-app recurring transfer",
+      "scheduleSelect": "Select schedule",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "memoLabel": "Memo",
+      "memoPlaceholder": "Memo (optional, max 255 chars)",
+      "submitting": "Setting up…",
+      "submitLabel": "Set up recurring",
+      "errInput": "Please check your input.",
+      "errValidate": "Recurring transfer validation failed.",
+      "errCreate": "Failed to set up recurring transfer.",
+      "errValidateFmt": "Validation failed.",
+      "noticeTextNew": "The next run date is calculated automatically. A reminder is sent before each transfer; insufficient balance may cause failure."
     },
     "complete": {
       "title": "Recurring set",
@@ -983,7 +1038,11 @@
       "summaryRecipient": "To {{name}}: {{amount}}",
       "summarySchedule": "{{schedule}} recurring · processed",
       "viewList": "View list",
-      "backHome": "Back to home"
+      "backHome": "Back to home",
+      "recipientFallback": "Recipient",
+      "recurringLabel": "Recurring",
+      "nextRunLabel": "Next run",
+      "fallbackText": "Your recurring transfer has been set up."
     }
   },
   "doc": {
@@ -1069,36 +1128,42 @@
   "chat": {
     "entryOpenAria": "Open AI chatbot",
     "entryHeadline": "Have more questions about the result?",
-    "entrySub": "Feel free to ask our AI chatbot",
+    "entrySub": "Ask our AI chatbot",
     "aria": "AI chatbot",
     "title": "AI chatbot",
     "close": "Close",
     "introTitle": "Ask us anything",
-    "introSub": "Here's what we can help with",
+    "introSub": "We answer with legal lookup, FX, community, and web search",
     "hintsLaw": {
-      "h": "Laws",
-      "e": "What's the minimum wage?"
+      "h": "Legal guidance",
+      "e": "Check if this violates the minimum wage"
     },
     "hintsRate": {
-      "h": "Rates",
-      "e": "How much is 1M KRW in Vietnamese Dong?"
+      "h": "FX conversion",
+      "e": "Convert my salary to Vietnamese Dong"
     },
     "hintsCommunity": {
       "h": "Community",
-      "e": "How did others solve this?"
+      "e": "Has anyone had a similar experience?"
     },
     "hintsWeb": {
       "h": "Web search",
-      "e": "Tell me about recent labor law changes"
+      "e": "What is this year's minimum wage for foreign workers?"
     },
     "suggestedLabel": "Ask about this result",
     "chipMore": "More on {{title}}",
-    "inputPlaceholder": "Ask anything…",
+    "inputPlaceholder": "Type your question…",
     "send": "Send",
-    "errAuth": "Your session expired. Please log in again.",
-    "errForbidden": "You can only ask about your own analysis result.",
+    "errAuth": "Your session has expired. Please log in again.",
+    "errForbidden": "You can only ask about your own analysis.",
     "errDocNotFound": "Document not found. Please refresh and try again.",
     "errBadInput": "Please check your question.",
-    "errGeneric": "Please try again later."
+    "errGeneric": "Please try again in a moment.",
+    "askMore": "Ask more",
+    "askMorePrompt": "Tell me more about {{title}}.",
+    "askMorePromptWithMeta": "Tell me more about {{title}}, specifically about {{meta}}.",
+    "askMoreAria": "Ask AI more about {{title}}",
+    "typingAria": "Generating response",
+    "fabLabel": "Have a question? Just ask"
   }
 }

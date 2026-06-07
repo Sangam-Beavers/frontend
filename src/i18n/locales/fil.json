@@ -741,7 +741,7 @@
       "receiptTitle": "Resibo ng padala",
       "receiptSub": "Tala ng padala",
       "txId": "Transaction ID",
-      "dateTime": "Petsa/oras",
+      "dateTime": "Petsa at oras",
       "sender": "Nagpadala",
       "recipient": "Tatanggap",
       "method": "Paraan",
@@ -756,7 +756,34 @@
       "qrDesc": "Para sa verification o pagbahagi.",
       "saveImage": "I-save bilang larawan",
       "savePdf": "I-save bilang PDF",
-      "goHome": "Home"
+      "goHome": "Bumalik sa home",
+      "loading": "Naglo-load…",
+      "errNotFound": "Hindi makita ang resibo.",
+      "errLoadFailed": "Hindi ma-load ang resibo.",
+      "titleCompleted": "Resibo ng transfer",
+      "titleOther": "Transfer ({{status}})",
+      "subtitle": "Global Bridge wallet transfer",
+      "txNumber": "Transaction ID",
+      "senderRow": "Nagpadala",
+      "recipientRow": "Tagatanggap",
+      "methodRow": "Paraan",
+      "methodInternal": "In-app transfer",
+      "methodRemittance": "International remittance",
+      "bankRow": "Receiving bank",
+      "accountRow": "Receiving account",
+      "currencyRow": "Currency",
+      "amountRow": "Halaga",
+      "feeRow": "Bayad",
+      "feeNone": "Wala",
+      "exchangeRateRow": "Exchange rate",
+      "receiveAmountRow": "Halagang natanggap",
+      "receiveCurrencyRow": "Currency na natanggap",
+      "statusRow": "Status",
+      "statusCompleted": "Tapos na",
+      "statusPending": "Naghihintay",
+      "statusProcessing": "Pinoproseso",
+      "statusFailed": "Nabigo",
+      "statusCancelled": "Kanselado"
     }
   },
   "charge": {
@@ -940,7 +967,8 @@
       "weekdaySun": "Lin",
       "statusActive": "Aktibo",
       "statusPaused": "Naka-pause",
-      "statusCanceled": "Kinansela"
+      "statusCanceled": "Kinansela",
+      "history": "Kasaysayan"
     },
     "setup": {
       "title": "Set up",
@@ -975,7 +1003,34 @@
       "endCountPlaceholder": "Ilagay bilang",
       "noticeTitle": "Paalala",
       "noticeText": "Magpapadala ng abiso bago transfer.",
-      "submit": "I-set up"
+      "submit": "I-set up",
+      "recentSection": "Mga kamakailang tagatanggap",
+      "recentLoading": "Naglo-load…",
+      "recentError": "Hindi makuha ang kamakailang transfers.",
+      "recentRetry": "Subukan muli",
+      "recentEmpty": "Wala pang kasaysayan. Hanapin gamit ang email sa ibaba.",
+      "emailLabel": "Email ng tagatanggap",
+      "emailPlaceholder": "Mag-enter ng email (hal: user@example.com)",
+      "verify": "I-verify",
+      "verifying": "Vine-verify…",
+      "verifyErrEmpty": "Mag-enter ng email.",
+      "verifyErrFormat": "Pakitsek ang format ng email.",
+      "verifyErrNotFound": "Walang miyembrong may ganitong email.",
+      "verifyErrGeneric": "Nabigo ang verification.",
+      "verifiedBadge": "Verified",
+      "verifiedMethod": "In-app recurring transfer",
+      "scheduleSelect": "Pumili ng iskedyul",
+      "weekly": "Lingguhan",
+      "monthly": "Buwanan",
+      "memoLabel": "Memo",
+      "memoPlaceholder": "Memo (optional, hanggang 255 char)",
+      "submitting": "Sine-set up…",
+      "submitLabel": "I-set up ang recurring",
+      "errInput": "Pakitsek ang input.",
+      "errValidate": "Nabigo ang validation.",
+      "errCreate": "Hindi na-set up ang recurring transfer.",
+      "errValidateFmt": "Nabigo ang validation.",
+      "noticeTextNew": "Ang susunod na petsa ay awtomatikong kinakalkula. May abiso bago ang transfer; kulang na balanse ay maaaring magdulot ng failure."
     },
     "complete": {
       "title": "Nakatakda",
@@ -983,7 +1038,11 @@
       "summaryRecipient": "Para kay {{name}}: {{amount}}",
       "summarySchedule": "{{schedule}} · naproseso",
       "viewList": "Tingnan",
-      "backHome": "Home"
+      "backHome": "Home",
+      "recipientFallback": "Tagatanggap",
+      "recurringLabel": "Recurring",
+      "nextRunLabel": "Susunod",
+      "fallbackText": "Naka-set up na ang recurring transfer."
     }
   },
   "doc": {
@@ -1074,31 +1133,37 @@
     "title": "AI chatbot",
     "close": "Isara",
     "introTitle": "Magtanong ng kahit ano",
-    "introSub": "Eto ang matutulungan namin",
+    "introSub": "Sasagot kami gamit ang batas, FX, komunidad, at web search",
     "hintsLaw": {
-      "h": "Mga batas",
-      "e": "Magkano ang minimum wage?"
+      "h": "Gabay sa batas",
+      "e": "Tingnan kung lumalabag sa minimum wage"
     },
     "hintsRate": {
-      "h": "Palitan",
-      "e": "Magkano ang 1M KRW sa Vietnamese Dong?"
+      "h": "Conversion ng FX",
+      "e": "I-convert ang sahod ko sa Vietnamese Dong"
     },
     "hintsCommunity": {
       "h": "Komunidad",
-      "e": "Paano nila ito nilutas?"
+      "e": "May nakaranas ba ng katulad?"
     },
     "hintsWeb": {
       "h": "Web search",
-      "e": "Sabihin ang mga kamakailang labor law"
+      "e": "Ano ang minimum wage ng taong ito para sa foreign workers?"
     },
     "suggestedLabel": "Itanong ang resulta",
     "chipMore": "Higit pang detalye sa {{title}}",
-    "inputPlaceholder": "Magtanong ng kahit ano…",
+    "inputPlaceholder": "I-type ang tanong mo…",
     "send": "Ipadala",
-    "errAuth": "Nag-expire na ang session. Mag-login muli.",
-    "errForbidden": "Sariling resulta lang ang puwedeng tanungin.",
-    "errDocNotFound": "Hindi nahanap ang dokumento. I-refresh at subukan muli.",
-    "errBadInput": "Pakitsek ang iyong tanong.",
-    "errGeneric": "Subukan ulit mamaya."
+    "errAuth": "Nag-expire ang session. Mag-log in muli.",
+    "errForbidden": "Maaari mo lang itanong ang sarili mong pagsusuri.",
+    "errDocNotFound": "Hindi makita ang dokumento. I-refresh at subukang muli.",
+    "errBadInput": "Pakitsek ang tanong mo.",
+    "errGeneric": "Subukang muli mamaya.",
+    "askMore": "Magtanong pa",
+    "askMorePrompt": "Sabihin pa tungkol sa {{title}}.",
+    "askMorePromptWithMeta": "Sabihin pa tungkol sa {{title}}, partikular sa {{meta}}.",
+    "askMoreAria": "Tanungin ang AI pa tungkol sa {{title}}",
+    "typingAria": "Bumubuo ng tugon",
+    "fabLabel": "May tanong? Itanong lang"
   }
 }

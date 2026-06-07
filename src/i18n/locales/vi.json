@@ -741,7 +741,7 @@
       "receiptTitle": "Biên lai hoàn tất",
       "receiptSub": "Hồ sơ chuyển tiền",
       "txId": "Mã giao dịch",
-      "dateTime": "Ngày/giờ",
+      "dateTime": "Ngày giờ",
       "sender": "Người gửi",
       "recipient": "Người nhận",
       "method": "Phương thức",
@@ -754,9 +754,36 @@
       "qrAria": "Mã QR",
       "qrTitle": "QR xác minh",
       "qrDesc": "Dùng để xác minh hoặc chia sẻ.",
-      "saveImage": "Lưu ảnh",
-      "savePdf": "Lưu PDF",
-      "goHome": "Về trang chủ"
+      "saveImage": "Lưu dưới dạng ảnh",
+      "savePdf": "Lưu dưới dạng PDF",
+      "goHome": "Về trang chủ",
+      "loading": "Đang tải…",
+      "errNotFound": "Không tìm thấy biên lai chuyển tiền.",
+      "errLoadFailed": "Không thể tải biên lai.",
+      "titleCompleted": "Biên lai chuyển tiền",
+      "titleOther": "Chuyển tiền ({{status}})",
+      "subtitle": "Lịch sử chuyển tiền ví Global Bridge",
+      "txNumber": "Mã giao dịch",
+      "senderRow": "Người gửi",
+      "recipientRow": "Người nhận",
+      "methodRow": "Phương thức",
+      "methodInternal": "Chuyển trong ứng dụng",
+      "methodRemittance": "Chuyển tiền quốc tế",
+      "bankRow": "Ngân hàng nhận",
+      "accountRow": "Tài khoản nhận",
+      "currencyRow": "Tiền tệ",
+      "amountRow": "Số tiền",
+      "feeRow": "Phí",
+      "feeNone": "Không",
+      "exchangeRateRow": "Tỷ giá",
+      "receiveAmountRow": "Số tiền nhận",
+      "receiveCurrencyRow": "Tiền tệ nhận",
+      "statusRow": "Trạng thái",
+      "statusCompleted": "Hoàn tất",
+      "statusPending": "Đang chờ",
+      "statusProcessing": "Đang xử lý",
+      "statusFailed": "Thất bại",
+      "statusCancelled": "Đã hủy"
     }
   },
   "charge": {
@@ -940,7 +967,8 @@
       "weekdaySun": "CN",
       "statusActive": "Đang hoạt động",
       "statusPaused": "Tạm dừng",
-      "statusCanceled": "Đã hủy"
+      "statusCanceled": "Đã hủy",
+      "history": "Lịch sử"
     },
     "setup": {
       "title": "Thiết lập",
@@ -975,7 +1003,34 @@
       "endCountPlaceholder": "Nhập số lần",
       "noticeTitle": "Lưu ý",
       "noticeText": "Thông báo sẽ gửi trước; có thể thất bại nếu thiếu số dư.",
-      "submit": "Thiết lập"
+      "submit": "Thiết lập",
+      "recentSection": "Người nhận gần đây",
+      "recentLoading": "Đang tải…",
+      "recentError": "Không thể tải lịch sử chuyển tiền.",
+      "recentRetry": "Thử lại",
+      "recentEmpty": "Chưa có lịch sử chuyển tiền. Tìm theo email bên dưới.",
+      "emailLabel": "Email người nhận",
+      "emailPlaceholder": "Nhập email (ví dụ: user@example.com)",
+      "verify": "Xác nhận",
+      "verifying": "Đang xác nhận…",
+      "verifyErrEmpty": "Vui lòng nhập email.",
+      "verifyErrFormat": "Vui lòng kiểm tra định dạng email.",
+      "verifyErrNotFound": "Không tìm thấy thành viên với email này.",
+      "verifyErrGeneric": "Xác nhận thất bại.",
+      "verifiedBadge": "Đã xác nhận",
+      "verifiedMethod": "Chuyển tiền định kỳ trong ứng dụng",
+      "scheduleSelect": "Chọn lịch",
+      "weekly": "Hàng tuần",
+      "monthly": "Hàng tháng",
+      "memoLabel": "Ghi chú",
+      "memoPlaceholder": "Ghi chú (tùy chọn, tối đa 255 ký tự)",
+      "submitting": "Đang thiết lập…",
+      "submitLabel": "Thiết lập định kỳ",
+      "errInput": "Vui lòng kiểm tra thông tin.",
+      "errValidate": "Xác thực chuyển tiền định kỳ thất bại.",
+      "errCreate": "Không thể thiết lập chuyển tiền định kỳ.",
+      "errValidateFmt": "Xác thực thất bại.",
+      "noticeTextNew": "Ngày chạy tiếp theo được tính tự động. Thông báo sẽ gửi trước mỗi lần chuyển; số dư không đủ có thể gây thất bại."
     },
     "complete": {
       "title": "Đã thiết lập",
@@ -983,7 +1038,11 @@
       "summaryRecipient": "Đến {{name}}: {{amount}}",
       "summarySchedule": "{{schedule}} · đã xử lý",
       "viewList": "Xem danh sách",
-      "backHome": "Về trang chủ"
+      "backHome": "Về trang chủ",
+      "recipientFallback": "Người nhận",
+      "recurringLabel": "Định kỳ",
+      "nextRunLabel": "Lần tới",
+      "fallbackText": "Đã thiết lập chuyển tiền định kỳ."
     }
   },
   "doc": {
@@ -1074,31 +1133,37 @@
     "title": "Chatbot AI",
     "close": "Đóng",
     "introTitle": "Hãy hỏi bất cứ điều gì",
-    "introSub": "Chúng tôi có thể giúp bạn với",
+    "introSub": "Chúng tôi trả lời với pháp luật, tỷ giá, cộng đồng và tìm kiếm web",
     "hintsLaw": {
-      "h": "Luật pháp",
-      "e": "Lương tối thiểu là bao nhiêu?"
+      "h": "Hướng dẫn pháp lý",
+      "e": "Kiểm tra xem có vi phạm lương tối thiểu không"
     },
     "hintsRate": {
-      "h": "Tỷ giá",
-      "e": "1 triệu Won bằng bao nhiêu VND?"
+      "h": "Chuyển đổi tỷ giá",
+      "e": "Đổi lương của tôi sang VND"
     },
     "hintsCommunity": {
       "h": "Cộng đồng",
-      "e": "Người khác giải quyết thế nào?"
+      "e": "Có ai đã trải qua điều tương tự không?"
     },
     "hintsWeb": {
-      "h": "Tìm web",
-      "e": "Cập nhật luật lao động gần đây"
+      "h": "Tìm kiếm web",
+      "e": "Lương tối thiểu năm nay cho người nước ngoài là bao nhiêu?"
     },
     "suggestedLabel": "Hỏi về kết quả này",
     "chipMore": "Chi tiết về {{title}}",
-    "inputPlaceholder": "Hỏi bất cứ điều gì…",
+    "inputPlaceholder": "Nhập câu hỏi của bạn…",
     "send": "Gửi",
     "errAuth": "Phiên đã hết hạn. Vui lòng đăng nhập lại.",
     "errForbidden": "Bạn chỉ có thể hỏi về kết quả phân tích của mình.",
     "errDocNotFound": "Không tìm thấy tài liệu. Vui lòng làm mới và thử lại.",
-    "errBadInput": "Vui lòng kiểm tra câu hỏi.",
-    "errGeneric": "Vui lòng thử lại sau."
+    "errBadInput": "Vui lòng kiểm tra câu hỏi của bạn.",
+    "errGeneric": "Vui lòng thử lại sau giây lát.",
+    "askMore": "Hỏi thêm",
+    "askMorePrompt": "Hãy nói thêm về {{title}}.",
+    "askMorePromptWithMeta": "Hãy nói thêm về {{title}}, đặc biệt là về {{meta}}.",
+    "askMoreAria": "Hỏi AI thêm về {{title}}",
+    "typingAria": "Đang tạo phản hồi",
+    "fabLabel": "Có câu hỏi? Cứ hỏi nhé"
   }
 }

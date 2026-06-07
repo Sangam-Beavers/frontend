@@ -1,12 +1,16 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
+import { buildTransferReceiptPath } from '@/constants/routes';
 import styles from './TransferCompletePage.module.css';
 
 interface CompleteState {
   recipientName: string;
   currency: string;
   amount: string;
+  /** 송금 실행 응답의 public_id. 영수증 페이지가 path로 받아 API 조회한다.
+   * 송금 실행 연동 사이클에서 호출처가 채워준다. 없으면 영수증 버튼 disabled. */
+  transferPublicId?: string;
 }
 
 const FALLBACK: CompleteState = {
@@ -66,15 +70,12 @@ export default function TransferCompletePage() {
         <button
           type="button"
           className={styles.ghostBtn}
-          onClick={() =>
-            navigate('/transfer/receipt', {
-              state: {
-                recipient: state.recipientName,
-                currency: state.currency,
-                amount: state.amount,
-              },
-            })
-          }
+          disabled={!state.transferPublicId}
+          onClick={() => {
+            if (state.transferPublicId) {
+              navigate(buildTransferReceiptPath(state.transferPublicId));
+            }
+          }}
         >
           {t('transfer.complete.viewReceipt')}
         </button>
