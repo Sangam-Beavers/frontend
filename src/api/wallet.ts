@@ -493,6 +493,54 @@ export interface ScheduledTransferListResponse {
   total_pages: number;
 }
 
+/** 최근 송금한 외부 계좌 한 건 (백엔드 RecentAccountsResponse.AccountItem). */
+export interface RecentRemittanceAccountItem {
+  /** 은행 코드 (예: "KOOKMIN"). */
+  bank_code: string;
+  /** 은행명 (예: "국민은행"). */
+  bank_name: string;
+  /** 마스킹된 계좌번호 (앞 3 + 별표 + 뒤 2). */
+  account_number: string;
+  /** 수취인명 (송금 시점 transactions.receiver_name snapshot). */
+  account_holder: string;
+  /** 가장 최근 송금의 통화 코드 (KRW/USD/PHP/VND 중 1). */
+  currency_code: string;
+  /** 가장 최근 송금 금액 (string 소수 4자리, 예: "200000.0000"). */
+  last_amount: string;
+  /** 가장 최근 송금 시각 (ISO 8601 UTC Z). */
+  last_transferred_at: string;
+}
+
+/** 최근 송금 계좌 목록 응답 (GET /transfers/recent-accounts).
+ *  계좌별 최신 송금 1건씩, 최근순. 이력 없으면 빈 배열. */
+export interface RecentRemittanceAccountsResponse {
+  accounts: RecentRemittanceAccountItem[];
+}
+
+/** 송금 종류 — 백엔드 TransactionType enum과 일치. */
+export type TransferKind = 'INTERNAL_TRANSFER' | 'REMITTANCE';
+
+/** 송금 수수료 조회 요청 (POST /transfers/fee). */
+export interface TransferFeeRequest {
+  /** 송금 방식 — INTERNAL_TRANSFER(앱 내, 수수료 0) / REMITTANCE(타행, amount × 0.5%). */
+  transfer_type: TransferKind;
+  /** 송금 통화 코드 (KRW/USD/PHP/VND). */
+  currency_code: string;
+  /** 송금 금액 (string 십진수, 정수 ≤14자리·소수 ≤4자리, 양수). 예: "10000.0000". */
+  amount: string;
+}
+
+/** 송금 수수료 조회 응답 (백엔드 TransferFeeResponse).
+ *  금액은 모두 소수 4자리 string. */
+export interface TransferFeeResponse {
+  /** 수수료. INTERNAL은 "0.0000". */
+  fee: string;
+  /** 수수료 통화 (송금 통화와 동일). */
+  fee_currency_code: string;
+  /** 총 출금 금액 = amount + fee. */
+  total_deduct_amount: string;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -600,16 +648,7 @@ export const walletApi = {
   getMyAccounts: () => apiClient.get<unknown, AccountListResponse>('/accounts'),
 
   // ===== 정기 송금 =====
-
-  /**
-   * 정기 송금 목록 조회 (200) — GET /transfers/scheduled?status=&page=&size=.
-   *
-   * <p>status로 ACTIVE/PAUSED/CANCELLED 필터 가능 (미지정 시 전체). 본인 정기송금만.
-   */
-  getScheduledTransfers: (status?: ScheduledTransferStatus, page = 0, size = 20) =>
-    apiClient.get<unknown, ScheduledTransferListResponse>('/transfers/scheduled', {
-      params: { ...(status ? { status } : {}), page, size },
-    }),
+  // getScheduledTransfers(목록 조회)는 develop의 다른 PR에서 추가됨(아래에 정의) — 중복 제거.
 
   /**
    * 정기 송금 대상 유효성 검증 (200) — POST /transfers/scheduled/validate.
@@ -789,6 +828,34 @@ export const walletApi = {
     apiClient.get<unknown, ScheduledTransferListResponse>('/transfers/scheduled', {
       params: status ? { status, page, size } : { page, size },
     }),
+
+  /**
+   * 최근 송금한 계좌 조회 (200) — TransferBank 화면 "최근 송금한 계좌" 섹션용.
+   *
+   * <p>내가 과거에 타인 계좌로 보낸 송금의 최신 1건씩 계좌별로 묶어 최근순으로 반환.
+   * 송금 이력 없거나 외부 송금만 한 적이 없으면 빈 배열.
+   *
+   * <p>에러: COMMON4001(400, size 1~50 범위 위반) / AUTH4011(401, interceptor 처리)
+   * / WALLET4001(404, 지갑 없음 — UI에서 섹션 숨김 처리).
+   *
+   * @param size 조회 건수 (1~50, 기본 10)
+   */
+  getRecentRemittanceAccounts: (size?: number) =>
+    apiClient.get<unknown, RecentRemittanceAccountsResponse>('/transfers/recent-accounts', {
+      params: size !== undefined ? { size } : undefined,
+    }),
+
+  /**
+   * 송금 수수료 조회 (200) — TransferConfirm 화면 수수료 표시용.
+   *
+   * <p>입력(송금 종류·통화·금액)으로 수수료를 계산해 반환. DB·외부 호출 없는 순수 계산.
+   * 정책: INTERNAL_TRANSFER=0, REMITTANCE=amount × 0.5% (HALF_UP 4자리).
+   *
+   * <p>에러: COMMON4001(400, body 검증 — 음수/형식) / TRANSFER4002(400, 미지원 통화)
+   * / TRANSFER4003(400, 미지원 송금 유형) / AUTH4011(401, interceptor 처리).
+   */
+  getTransferFee: (body: TransferFeeRequest) =>
+    apiClient.post<unknown, TransferFeeResponse>('/transfers/fee', body),
 
   /**
    * 송금 확인증 단건 조회 (200) — 완료된 INTERNAL_TRANSFER 또는 REMITTANCE 한 건 (api-spec §7-1).
