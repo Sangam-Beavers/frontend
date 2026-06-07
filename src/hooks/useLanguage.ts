@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import i18n from '@/i18n';
 import { memberApi, type LanguageResponse } from '@/api/member';
 
 /**
@@ -35,9 +36,14 @@ export const useUpdateLanguage = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (language: string) => memberApi.updateLanguage(language),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // 캐시 갱신
       queryClient.invalidateQueries({ queryKey: ['member', 'language'] });
       queryClient.invalidateQueries({ queryKey: ['member', 'me'] });
+      // 이슈 #153 — i18next에 즉시 반영 (서버 동기화 기다리지 않고 화면 전환)
+      if (data?.language) {
+        void i18n.changeLanguage(data.language);
+      }
     },
   });
 };
