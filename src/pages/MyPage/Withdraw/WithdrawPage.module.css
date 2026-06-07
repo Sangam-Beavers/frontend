@@ -1,0 +1,185 @@
+.section {
+  padding: 8px 0 160px;
+}
+
+.heading {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--ink);
+  margin: 16px 4px 8px;
+  line-height: 1.35;
+}
+
+.subheading {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 4px 20px;
+  line-height: 1.5;
+}
+
+/* ─── 사유 선택 ───────────────────────────────────────── */
+.reasonList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.reasonItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.reasonItemSelected {
+  background: var(--soft2);
+  border-color: var(--blue);
+}
+
+.reasonRadio {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--blue);
+  flex-shrink: 0;
+}
+
+.reasonLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.etcInput {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  min-height: 90px;
+  resize: vertical;
+  background: #fff;
+  color: var(--ink);
+}
+
+.etcInput:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+/* ─── 안내 단계 ───────────────────────────────────────── */
+.lossList {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lossList li {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 13px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.lossList strong {
+  display: block;
+  color: var(--ink);
+  font-weight: 900;
+  margin-bottom: 2px;
+}
+
+.warningCard {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #9a3412;
+  margin: 4px 0 16px;
+}
+
+/* ─── 하단 고정 버튼 ──────────────────────────────────── */
+/* 하단탭바(BottomNav, 약 66px) 위로 띄움 — LanguageSettingsPage와 동일 패턴. */
+.fixedBtn {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 66px;
+  padding: 12px 18px 14px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+}
+
+.btnRow {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 10px;
+}
+
+.primaryBtn {
+  width: 100%;
+  border-radius: 15px;
+  padding: 15px 16px;
+  background: linear-gradient(135deg, #0b66ff, #0348dd);
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.primaryBtn:disabled {
+  background: var(--soft);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.ghostBtn {
+  border-radius: 15px;
+  padding: 14px 16px;
+  background: var(--soft);
+  color: var(--ink);
+  font-weight: 900;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.ghostBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dangerBtn {
+  border-radius: 15px;
+  padding: 14px 16px;
+  background: #dc2626;
+  color: #fff;
+  font-weight: 900;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dangerBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

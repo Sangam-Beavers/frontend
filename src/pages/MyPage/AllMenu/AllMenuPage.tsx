@@ -47,6 +47,7 @@ const mypageItems: MenuItem[] = [
   { label: '언어 설정', path: '/mypage/language' },
   { label: '구독 관리', path: '/mypage/subscription' },
   { label: '계좌 관리', path: '/mypage/accounts' },
+  { label: '회원 탈퇴', path: '/mypage/withdraw' },
 ];
 
 const supportItems: MenuItem[] = [

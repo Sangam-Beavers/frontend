@@ -38,6 +38,7 @@ export const ROUTES = {
   MYPAGE_WALLET_HISTORY: '/mypage/wallet-history',
   MYPAGE_EXCHANGE_HISTORY: '/mypage/exchange-history',
   MYPAGE_DOC_ANALYSIS_HISTORY: '/mypage/doc-analysis-history',
+  MYPAGE_WITHDRAW: '/mypage/withdraw',
 
   // ===== Service: Charge =====
   CHARGE: '/charge',
