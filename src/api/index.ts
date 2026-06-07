@@ -43,6 +43,13 @@ export type {
   TransactionHistoryItem,
   TransactionListResponse,
   TransferReceiptResponse,
+  TransferTypeCode,
+  ValidateScheduledRequest,
+  ValidateScheduledResponse,
+  CreateScheduledTransferRequest,
+  ScheduledTransferResponse,
+  ScheduledTransferHistoryItem,
+  ScheduledTransferHistoryResponse,
 } from './wallet';
 export { documentApi } from './document';
 export type {

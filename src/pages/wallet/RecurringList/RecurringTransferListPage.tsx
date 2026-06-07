@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import type { ScheduledTransferItem } from '@/api/wallet';
 import TopBar from '@/components/navigation/TopBar';
+import { buildRecurringHistoryPath } from '@/constants/routes';
 import { useScheduledTransfers } from '@/hooks/useScheduledTransfers';
 import styles from './RecurringTransferListPage.module.css';
 
@@ -100,7 +101,9 @@ export default function RecurringTransferListPage() {
               key={transfer.public_id}
               type="button"
               className={styles.item}
-              onClick={() => navigate('/recurring/setup')}
+              // 행 클릭 시 해당 정기 송금의 회차 실행 이력 페이지로 이동
+              // (api-spec — GET /transfers/scheduled/{id}/history).
+              onClick={() => navigate(buildRecurringHistoryPath(transfer.public_id))}
             >
               <div className={styles.itemMain}>
                 <div className={styles.itemTitle}>{transfer.receiver_name ?? '정기 송금'}</div>
@@ -110,7 +113,7 @@ export default function RecurringTransferListPage() {
                   {formatStatusLabel(transfer.status)}
                 </div>
               </div>
-              <span className={styles.pill}>관리</span>
+              <span className={styles.pill}>내역</span>
             </button>
           ))
         )}

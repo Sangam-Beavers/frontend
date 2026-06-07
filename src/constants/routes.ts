@@ -56,6 +56,7 @@ export const ROUTES = {
   RECURRING: '/recurring',
   RECURRING_SETUP: '/recurring/setup',
   RECURRING_COMPLETE: '/recurring/complete',
+  RECURRING_HISTORY: '/recurring/:transferPublicId/history',
 
   // ===== Service: Transfer =====
   TRANSFER: '/transfer',
@@ -84,3 +85,6 @@ export const buildCommunityPostEditPath = (postId: string): string =>
 
 export const buildTransferReceiptPath = (transferPublicId: string): string =>
   `/transfer/receipt/${transferPublicId}`;
+
+export const buildRecurringHistoryPath = (transferPublicId: string): string =>
+  `/recurring/${transferPublicId}/history`;
