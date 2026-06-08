@@ -1,0 +1,51 @@
+# Node
+node_modules/
+npm-debug.log
+pnpm-debug.log
+
+# 빌드 산출물 (Docker가 다시 빌드함)
+dist/
+build/
+
+# Git / IDE
+.git/
+.gitignore
+.gitattributes
+.github/
+.idea/
+.vscode/
+
+# 환경/시크릿 — .env.production만 이미지에 들어감 (placeholder만 있음)
+.env
+.env.local
+.env.development
+.env.development.local
+.env.example
+
+# 캐시
+.cache/
+.parcel-cache/
+.vite/
+
+# 로그/임시
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# 문서/Figma/Husky
+figma/
+*.md
+.husky/
+.claude/
+
+# Docker 자체
+Dockerfile
+.dockerignore
+
+# Lint/format 설정은 이미지에 불필요 (빌드만 됨)
+eslint.config.js
+.prettierrc
+.prettierignore
+commitlint.config.js
