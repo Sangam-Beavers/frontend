@@ -13,12 +13,42 @@
 // ─────────────────────────────────────────────────────────────
 
 import { getAccessToken } from '@/auth/tokenStore';
-import { ApiException, type ApiError } from './client';
+import { apiClient, ApiException, type ApiError } from './client';
 
 export interface ChatRequest {
   message: string;
   session_id?: string;
   user_lang: string;
+}
+
+// ─── 대화 이력 조회 (재방문 복원) ───
+// 백엔드 계약: GET /api/v1/documents/{publicId}/chat/history?limit=&cursor=
+// 일반 JSON 응답이라 axios(apiClient) 사용 — envelope은 interceptor가 풀어준다.
+// 이력 데이터는 계정 B DynamoDB에 있고 백엔드는 권한검증 + Lambda 릴레이만 한다(ai-chatbot-mcp.md §6-2).
+
+export interface ChatHistoryMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
+}
+
+export interface ChatHistoryResponse {
+  messages: ChatHistoryMessage[];
+  next_cursor: string | null;
+}
+
+/**
+ * 챗봇 대화 이력 조회 — 채팅 시트 마운트 시 1회 호출해 이전 대화를 복원(시드)한다.
+ * 이력이 없으면 messages 빈 배열(에러 아님). 분석요약 합성 턴은 내려오지 않는다.
+ */
+export async function fetchChatHistory(
+  documentPublicId: string,
+  params?: { limit?: number; cursor?: string }
+): Promise<ChatHistoryResponse> {
+  return apiClient.get<unknown, ChatHistoryResponse>(
+    `/documents/${documentPublicId}/chat/history`,
+    { params }
+  );
 }
 
 export interface ChatStreamCallbacks {
@@ -87,8 +117,10 @@ export function openChatStream(
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let buffer = '';
+      // done/error 종결 프레임 수신 여부 — 없이 EOF면 중계가 끊긴 것(백엔드 completeWithError 등).
+      // 콜백을 안 부르면 isStreaming이 영원히 true로 남아 입력창이 잠긴다(침묵 실패).
+      let terminated = false;
 
-      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
@@ -99,11 +131,18 @@ export function openChatStream(
         while ((sepIdx = buffer.indexOf('\n\n')) !== -1) {
           const frame = buffer.slice(0, sepIdx);
           buffer = buffer.slice(sepIdx + 2);
-          handleFrame(frame, callbacks);
+          terminated = handleFrame(frame, callbacks) || terminated;
         }
       }
       // 남은 버퍼에 done이 들어있을 가능성도 처리.
-      if (buffer.trim().length > 0) handleFrame(buffer, callbacks);
+      if (buffer.trim().length > 0) {
+        terminated = handleFrame(buffer, callbacks) || terminated;
+      }
+      if (!terminated) {
+        callbacks.onError(
+          new ApiException('STREAM_INTERRUPTED', 0, '응답이 중단됐어요. 잠시 후 다시 시도해주세요.')
+        );
+      }
     } catch (e) {
       // AbortError는 사용자가 의도적으로 취소한 경우라 에러로 알리지 않음.
       if (e instanceof DOMException && e.name === 'AbortError') return;
@@ -123,8 +162,10 @@ export function openChatStream(
  * event: token
  * data: 안녕하세요
  * </pre>
+ *
+ * @returns 종결 프레임(done/error)이었으면 true — 호출측이 EOF 시 중단 여부 판정에 사용.
  */
-function handleFrame(frame: string, cb: ChatStreamCallbacks): void {
+function handleFrame(frame: string, cb: ChatStreamCallbacks): boolean {
   let eventName = 'message';
   const dataLines: string[] = [];
 
@@ -158,8 +199,22 @@ function handleFrame(frame: string, cb: ChatStreamCallbacks): void {
       // done 데이터가 JSON이 아니면 빈 문자열로.
     }
     cb.onDone(sessionId);
+    return true;
+  } else if (eventName === 'error') {
+    // 백엔드 SseRelayListener가 Lambda/중계 오류를 event:error로 흘려준다.
+    // data: {"message": "..."} — 사용자에게 보여줄 안내 문구.
+    let message = '답변 생성 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.';
+    try {
+      const parsed = JSON.parse(data) as { message?: string };
+      if (parsed.message) message = parsed.message;
+    } catch {
+      // error 데이터가 JSON이 아니면 기본 문구 사용.
+    }
+    cb.onError(new ApiException('CHAT_STREAM_ERROR', 0, message));
+    return true;
   }
   // 그 외 이벤트 이름은 무시(미래 확장 대비).
+  return false;
 }
 
 /**

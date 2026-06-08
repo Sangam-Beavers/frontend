@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import { documentApi } from '@/api';
+import { useDocAnalysisStore } from '@/stores/docAnalysisStore';
 import styles from './DocAnalysisLoadingPage.module.css';
 
 /**
@@ -48,6 +49,16 @@ export default function DocAnalysisLoadingPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { docType, publicId } = (location.state as { docType?: string; publicId?: string }) ?? {};
+
+  // 업로드한 원본 이미지 미리보기 — Preview 페이지와 동일하게 스토어의 File로 object URL 생성.
+  // 새로고침 등으로 스토어가 비면 기존 아이콘+라벨 플레이스홀더로 폴백.
+  const docImage = useDocAnalysisStore((s) => s.docImage);
+  const imageUrl = useMemo(() => (docImage ? URL.createObjectURL(docImage) : null), [docImage]);
+  useEffect(() => {
+    return () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+    };
+  }, [imageUrl]);
 
   // publicId 없이 직접 진입(URL 직접 입력 등)하면 폴링 대상이 없으므로 처음으로 돌려보낸다.
   useEffect(() => {
@@ -110,10 +121,20 @@ export default function DocAnalysisLoadingPage() {
       <TopBar title={t('doc.loading.title')} onBack={() => navigate(-1)} />
 
       <div className={styles.preview}>
-        <span className={styles.previewIcon}>🖼️</span>
-        <span className={styles.previewLabel}>
-          {t('doc.loading.imageLabel', { type: docType ?? t('doc.loading.defaultDocType') })}
-        </span>
+        {imageUrl ? (
+          <img
+            className={styles.previewImage}
+            src={imageUrl}
+            alt={t('doc.loading.imageLabel', { type: docType ?? t('doc.loading.defaultDocType') })}
+          />
+        ) : (
+          <>
+            <span className={styles.previewIcon}>🖼️</span>
+            <span className={styles.previewLabel}>
+              {t('doc.loading.imageLabel', { type: docType ?? t('doc.loading.defaultDocType') })}
+            </span>
+          </>
+        )}
       </div>
 
       <div className={styles.steps}>

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +10,10 @@ import styles from './DocAnalysisResultPage.module.css';
 
 // 백엔드 dev seed의 완료문서 ID — publicId 없이 직접 진입했을 때(개발 중 새로고침 등) 폴백.
 // 정상 플로우(제출→로딩→결과)에서는 Loading 페이지가 documentPublicId를 state로 넘겨준다.
-const DEV_FALLBACK_DOCUMENT_ID = '00000000-0000-0000-0000-000000000001';
+// dev 빌드 전용 — 프로덕션에선 폴백 없이 시작 화면으로 돌려보낸다(아래 가드).
+const DEV_FALLBACK_DOCUMENT_ID = import.meta.env.DEV
+  ? '00000000-0000-0000-0000-000000000001'
+  : undefined;
 
 /** 종합 위험 등급별 결론 카드 i18n 키 매핑. null(등급 미산출)은 PARTIAL 등 예외 케이스. */
 const VERDICT_KEYS: Record<RiskLevelCode, { titleKey: string; textKey: string }> = {
@@ -35,7 +39,8 @@ export default function DocAnalysisResultPage() {
     isPending,
   } = useQuery({
     queryKey: ['documentResult', documentPublicId],
-    queryFn: () => documentApi.getResult(documentPublicId),
+    queryFn: () => documentApi.getResult(documentPublicId!),
+    enabled: !!documentPublicId,
   });
 
   const riskItems = result?.risk_items ?? [];
@@ -43,11 +48,28 @@ export default function DocAnalysisResultPage() {
   // 결과 미생성(ANALYZING 중 진입 등) — 백엔드가 COMMON4221(422)로 응답.
   const notReady = error instanceof ApiException && error.code === 'COMMON4221';
 
+  // 진입 가드 — 결과 페이지는 "분석 완료 + 결과 적재" 상태에서만 머문다.
+  // ① publicId 없이 직접 진입(URL 입력 등): 조회 대상이 없으므로 분석 시작 화면으로.
+  // ② 결과 미생성(422): 아직 분석 중 — 로딩(폴링) 화면으로 돌려보내 완료 시 다시 넘어오게 한다.
+  useEffect(() => {
+    if (!documentPublicId) {
+      navigate('/doc-analysis', { replace: true });
+    } else if (notReady) {
+      navigate('/doc-analysis/loading', {
+        replace: true,
+        state: { publicId: documentPublicId },
+      });
+    }
+  }, [documentPublicId, notReady, navigate]);
+
   // 챗봇 시트 초기 화면의 추천 질문 — 분석에서 나온 위험 항목 기반.
   const suggestedTopics = riskItems.map((item) => ({
     title: item.clause,
     meta: item.description,
   }));
+
+  // 가드 useEffect가 리다이렉트할 때까지 빈 화면 — 폴백 ID로 잘못 렌더링되는 것 방지.
+  if (!documentPublicId) return null;
 
   return (
     <div className={styles.pageWrapper}>
