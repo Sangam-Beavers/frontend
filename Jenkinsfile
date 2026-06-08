@@ -21,6 +21,8 @@ pipeline {
             image: sonarsource/sonar-scanner-cli:latest
             command: ["sleep"]
             args: ["infinity"]
+            securityContext:
+              runAsUser: 0
           - name: kaniko
             image: gcr.io/kaniko-project/executor:debug
             command: ["sleep"]
@@ -64,7 +66,7 @@ pipeline {
       steps {
         container('scanner') {
           withSonarQubeEnv('sonarqube') {
-            sh 'cd source && sonar-scanner -Dsonar.working.directory=/tmp/scannerwork'
+            sh 'cd source && sonar-scanner'
           }
         }
       }
