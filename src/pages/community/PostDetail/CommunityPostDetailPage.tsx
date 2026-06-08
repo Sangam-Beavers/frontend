@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
+import Comment from '@/components/community/Comment';
+import TranslateButton from '@/components/community/TranslateButton';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import TopBar from '@/components/navigation/TopBar';
 import { buildCommunityPostEditPath } from '@/constants/routes';
@@ -10,20 +12,43 @@ import { useCreateComment } from '@/hooks/useCreateComment';
 import { useDeleteComment } from '@/hooks/useDeleteComment';
 import { useDeletePost } from '@/hooks/useDeletePost';
 import { usePostDetail } from '@/hooks/usePostDetail';
+import { usePostTranslation } from '@/hooks/usePostTranslation';
 import { useToggleLike } from '@/hooks/useToggleLike';
 import { categoryLabel, formatCommunityDate } from '@/utils/communityFeed';
 import { communityErrorMessage } from '@/utils/communityErrorMessage';
+import { translationErrorMessage } from '@/utils/translationErrorMessage';
 import styles from './CommunityPostDetailPage.module.css';
 
 export default function CommunityPostDetailPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { postId = '' } = useParams<{ postId: string }>();
   const [draft, setDraft] = useState<string>('');
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
   const [confirmCommentId, setConfirmCommentId] = useState<string | null>(null);
 
+  // 이슈 #160 — 게시글 번역 상태. 같은 (post, language) 조합은 react-query 캐시에 들어가
+  // 토글 시 즉시 전환. 사용자가 i18n.language를 바꾸면 새 key로 다시 호출된다.
+  const [showTranslated, setShowTranslated] = useState<boolean>(false);
+  const [translateError, setTranslateError] = useState<string | null>(null);
+
   const { data: post, isLoading, error } = usePostDetail(postId);
+  const targetLanguage = i18n.language;
+  const {
+    data: translation,
+    isFetching: isTranslating,
+    error: translateApiError,
+  } = usePostTranslation(postId, targetLanguage, showTranslated);
+
+  // 번역 호출 에러 → 사용자 메시지 + 원문 상태로 되돌림.
+  useEffect(() => {
+    if (translateApiError) {
+      setTranslateError(translationErrorMessage(translateApiError, t));
+      setShowTranslated(false);
+    } else {
+      setTranslateError(null);
+    }
+  }, [translateApiError, t]);
   const {
     data: commentsData,
     isLoading: isCommentsLoading,
@@ -139,13 +164,26 @@ export default function CommunityPostDetailPage() {
         </div>
       </div>
 
-      <h2 className={styles.title}>{post.title}</h2>
-      <p className={styles.body}>{post.content}</p>
+      <h2 className={styles.title}>
+        {showTranslated && translation ? translation.translated_title : post.title}
+      </h2>
+      <p className={styles.body}>
+        {showTranslated && translation ? translation.translated_content : post.content}
+      </p>
 
       <div className={styles.btnRow}>
-        <button type="button" className={styles.secondary}>
-          {t('community.postDetail.translate')}
-        </button>
+        <TranslateButton
+          variant="post"
+          className={styles.secondary}
+          originalLanguage={post.language}
+          targetLanguage={targetLanguage}
+          isTranslated={showTranslated && Boolean(translation)}
+          isLoading={isTranslating}
+          onClick={() => {
+            setTranslateError(null);
+            setShowTranslated((prev) => !prev);
+          }}
+        />
         <button
           type="button"
           className={`${styles.secondary} ${liked ? styles.likeActive : ''}`}
@@ -157,6 +195,7 @@ export default function CommunityPostDetailPage() {
         </button>
       </div>
 
+      {translateError && <div className={styles.likeError}>{translateError}</div>}
       {likeError && <div className={styles.likeError}>{likeError}</div>}
 
       {post.is_author && (
@@ -202,30 +241,25 @@ export default function CommunityPostDetailPage() {
         <div className={styles.commentEmpty}>{t('community.postDetail.commentEmpty')}</div>
       ) : (
         comments.map((comment) => (
-          <div key={comment.public_id} className={styles.comment}>
-            <div className={styles.commentAvatar}>{comment.author_nickname.charAt(0) || '?'}</div>
-            <div className={styles.commentBody}>
-              <div className={styles.commentName}>
-                {comment.author_nickname}
-                {comment.author_is_verified && (
-                  <span className={styles.verifiedPill}>{t('mypage.verifiedBadge')}</span>
-                )}
-              </div>
-              <div className={styles.commentText}>{comment.content}</div>
-              <div className={styles.commentMeta}>
-                <span>{formatCommunityDate(comment.created_at)}</span>
-                {comment.is_author && (
-                  <button
-                    type="button"
-                    className={styles.commentDelete}
-                    onClick={() => setConfirmCommentId(comment.public_id)}
-                  >
-                    {t('community.postDetail.commentDelete')}
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
+          <Comment
+            key={comment.public_id}
+            postId={postId}
+            comment={comment}
+            onRequestDelete={setConfirmCommentId}
+            verifiedLabel={t('mypage.verifiedBadge')}
+            deleteLabel={t('community.postDetail.commentDelete')}
+            metaClassName={styles.commentMeta}
+            classNames={{
+              root: styles.comment,
+              avatar: styles.commentAvatar,
+              body: styles.commentBody,
+              name: styles.commentName,
+              verifiedPill: styles.verifiedPill,
+              text: styles.commentText,
+              delete: styles.commentDelete,
+              error: styles.commentError,
+            }}
+          />
         ))
       )}
 

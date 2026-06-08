@@ -66,5 +66,6 @@ export function toFeedPostItem(item: PostSummaryItem): FeedPostItem {
     meta: `${item.author_nickname} · ${label} · 댓글 ${item.comment_count} · 좋아요 ${item.like_count}`,
     avatarInitial: item.author_nickname.charAt(0) || '?',
     avatarTone: toneFor(item.author_nickname || item.public_id),
+    language: item.language,
   };
 }

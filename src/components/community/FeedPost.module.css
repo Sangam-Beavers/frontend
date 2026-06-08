@@ -30,6 +30,13 @@
   line-height: 1.45;
 }
 
+/* 카드 하단 번역 토글 영역 — comment variant TranslateButton 한 개 */
+.actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .avatar {
   width: 46px;
   height: 46px;

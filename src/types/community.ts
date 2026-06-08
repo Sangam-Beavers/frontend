@@ -9,6 +9,11 @@ export interface FeedPostItem {
   body: string;
   avatarInitial: string;
   avatarTone: AvatarTone;
+  /**
+   * 작성 언어 코드. 카드별 "Translate" 버튼이 `i18n.language`와 비교해 같으면 숨긴다.
+   * 백엔드가 응답에 안 채워주면 undefined — 그땐 가드 못해 버튼 항상 노출(안전 fallback).
+   */
+  language?: string;
 }
 
 export interface CommunityTabItem {

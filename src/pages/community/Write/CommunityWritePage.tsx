@@ -32,7 +32,8 @@ export default function CommunityWritePage() {
   const [category, setCategory] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [body, setBody] = useState<string>('');
-  const [allowAutoTranslate, setAllowAutoTranslate] = useState<boolean>(false);
+  // 이슈 #160 — autoTranslate(작성 시점 자동 번역) 토글은 제거되었다.
+  // 번역은 게시글 상세 화면에서 "번역 보기" 버튼 클릭 시 동적으로 호출(lazy).
 
   // 편집 모드에서 기존 글을 한 번만 폼에 채운다(이후 사용자가 수정해도 덮어쓰지 않음).
   const { data: existingPost } = usePostDetail(isEdit ? (postId as string) : '');
@@ -116,19 +117,6 @@ export default function CommunityWritePage() {
           value={body}
           onChange={(event) => setBody(event.target.value)}
         />
-      </div>
-
-      <div className={styles.toggleRow}>
-        <span>{t('community.writePage.autoTranslate')}</span>
-        <button
-          type="button"
-          aria-pressed={allowAutoTranslate}
-          aria-label={t('community.writePage.autoTranslate')}
-          className={`${styles.checkbox} ${allowAutoTranslate ? styles.checkboxChecked : ''}`}
-          onClick={() => setAllowAutoTranslate((prev) => !prev)}
-        >
-          {allowAutoTranslate ? '✓' : ''}
-        </button>
       </div>
 
       {errorMessage && <div className={styles.errorText}>{errorMessage}</div>}
