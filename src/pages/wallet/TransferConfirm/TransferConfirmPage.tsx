@@ -15,6 +15,16 @@ interface TransferState {
   recipientKind?: 'account' | 'user';
   currency: string;
   amount: string;
+  // ─── 송금 실행 body 조립용 (TransferApp 신규 필드, INTERNAL_TRANSFER에만 채워짐) ───
+  /** 송금 유형 — INTERNAL_TRANSFER 흐름은 TransferApp이 채움. REMITTANCE는 다음 사이클. */
+  transferType?: 'INTERNAL_TRANSFER' | 'REMITTANCE';
+  /** INTERNAL_TRANSFER 수신자 UUID. */
+  receiverPublicId?: string;
+  /** REMITTANCE 수신 계좌 UUID — 다음 사이클. */
+  bankAccountPublicId?: string;
+  /** 백엔드 요청용 십진수 string ("10000.0000") — 사용자 입력 정수에 .toFixed(4) 적용. */
+  amountDecimal?: string;
+  memo?: string | null;
 }
 
 const FALLBACK: TransferState = {
@@ -70,6 +80,13 @@ export default function TransferConfirmPage() {
   const location = useLocation();
   const state = (location.state as TransferState) ?? FALLBACK;
   const [confirmed, setConfirmed] = useState(false);
+
+  /**
+   * 멱등성 키 — Confirm 진입 시 한 번 생성하고 끝까지 같은 키를 쓴다.
+   * 뒤로가기 → 다시 송금하기 / 네트워크 재시도 어느 경로든 같은 키 유지 → 백엔드가 첫 결과 재반환.
+   * 새 송금 시도(Confirm 다시 진입)는 컴포넌트 mount가 새로 일어나 새 키 생성 — 의도된 분리.
+   */
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   // recipientKind로 송금 유형 추론 — 'account'(내/타인 계좌)면 REMITTANCE, 'user'(앱 사용자)면 INTERNAL.
   // recipientKind 미지정(레거시/fallback)은 안전하게 INTERNAL로 간주(수수료 0).
@@ -200,11 +217,20 @@ export default function TransferConfirmPage() {
           onClick={() =>
             navigate('/transfer/auth', {
               state: {
+                // 표시용
                 recipientName: state.recipientName,
                 recipientInitial: state.recipientInitial,
                 recipientMeta: state.recipientMeta,
                 currency: state.currency,
                 amount: state.amount,
+                // 송금 실행 body 조립용 (TransferApp이 채워준 신규 필드를 그대로 릴레이)
+                transferType: state.transferType,
+                receiverPublicId: state.receiverPublicId,
+                bankAccountPublicId: state.bankAccountPublicId,
+                amountDecimal: state.amountDecimal,
+                memo: state.memo,
+                // 결제 흐름 단일 멱등성 키 — Auth에서 executeTransfer 호출 시 그대로 사용
+                idempotencyKey,
               },
             })
           }

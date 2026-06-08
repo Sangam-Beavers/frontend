@@ -19,6 +19,31 @@ function recentKey(acc: RecentRemittanceAccountItem): string {
   return `${acc.bank_code}::${acc.account_number}`;
 }
 
+/**
+ * '최근 송금한 계좌'를 본인 등록 계좌(`useMyAccounts`)와 매칭해 UUID를 얻는다.
+ *
+ * <p>백엔드 `RecentRemittanceAccountItem`은 송금 이력에서 합성한 표시용 정보라 `account_public_id`가
+ * 없다. 그러나 REMITTANCE 실행에는 `bank_account_public_id`가 필수이므로, 본인 등록 계좌 중 동일
+ * 계좌를 찾아 그 UUID를 사용한다.
+ *
+ * <p>매칭 키: (`bank_code`, `account_number_masked`) — 양쪽 모두 "앞 3 + 별표 + 끝 2" 동일 형식이라
+ * 문자열 전체 비교로 충분. 다음 사이클에서 백엔드가 응답에 `account_public_id`를 직접 포함하면
+ * 이 로직은 제거 가능.
+ *
+ * @returns 매칭된 본인 계좌 또는 null(삭제됐거나 다른 사용자 계좌)
+ */
+function findMyAccountForRecent(
+  recent: RecentRemittanceAccountItem,
+  myAccounts: AccountItem[]
+): AccountItem | null {
+  return (
+    myAccounts.find(
+      (my) =>
+        my.bank_code === recent.bank_code && my.account_number_masked === recent.account_number
+    ) ?? null
+  );
+}
+
 export default function TransferBankPage() {
   const navigate = useNavigate();
   const { data, isLoading, error } = useMyAccounts();
@@ -42,30 +67,49 @@ export default function TransferBankPage() {
 
   const [amount, setAmount] = useState('');
   const num = Number(amount) || 0;
-  const canSubmit = selected !== null && num > 0;
+  // 송금 가능 조건: 'my' 계좌 선택 + 금액 > 0. 'recent' 매칭 실패 상태는 송금 막음.
+  const canSubmit = selected !== null && selected.kind === 'my' && num > 0;
+
+  /** 'recent' 클릭 — 본인 등록 계좌와 매칭해 'my' 선택으로 정규화. 매칭 실패 시 안내. */
+  const [recentMatchError, setRecentMatchError] = useState<string | null>(null);
+  function handleRecentClick(acc: RecentRemittanceAccountItem) {
+    setRecentMatchError(null);
+    const matched = findMyAccountForRecent(acc, accounts);
+    if (matched) {
+      // 매칭 성공 → 'my' 선택으로 통일 (UUID 확보, 송금 실행 가능)
+      setPicked({ kind: 'my', account: matched });
+    } else {
+      // 매칭 실패 — 등록된 적 없거나 삭제된 계좌. 'recent'에 picked 그대로 두되 송금은 막힘.
+      setPicked({ kind: 'recent', account: acc });
+      setRecentMatchError(
+        '이 계좌는 현재 등록된 내 계좌 목록에 없습니다. 등록 후 다시 시도해주세요.'
+      );
+    }
+  }
 
   function buildConfirmState() {
     if (!selected) return null;
     if (selected.kind === 'my') {
       const a = selected.account;
+      const amountDecimal = num.toFixed(4);
       return {
+        // 표시용
         recipientName: '내 계좌',
         recipientInitial: a.bank_name?.[0] ?? '',
         recipientMeta: `${a.bank_name} ${a.account_number_masked}`,
         recipientKind: 'account' as const,
         currency: 'KRW',
         amount: num.toLocaleString(),
+        // 송금 실행 body 조립용 (REMITTANCE)
+        transferType: 'REMITTANCE' as const,
+        bankAccountPublicId: a.account_public_id,
+        amountDecimal,
+        memo: null,
       };
     }
-    const a = selected.account;
-    return {
-      recipientName: a.account_holder,
-      recipientInitial: a.account_holder?.[0] ?? '',
-      recipientMeta: `${a.bank_name} ${a.account_number}`,
-      recipientKind: 'account' as const,
-      currency: a.currency_code, // 최근 송금 시점의 통화 — v1은 라벨 용도, 입력은 숫자만
-      amount: num.toLocaleString(),
-    };
+    // 'recent' kind는 사실상 도달하지 않음(handleRecentClick이 매칭 성공 시 'my'로 정규화).
+    // 매칭 실패로 그대로 남아있다면 송금 실행 불가 — buildConfirmState 호출 자체가 막혀야 한다.
+    return null;
   }
 
   return (
@@ -111,7 +155,7 @@ export default function TransferBankPage() {
                     <div
                       key={recentKey(acc)}
                       className={`${styles.item} ${isSelected ? styles.itemSelected : ''}`}
-                      onClick={() => setPicked({ kind: 'recent', account: acc })}
+                      onClick={() => handleRecentClick(acc)}
                     >
                       <div className={styles.itemMain}>
                         <div className={styles.itemTitle}>
@@ -195,6 +239,19 @@ export default function TransferBankPage() {
           )}
         </div>
 
+        {recentMatchError && (
+          <div className={styles.emptyState} role="alert">
+            <div className={styles.emptyText}>{recentMatchError}</div>
+            <button
+              type="button"
+              className={styles.registerBtn}
+              onClick={() => navigate('/charge/add-account')}
+            >
+              계좌 등록하기
+            </button>
+          </div>
+        )}
+
         <div className={styles.field}>
           <label className={styles.label} htmlFor="transfer-amount">
             송금할 금액
@@ -205,7 +262,7 @@ export default function TransferBankPage() {
             inputMode="numeric"
             className={styles.input}
             placeholder="0"
-            disabled={selected === null}
+            disabled={selected === null || selected.kind === 'recent'}
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ''))}
           />
