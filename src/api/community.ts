@@ -39,6 +39,11 @@ export interface PostSummaryItem {
   title: string;
   /** 본문 미리보기 — 앞 100자, 초과 시 … 표기. */
   content_preview: string;
+  /**
+   * 작성 언어 코드(ko/en/vi/fil). 목록 카드의 "Translate" 버튼 가드용 —
+   * `i18n.language`와 같으면 버튼 숨김. 백엔드 #161 머지 전 응답엔 없을 수 있어 optional.
+   */
+  language?: string;
   author_nickname: string;
   like_count: number;
   comment_count: number;
@@ -90,6 +95,13 @@ export interface PostDetailResponse {
   comment_count: number;
   created_at: string;
   updated_at: string;
+  /**
+   * 원문 언어 코드 (예: "ko" / "en" / "vi" / "fil"). 백엔드 #161에서 추가 예정 — 호환을 위해 optional.
+   *
+   * <p>"번역 보기" 버튼 노출 가드용 — 사용자 i18n.language와 같으면 버튼을 숨긴다.
+   * 백엔드가 아직 안 내려주는 동안은 undefined → 버튼은 항상 노출(있는 그대로 사용자가 시도).
+   */
+  language?: string;
 }
 
 /** 좋아요 저장/취소 응답 (POST·DELETE /community/posts/{id}/likes). */
@@ -138,6 +150,11 @@ export interface CommentItem {
   /** 요청자가 작성자인지 — 댓글 삭제 노출 판단. 비로그인/타인은 false. */
   is_author: boolean;
   created_at: string;
+  /**
+   * 댓글 원문 언어 코드. 백엔드 #161에서 추가 예정 — 호환을 위해 optional.
+   * 게시글과 동일하게 i18n.language와 같으면 "번역 보기" 버튼을 숨긴다.
+   */
+  language?: string;
 }
 
 /** 댓글 목록 응답 (GET /community/posts/{id}/comments) — 페이지 메타 포함. */
@@ -167,6 +184,34 @@ export interface PostUpdateRequest {
   category?: string;
   title?: string;
   content?: string;
+}
+
+/**
+ * 게시글 동적 번역 응답 (GET /community/posts/{id}/translation, 이슈 #160 / 백엔드 #161).
+ *
+ * <p>사용자가 "번역 보기" 버튼을 누르면 호출 — 트리거 lazy. 목록에서는 호출하지 않는다.
+ * 응답 언어는 요청 시 `language` 쿼리 파라미터 그대로 (예: 'ko'/'en'/'vi'/'fil').
+ * 같은 언어 요청은 프론트에서 가드(버튼 비노출)하므로 정상 흐름에선 안 옴.
+ */
+export interface PostTranslationResponse {
+  /** 번역된 제목. */
+  translated_title: string;
+  /** 번역된 본문. */
+  translated_content: string;
+  /** 번역 결과 언어 코드 (요청한 language와 동일). */
+  translated_language: string;
+}
+
+/**
+ * 댓글 동적 번역 응답 (GET /community/posts/{postId}/comments/{commentId}/translation, 이슈 #160 / 백엔드 #161).
+ *
+ * <p>게시글 번역과 동일 패턴 — 댓글은 제목이 없어 content만 반환한다.
+ */
+export interface CommentTranslationResponse {
+  /** 번역된 댓글 본문. */
+  translated_content: string;
+  /** 번역 결과 언어 코드 (요청한 language와 동일). */
+  translated_language: string;
 }
 
 // ---------- API 함수 ----------
@@ -272,4 +317,37 @@ export const communityApi = {
    */
   getLikedPosts: (params?: LikedPostListParams) =>
     apiClient.get<unknown, LikedPostListResponse>('/community/posts/liked', { params }),
+
+  /**
+   * 게시글 동적 번역 조회 (200) — 이슈 #160 / 백엔드 #161.
+   *
+   * <p>사용자가 "번역 보기" 버튼을 누른 시점에만 호출(lazy). 대상 언어는 현재 i18n.language.
+   * 원문 언어와 같으면 프론트에서 호출 자체를 막는다(버튼 비노출).
+   *
+   * <p>실패 코드:
+   * <ul>
+   *   <li>COMMUNITY4001 — 없는 게시글(404)</li>
+   *   <li>COMMUNITY4003 — 지원하지 않는 언어(400)</li>
+   *   <li>COMMUNITY4004 — 본문이 너무 김(400)</li>
+   * </ul>
+   *
+   * <p>응답은 캐시해 두는 편이 좋다 — 같은 (post, language) 조합에 대한 두 번째 클릭은
+   * react-query 캐시로 즉시 반환된다(useMutation 대신 useQuery + enabled 토글 패턴).
+   */
+  getPostTranslation: (postId: string, language: string) =>
+    apiClient.get<unknown, PostTranslationResponse>(`/community/posts/${postId}/translation`, {
+      params: { language },
+    }),
+
+  /**
+   * 댓글 동적 번역 조회 (200) — 이슈 #160 / 백엔드 #161.
+   *
+   * <p>게시글 번역과 동일 패턴. 댓글은 제목이 없어 content만 반환한다.
+   * 실패 코드도 게시글과 동일(COMMUNITY4001/4003/4004).
+   */
+  getCommentTranslation: (postId: string, commentId: string, language: string) =>
+    apiClient.get<unknown, CommentTranslationResponse>(
+      `/community/posts/${postId}/comments/${commentId}/translation`,
+      { params: { language } }
+    ),
 };
