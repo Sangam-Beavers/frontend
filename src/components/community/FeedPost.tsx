@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TranslateButton from '@/components/community/TranslateButton';
@@ -48,9 +48,7 @@ export default function FeedPost({ post }: FeedPostProps) {
   const titleText = isShowingTranslation ? translation!.translated_title : post.title;
   const bodyText = isShowingTranslation ? translation!.translated_content : post.body;
 
-  const handleTranslateClick = (event: MouseEvent<HTMLButtonElement>) => {
-    // 카드 onClick의 네비게이션을 막아야 한다 — 버튼만 단독 동작.
-    event.stopPropagation();
+  const handleTranslateClick = () => {
     setShowTranslated((prev) => !prev);
   };
 
