@@ -20,7 +20,8 @@ export interface ExecuteTransferParams {
  * <p>성공 시 잔액·거래내역·송금 관련 캐시를 invalidate해 송금 후 화면들이 최신 상태가 되도록 한다:
  * - `['wallet','balances']` (잔액)
  * - `['wallet','transactions']` (거래내역)
- * - `['wallet','recent-recipients']` (최근 송금 사용자 — 새 수신자 반영)
+ * - `['wallet','recent-recipients']` (INTERNAL — 최근 송금 앱 사용자)
+ * - `['wallet','recent-remittance-accounts']` (REMITTANCE — 최근 송금 외부 계좌, CodeRabbit 반영)
  * - `['wallet','wallet-me']` (홈 원화 환산)
  *
  * <p>에러는 ApiException으로 throw — 호출 측 onError에서 코드별 분기.
@@ -35,6 +36,7 @@ export const useExecuteTransfer = () => {
       queryClient.invalidateQueries({ queryKey: ['wallet', 'balances'] });
       queryClient.invalidateQueries({ queryKey: ['wallet', 'transactions'] });
       queryClient.invalidateQueries({ queryKey: ['wallet', 'recent-recipients'] });
+      queryClient.invalidateQueries({ queryKey: ['wallet', 'recent-remittance-accounts'] });
       queryClient.invalidateQueries({ queryKey: ['wallet', 'wallet-me'] });
     },
   });

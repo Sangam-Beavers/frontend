@@ -125,7 +125,11 @@ export default function TransferAppPage() {
    */
   function handleNext() {
     if (!verified) return;
-    const amountDecimal = Number(amount).toFixed(4);
+    // 방어적 NaN 가드 — canSubmit이 Number(amount) > 0을 체크하지만,
+    // 비정상 입력(빈 문자열·문자 등)이 들어왔을 때 NaN.toFixed(4) → "NaN"이 백엔드로 가는 것을 막는다.
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) return;
+    const amountDecimal = numericAmount.toFixed(4);
     navigate('/transfer/confirm', {
       state: {
         // 표시용 (기존 컨벤션 유지)
