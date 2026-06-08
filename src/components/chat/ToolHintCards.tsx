@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styles from './ToolHintCards.module.css';
 
 /**
@@ -13,6 +14,7 @@ import styles from './ToolHintCards.module.css';
  * "어떤 걸 물어볼 수 있는지" 관점으로 안내한다.
  *
  * 2x2 grid 레이아웃 — 시트 첫 시야에 4가지 도구가 모두 보이도록.
+ * 이슈 #153 — 라벨/예시 모두 i18n 키화.
  */
 
 interface ToolHintCardsProps {
@@ -20,35 +22,41 @@ interface ToolHintCardsProps {
   onPick: (example: string) => void;
 }
 
-const HINTS: { icon: string; heading: string; example: string }[] = [
-  { icon: '📜', heading: '법령', example: '최저임금이 얼마예요?' },
-  { icon: '💱', heading: '환율', example: '100만원이 베트남 동으로 얼마예요?' },
-  { icon: '💬', heading: '커뮤니티', example: '다른 분들은 어떻게 해결했어요?' },
-  { icon: '🌐', heading: '웹 검색', example: '최근 노동법 개정 내용 알려주세요' },
-];
+const HINT_KEYS: { icon: string; key: 'hintsLaw' | 'hintsRate' | 'hintsCommunity' | 'hintsWeb' }[] =
+  [
+    { icon: '📜', key: 'hintsLaw' },
+    { icon: '💱', key: 'hintsRate' },
+    { icon: '💬', key: 'hintsCommunity' },
+    { icon: '🌐', key: 'hintsWeb' },
+  ];
 
 export default function ToolHintCards({ onPick }: ToolHintCardsProps) {
+  const { t } = useTranslation();
   return (
     <div className={styles.intro}>
-      <div className={styles.title}>무엇이든 물어보세요 🤖</div>
-      <div className={styles.subtitle}>이런 걸 도와드릴 수 있어요</div>
+      <div className={styles.title}>{t('chat.introTitle')} 🤖</div>
+      <div className={styles.subtitle}>{t('chat.introSub')}</div>
       <div className={styles.grid}>
-        {HINTS.map((hint) => (
-          <button
-            key={hint.heading}
-            type="button"
-            className={styles.hint}
-            onClick={() => onPick(hint.example)}
-          >
-            <div className={styles.row}>
-              <span className={styles.icon} aria-hidden>
-                {hint.icon}
-              </span>
-              <span className={styles.heading}>{hint.heading}</span>
-            </div>
-            <span className={styles.example}>{hint.example}</span>
-          </button>
-        ))}
+        {HINT_KEYS.map((hint) => {
+          const heading = t(`chat.${hint.key}.h`);
+          const example = t(`chat.${hint.key}.e`);
+          return (
+            <button
+              key={hint.key}
+              type="button"
+              className={styles.hint}
+              onClick={() => onPick(example)}
+            >
+              <div className={styles.row}>
+                <span className={styles.icon} aria-hidden>
+                  {hint.icon}
+                </span>
+                <span className={styles.heading}>{heading}</span>
+              </div>
+              <span className={styles.example}>{example}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

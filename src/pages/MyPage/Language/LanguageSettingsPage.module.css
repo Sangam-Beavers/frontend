@@ -79,3 +79,16 @@
   cursor: pointer;
   font-family: inherit;
 }
+
+.primaryBtn:disabled {
+  background: var(--soft);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.loading {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 28px 14px;
+}

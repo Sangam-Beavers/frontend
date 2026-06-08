@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ROUTES } from '@/constants/routes';
 import styles from './CommunityMenu.module.css';
 
@@ -20,6 +21,7 @@ export default function CommunityMenu({
   searchActive = false,
 }: CommunityMenuProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className={styles.menu}>
@@ -30,7 +32,7 @@ export default function CommunityMenu({
         onClick={onToggleSearch}
       >
         <span className={styles.icon}>🔍</span>
-        검색
+        {t('community.search')}
       </button>
       <button
         type="button"
@@ -38,14 +40,15 @@ export default function CommunityMenu({
         onClick={() => navigate(ROUTES.COMMUNITY_WRITE)}
       >
         <span className={styles.icon}>✏️</span>
-        글쓰기
+        {t('community.write')}
       </button>
       <button
         type="button"
         className={styles.item}
         onClick={() => navigate(ROUTES.COMMUNITY_LIKED)}
       >
-        <span className={styles.icon}>❤️</span>내 관심글
+        <span className={styles.icon}>❤️</span>
+        {t('community.liked')}
       </button>
     </div>
   );

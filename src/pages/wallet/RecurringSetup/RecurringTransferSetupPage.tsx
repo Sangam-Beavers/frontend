@@ -1,24 +1,45 @@
-import { useState } from 'react';
+// pages/wallet/RecurringSetup/RecurringTransferSetupPage.tsx
+// 정기 송금 설정 (INTERNAL_TRANSFER 한정 — 앱 사용자 간)
+// develop의 API 연동 + i18n 키화 통합
+
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { ApiException } from '@/api';
+import type { CreateScheduledTransferRequest, ScheduledTransferFrequency } from '@/api/wallet';
 import TopBar from '@/components/navigation/TopBar';
-import { RECENT_USERS_MOCK, type RecentUser } from '@/mocks/transferMock';
+import { useCreateScheduled } from '@/hooks/useCreateScheduled';
+import { useRecentInternalRecipients } from '@/hooks/useRecentInternalRecipients';
 import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
+import { useValidateMember } from '@/hooks/useValidateMember';
+import { useValidateScheduled } from '@/hooks/useValidateScheduled';
 import styles from './RecurringTransferSetupPage.module.css';
 
-const RECENT_USERS = RECENT_USERS_MOCK.result;
-const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
-const MONTH_DAYS = Array.from({ length: 28 }, (_, i) => i + 1);
-
-const TONE_CLASS: Record<string, string> = {
-  best: 'avatarBest',
-  good: 'avatarGood',
-  mid: 'avatarMid',
-  warn: 'avatarWarn',
-  bad: 'avatarBad',
+type AvatarTone = 'best' | 'good' | 'mid' | 'warn' | 'bad';
+const TONES: AvatarTone[] = ['best', 'good', 'mid', 'warn', 'bad'];
+const AVATAR_CLASS: Record<AvatarTone, string> = {
+  best: styles.avatarBest,
+  good: styles.avatarGood,
+  mid: styles.avatarMid,
+  warn: styles.avatarWarn,
+  bad: styles.avatarBad,
 };
 
+interface RecipientDisplay {
+  identifier: string;
+  name: string;
+  initial: string;
+  tone: AvatarTone;
+}
+
+type ScheduleType = '' | 'WEEKLY_PICK' | 'MONTHLY_PICK';
+const WEEKDAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+const MONTH_DAYS = Array.from({ length: 28 }, (_, i) => i + 1);
+
 export default function RecurringTransferSetupPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
   const {
     data: currenciesData,
     isLoading: currenciesLoading,
@@ -28,69 +49,232 @@ export default function RecurringTransferSetupPage() {
   const currencies = currenciesData?.currencies ?? [];
   const hasCurrenciesError = currenciesError != null;
 
-  const [recipientOpen, setRecipientOpen] = useState(false);
-  const [recipient, setRecipient] = useState<RecentUser | null>(null);
+  const {
+    data: recipientsData,
+    isLoading: recipientsLoading,
+    error: recipientsError,
+    refetch: refetchRecipients,
+  } = useRecentInternalRecipients();
+  const hasRecipientsError = recipientsError != null;
+
+  const recentRecipients: RecipientDisplay[] = useMemo(() => {
+    const list = recipientsData?.receivers ?? [];
+    return list.map((r, idx) => ({
+      identifier: r.member_public_id,
+      name: r.nickname,
+      initial: r.nickname.charAt(0).toUpperCase() || '?',
+      tone: TONES[idx % TONES.length],
+    }));
+  }, [recipientsData]);
+
+  const [emailInput, setEmailInput] = useState('');
+  const [verified, setVerified] = useState<RecipientDisplay | null>(null);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const validateMutation = useValidateMember();
+
+  function handleVerify() {
+    setVerifyError(null);
+    const trimmed = emailInput.trim();
+    if (!trimmed) {
+      setVerifyError(t('recurring.setup.verifyErrEmpty'));
+      return;
+    }
+    validateMutation.mutate(trimmed, {
+      onSuccess: (res) => {
+        setVerified({
+          identifier: res.receiver_public_id,
+          name: res.nickname,
+          initial: res.nickname.charAt(0).toUpperCase() || '?',
+          tone: 'good',
+        });
+      },
+      onError: (err) => {
+        setVerified(null);
+        if (err instanceof ApiException) {
+          if (err.code === 'COMMON4001') setVerifyError(t('recurring.setup.verifyErrFormat'));
+          else if (err.code === 'MEMBER4001')
+            setVerifyError(t('recurring.setup.verifyErrNotFound'));
+          else setVerifyError(err.message || t('recurring.setup.verifyErrGeneric'));
+        } else {
+          setVerifyError(t('recurring.setup.verifyErrGeneric'));
+        }
+      },
+    });
+  }
+
+  function handleRecentSelect(user: RecipientDisplay) {
+    setEmailInput('');
+    setVerified(user);
+    setVerifyError(null);
+  }
+
   const [currency, setCurrency] = useState('VND');
   const [amount, setAmount] = useState('');
-  const [scheduleType, setScheduleType] = useState('');
+  const [scheduleType, setScheduleType] = useState<ScheduleType>('');
   const [scheduleDay, setScheduleDay] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endType, setEndType] = useState('');
-  const [endCount, setEndCount] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [memo, setMemo] = useState('');
+
+  const validateScheduled = useValidateScheduled();
+  const createScheduled = useCreateScheduled();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const isSubmitting = validateScheduled.isPending || createScheduled.isPending;
 
   const canSubmit =
-    recipient !== null &&
+    verified !== null &&
+    currency !== '' &&
     Number(amount) > 0 &&
     scheduleType !== '' &&
-    startDate !== '' &&
-    endType !== '';
+    scheduleDay !== '';
 
-  function handleSelectRecipient(user: RecentUser) {
-    setRecipient(user);
-    setRecipientOpen(false);
+  function buildRequest(): CreateScheduledTransferRequest | null {
+    if (!verified) return null;
+    const frequency: ScheduledTransferFrequency =
+      scheduleType === 'WEEKLY_PICK' ? 'WEEKLY' : 'MONTHLY';
+    const day =
+      scheduleType === 'WEEKLY_PICK'
+        ? (WEEKDAY_KEYS as readonly string[]).indexOf(scheduleDay) + 1
+        : Number(scheduleDay);
+    if (!day || day < 1) return null;
+    return {
+      transfer_type: 'INTERNAL_TRANSFER',
+      receiver_public_id: verified.identifier,
+      amount: String(amount),
+      currency_code: currency,
+      receive_currency_code: currency,
+      frequency,
+      schedule_day: day,
+      memo: memo.trim() ? memo.trim() : null,
+    };
   }
+
+  function handleSubmit() {
+    setSubmitError(null);
+    const body = buildRequest();
+    if (!body) {
+      setSubmitError(t('recurring.setup.errInput'));
+      return;
+    }
+    validateScheduled.mutate(body, {
+      onSuccess: (res) => {
+        if (!res.is_valid) {
+          setSubmitError(res.reason ?? t('recurring.setup.errValidate'));
+          return;
+        }
+        createScheduled.mutate(body, {
+          onSuccess: (created) => {
+            navigate('/recurring/complete', {
+              state: { scheduled: created, recipientName: verified?.name ?? null },
+            });
+          },
+          onError: (err) => {
+            if (err instanceof ApiException) {
+              setSubmitError(err.message || t('recurring.setup.errCreate'));
+            } else {
+              setSubmitError(t('recurring.setup.errCreate'));
+            }
+          },
+        });
+      },
+      onError: (err) => {
+        if (err instanceof ApiException) {
+          setSubmitError(err.message || t('recurring.setup.errInput'));
+        } else {
+          setSubmitError(t('recurring.setup.errValidateFmt'));
+        }
+      },
+    });
+  }
+
+  const weekdayLabels: Record<(typeof WEEKDAY_KEYS)[number], string> = {
+    mon: t('recurring.setup.weekdayMon'),
+    tue: t('recurring.setup.weekdayTue'),
+    wed: t('recurring.setup.weekdayWed'),
+    thu: t('recurring.setup.weekdayThu'),
+    fri: t('recurring.setup.weekdayFri'),
+    sat: t('recurring.setup.weekdaySat'),
+    sun: t('recurring.setup.weekdaySun'),
+  };
 
   return (
     <div className={styles.contentPad}>
-      <TopBar title="정기 송금 설정" />
+      <TopBar title={t('recurring.setup.title')} />
 
-      {/* 송금 대상 */}
+      <div className={styles.section}>{t('recurring.setup.recentSection')}</div>
+      {recipientsLoading ? (
+        <div className={styles.emptyText}>{t('recurring.setup.recentLoading')}</div>
+      ) : hasRecipientsError ? (
+        <div className={styles.emptyText}>
+          {t('recurring.setup.recentError')}
+          <button type="button" className={styles.retryBtn} onClick={() => refetchRecipients()}>
+            {t('recurring.setup.recentRetry')}
+          </button>
+        </div>
+      ) : recentRecipients.length === 0 ? (
+        <div className={styles.emptyText}>{t('recurring.setup.recentEmpty')}</div>
+      ) : (
+        <div className={styles.scrollRow}>
+          {recentRecipients.map((user) => (
+            <button
+              key={user.identifier}
+              type="button"
+              className={styles.recentCard}
+              onClick={() => handleRecentSelect(user)}
+            >
+              <div className={`${styles.avatarBig} ${AVATAR_CLASS[user.tone]}`}>{user.initial}</div>
+              <div className={styles.recentName}>{user.name}</div>
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className={styles.field}>
-        <label htmlFor="recipient">송금 대상</label>
-        <button
-          id="recipient"
-          type="button"
-          className={styles.select}
-          onClick={() => setRecipientOpen((prev) => !prev)}
-        >
-          <span>{recipient ? `${recipient.name} · 앱 사용자` : '대상 선택'}</span>
-          <span aria-hidden>{recipientOpen ? '▴' : '▾'}</span>
-        </button>
-        {recipientOpen && (
-          <div className={styles.recipientList}>
-            {RECENT_USERS.map((user) => (
-              <div
-                key={user.email}
-                className={styles.recipientItem}
-                onClick={() => handleSelectRecipient(user)}
-              >
-                <div className={`${styles.avatar} ${styles[TONE_CLASS[user.tone]]}`}>
-                  {user.initial}
-                </div>
-                <div>
-                  <div className={styles.recipientName}>{user.name}</div>
-                  <div className={styles.recipientMeta}>{user.currency}</div>
-                </div>
-              </div>
-            ))}
+        <label className={styles.label}>{t('recurring.setup.emailLabel')}</label>
+        <div className={styles.inputRow}>
+          <input
+            type="email"
+            placeholder={t('recurring.setup.emailPlaceholder')}
+            value={emailInput}
+            onChange={(e) => {
+              setEmailInput(e.target.value);
+              setVerified(null);
+              setVerifyError(null);
+            }}
+          />
+          <button
+            type="button"
+            className={styles.inputAction}
+            onClick={handleVerify}
+            disabled={validateMutation.isPending}
+          >
+            {validateMutation.isPending
+              ? t('recurring.setup.verifying')
+              : t('recurring.setup.verify')}
+          </button>
+        </div>
+        {verifyError && (
+          <div className={styles.errorText} role="alert">
+            {verifyError}
           </div>
         )}
       </div>
 
-      {/* 송금 통화 / 금액 */}
+      {verified && (
+        <div className={styles.verifiedCard}>
+          <div className={`${styles.avatarBig} ${AVATAR_CLASS[verified.tone]}`}>
+            {verified.initial}
+          </div>
+          <div className={styles.verifiedInfo}>
+            <div className={styles.verifiedName}>
+              {verified.name}
+              <span className={styles.pill}>{t('recurring.setup.verifiedBadge')}</span>
+            </div>
+            <div className={styles.verifiedMeta}>{t('recurring.setup.verifiedMethod')}</div>
+          </div>
+        </div>
+      )}
+
       <div className={styles.field}>
-        <label>송금 통화 / 금액</label>
+        <label>{t('recurring.setup.amountLabel')}</label>
         <div className={styles.amountRow}>
           <select
             className={styles.selectNative}
@@ -98,8 +282,10 @@ export default function RecurringTransferSetupPage() {
             onChange={(e) => setCurrency(e.target.value)}
             disabled={currenciesLoading || hasCurrenciesError || currencies.length === 0}
           >
-            {currenciesLoading && <option value="">불러오는 중...</option>}
-            {hasCurrenciesError && <option value="">통화 불러오기 실패</option>}
+            {currenciesLoading && (
+              <option value="">{t('recurring.setup.currenciesLoading')}</option>
+            )}
+            {hasCurrenciesError && <option value="">{t('recurring.setup.currenciesError')}</option>}
             {!currenciesLoading &&
               !hasCurrenciesError &&
               currencies.map((c) => (
@@ -110,7 +296,7 @@ export default function RecurringTransferSetupPage() {
           </select>
           {hasCurrenciesError && (
             <button type="button" className={styles.retryBtn} onClick={() => refetchCurrencies()}>
-              다시 시도
+              {t('recurring.setup.retry')}
             </button>
           )}
           <input
@@ -124,49 +310,47 @@ export default function RecurringTransferSetupPage() {
         </div>
       </div>
 
-      {/* 송금 일정 */}
       <div className={styles.field}>
-        <label>송금 일정</label>
+        <label>{t('recurring.setup.scheduleLabel')}</label>
         <select
           className={styles.selectNative}
           value={scheduleType}
           onChange={(e) => {
-            setScheduleType(e.target.value);
+            setScheduleType(e.target.value as ScheduleType);
             setScheduleDay('');
           }}
         >
-          <option value="">일정 선택</option>
-          <option value="매일">매일</option>
-          <option value="매주">매주</option>
-          <option value="매월">매월</option>
+          <option value="">{t('recurring.setup.scheduleSelect')}</option>
+          <option value="WEEKLY_PICK">{t('recurring.setup.weekly')}</option>
+          <option value="MONTHLY_PICK">{t('recurring.setup.monthly')}</option>
         </select>
-        {scheduleType === '매주' && (
+        {scheduleType === 'WEEKLY_PICK' && (
           <div className={styles.subField}>
             <select
               className={styles.selectNative}
               value={scheduleDay}
               onChange={(e) => setScheduleDay(e.target.value)}
             >
-              <option value="">요일 선택</option>
-              {WEEKDAYS.map((d) => (
-                <option key={d} value={d}>
-                  {d}요일
+              <option value="">{t('recurring.setup.weekdayPlaceholder')}</option>
+              {WEEKDAY_KEYS.map((key) => (
+                <option key={key} value={key}>
+                  {weekdayLabels[key]}
                 </option>
               ))}
             </select>
           </div>
         )}
-        {scheduleType === '매월' && (
+        {scheduleType === 'MONTHLY_PICK' && (
           <div className={styles.subField}>
             <select
               className={styles.selectNative}
               value={scheduleDay}
               onChange={(e) => setScheduleDay(e.target.value)}
             >
-              <option value="">날짜 선택</option>
+              <option value="">{t('recurring.setup.datePlaceholder')}</option>
               {MONTH_DAYS.map((d) => (
                 <option key={d} value={String(d)}>
-                  {d}일
+                  {t('recurring.setup.dayOfMonth', { day: d })}
                 </option>
               ))}
             </select>
@@ -174,74 +358,40 @@ export default function RecurringTransferSetupPage() {
         )}
       </div>
 
-      {/* 시작일 */}
       <div className={styles.field}>
-        <label htmlFor="start-date">시작일</label>
+        <label className={styles.label} htmlFor="recurring-memo">
+          {t('recurring.setup.memoLabel')}
+        </label>
         <input
-          id="start-date"
-          type="date"
+          id="recurring-memo"
+          type="text"
           className={styles.input}
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
+          placeholder={t('recurring.setup.memoPlaceholder')}
+          maxLength={255}
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
         />
       </div>
 
-      {/* 종료 조건 */}
-      <div className={styles.field}>
-        <label>종료 조건</label>
-        <select
-          className={styles.selectNative}
-          value={endType}
-          onChange={(e) => {
-            setEndType(e.target.value);
-            setEndCount('');
-            setEndDate('');
-          }}
-        >
-          <option value="">종료 조건 선택</option>
-          <option value="무기한">해지 전까지 반복</option>
-          <option value="횟수">횟수 제한</option>
-          <option value="날짜">날짜 지정</option>
-        </select>
-        {endType === '횟수' && (
-          <div className={styles.subField}>
-            <input
-              type="text"
-              inputMode="numeric"
-              className={styles.input}
-              placeholder="반복 횟수 입력 (예: 12)"
-              value={endCount}
-              onChange={(e) => setEndCount(e.target.value.replace(/[^0-9]/g, ''))}
-            />
-          </div>
-        )}
-        {endType === '날짜' && (
-          <div className={styles.subField}>
-            <input
-              type="date"
-              className={styles.input}
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-          </div>
-        )}
+      <div className={`${styles.card} ${styles.cardWarn}`}>
+        <div className={styles.cardTitle}>{t('recurring.setup.noticeTitle')}</div>
+        <div className={styles.cardText}>{t('recurring.setup.noticeTextNew')}</div>
       </div>
 
-      <div className={`${styles.card} ${styles.cardWarn}`}>
-        <div className={styles.cardTitle}>정기 송금 안내</div>
-        <div className={styles.cardText}>
-          송금일 전 알림이 발송되며, 잔액 부족 시 송금이 실패할 수 있습니다.
+      {submitError && (
+        <div className={styles.errorText} role="alert">
+          {submitError}
         </div>
-      </div>
+      )}
 
       <div className={styles.primaryFixed}>
         <button
           type="button"
           className={styles.primary}
-          disabled={!canSubmit}
-          onClick={() => navigate('/recurring/complete')}
+          disabled={!canSubmit || isSubmitting}
+          onClick={handleSubmit}
         >
-          정기 송금 설정하기
+          {isSubmitting ? t('recurring.setup.submitting') : t('recurring.setup.submitLabel')}
         </button>
       </div>
     </div>

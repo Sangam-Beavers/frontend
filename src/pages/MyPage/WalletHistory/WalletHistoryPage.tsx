@@ -18,9 +18,11 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import { buildTransferReceiptPath } from '@/constants/routes';
 import { useTransactions } from '@/hooks/useTransactions';
 import type { WalletTabKey, WalletTransaction } from '@/types/history';
 import { toWalletTransaction } from '@/utils/transactionMapper';
@@ -30,20 +32,21 @@ const PAGE_SIZE = 20;
 
 interface WalletTab {
   key: WalletTabKey;
-  label: string;
+  labelKey: string;
 }
 
 const TABS: WalletTab[] = [
-  { key: 'all', label: '전체' },
-  { key: 'charge', label: '충전' },
-  { key: 'send', label: '송금' },
-  { key: 'receive', label: '받기' },
+  { key: 'all', labelKey: 'mypage2.walletHistory.tabs.all' },
+  { key: 'charge', labelKey: 'mypage2.walletHistory.tabs.charge' },
+  { key: 'send', labelKey: 'mypage2.walletHistory.tabs.send' },
+  { key: 'receive', labelKey: 'mypage2.walletHistory.tabs.receive' },
 ];
 
 const matchesTab = (kind: WalletTransaction['kind'], tab: WalletTabKey) =>
   tab === 'all' || tab === kind;
 
 export default function WalletHistoryPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<WalletTabKey>('all');
   const [page, setPage] = useState(0);
@@ -61,20 +64,21 @@ export default function WalletHistoryPage() {
 
   const errorMessage =
     error instanceof ApiException
-      ? error.message || '거래 내역을 불러오지 못했습니다.'
+      ? error.message || t('mypage2.walletHistory.loadError')
       : error
-        ? '거래 내역을 불러오지 못했습니다.'
+        ? t('mypage2.walletHistory.loadError')
         : null;
 
   const handleItemClick = (tx: WalletTransaction) => {
     if (tx.kind === 'send' && tx.receiptInfo) {
-      navigate('/transfer/receipt', { state: tx.receiptInfo });
+      // path param 기반 — 영수증 페이지가 publicId로 API 조회. state 전달 불필요(새로고침 안전).
+      navigate(buildTransferReceiptPath(tx.id));
     }
   };
 
   return (
     <>
-      <TopBar title="전자지갑" />
+      <TopBar title={t('mypage2.walletHistory.title')} />
 
       <div className={styles.tabs}>
         {TABS.map((tab) => (
@@ -84,22 +88,22 @@ export default function WalletHistoryPage() {
             className={`${styles.tab} ${activeTab === tab.key ? styles.active : ''}`}
             onClick={() => setActiveTab(tab.key)}
           >
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </div>
 
       {isLoading ? (
-        <div className={styles.stateCard}>불러오는 중...</div>
+        <div className={styles.stateCard}>{t('mypage2.walletHistory.loading')}</div>
       ) : errorMessage ? (
         <div className={styles.stateCard} role="alert">
           {errorMessage}
         </div>
       ) : transactions.length === 0 ? (
-        <div className={styles.stateCard}>거래 내역이 없습니다.</div>
+        <div className={styles.stateCard}>{t('mypage2.walletHistory.empty')}</div>
       ) : visible.length === 0 ? (
         // 페이지 데이터는 있는데 현재 탭 기준으론 비어있는 경우 — 다른 탭이나 다음 페이지를 안내.
-        <div className={styles.stateCard}>이 탭에 해당하는 거래가 이 페이지에 없습니다.</div>
+        <div className={styles.stateCard}>{t('mypage2.walletHistory.emptyTab')}</div>
       ) : (
         <>
           <div className={styles.list}>
@@ -134,10 +138,14 @@ export default function WalletHistoryPage() {
                 disabled={page === 0 || isFetching}
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
               >
-                이전
+                {t('mypage2.walletHistory.prev')}
               </button>
               <span className={styles.pageInfo}>
-                {page + 1} / {totalPages} (총 {totalElements}건)
+                {t('mypage2.walletHistory.pageInfo', {
+                  current: page + 1,
+                  total: totalPages,
+                  count: totalElements,
+                })}
               </span>
               <button
                 type="button"
@@ -145,7 +153,7 @@ export default function WalletHistoryPage() {
                 disabled={page >= totalPages - 1 || isFetching}
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               >
-                다음
+                {t('mypage2.walletHistory.next')}
               </button>
             </div>
           )}

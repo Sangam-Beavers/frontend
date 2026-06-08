@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './ChatInput.module.css';
 
 interface ChatInputProps {
@@ -12,8 +13,11 @@ interface ChatInputProps {
 /**
  * 챗봇 입력창. 다중 줄 textarea(자동 높이) + 전송 버튼.
  * Enter = 전송, Shift+Enter = 줄바꿈.
+ *
+ * 이슈 #153 — placeholder / aria-label 키화.
  */
 export default function ChatInput({ value, onChange, onSubmit, disabled }: ChatInputProps) {
+  const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [composing, setComposing] = useState(false);
 
@@ -44,7 +48,7 @@ export default function ChatInput({ value, onChange, onSubmit, disabled }: ChatI
       <textarea
         ref={textareaRef}
         className={styles.textarea}
-        placeholder="궁금한 점을 입력하세요…"
+        placeholder={t('chat.inputPlaceholder')}
         rows={1}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -58,7 +62,7 @@ export default function ChatInput({ value, onChange, onSubmit, disabled }: ChatI
         className={styles.sendBtn}
         onClick={submit}
         disabled={disabled || value.trim().length === 0}
-        aria-label="전송"
+        aria-label={t('chat.send')}
       >
         ↑
       </button>

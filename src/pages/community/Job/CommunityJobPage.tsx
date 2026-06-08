@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CommunityMenu from '@/components/community/CommunityMenu';
 import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
@@ -11,6 +12,7 @@ import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityJobPage.module.css';
 
 export default function CommunityJobPage() {
+  const { t } = useTranslation();
   const [showSearch, setShowSearch] = useState(false);
 
   // 주요 QnA — JOB 카테고리 답변 많은 순 Top 1 (api-spec §8).
@@ -30,7 +32,7 @@ export default function CommunityJobPage() {
 
   return (
     <>
-      <TopBar title="커뮤니티" />
+      <TopBar title={t('community.job.title')} />
 
       <CommunityTabs active="job" />
 
@@ -38,36 +40,36 @@ export default function CommunityJobPage() {
       {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
 
       <div className={styles.jobAd}>
-        <b>잡코리아 연동 공고</b>
-        <span>외국인 가능 · 기숙사 제공 · 비자 지원 공고를 추천해요</span>
+        <b>{t('community.job.adTitle')}</b>
+        <span>{t('community.job.adDescription')}</span>
         <button type="button" className={styles.jobAdBtn}>
-          공고 보기
+          {t('community.job.adButton')}
         </button>
       </div>
 
       <div className={styles.qnaCard}>
-        <b>주요 QnA</b>
-        {isQnaLoading && <div className={styles.qnaQuestion}>불러오는 중…</div>}
+        <b>{t('community.job.qnaTitle')}</b>
+        {isQnaLoading && <div className={styles.qnaQuestion}>{t('community.job.qnaLoading')}</div>}
         {!isQnaLoading && qnaError && (
-          <div className={styles.qnaQuestion}>
-            질문을 불러오지 못했어요. 잠시 후 다시 시도해주세요.
-          </div>
+          <div className={styles.qnaQuestion}>{t('community.job.qnaLoadError')}</div>
         )}
         {!isQnaLoading && !qnaError && !topQna && (
-          <div className={styles.qnaQuestion}>아직 등록된 질문이 없어요.</div>
+          <div className={styles.qnaQuestion}>{t('community.job.qnaEmpty')}</div>
         )}
         {topQna && (
           <>
             <div className={styles.qnaQuestion}>Q. {topQna.title}</div>
-            <p className={styles.qnaMeta}>답변 {topQna.comment_count}</p>
+            <p className={styles.qnaMeta}>
+              {t('community.job.answers', { count: topQna.comment_count })}
+            </p>
           </>
         )}
       </div>
 
       {isLoading ? (
-        <div className={styles.empty}>게시글을 불러오는 중…</div>
+        <div className={styles.empty}>{t('community.job.loading')}</div>
       ) : error ? (
-        <div className={styles.empty}>게시글을 불러오지 못했어요.</div>
+        <div className={styles.empty}>{t('community.job.loadError')}</div>
       ) : posts.length > 0 ? (
         <>
           {posts.map((item) => (
@@ -77,7 +79,7 @@ export default function CommunityJobPage() {
         </>
       ) : (
         <div className={styles.empty}>
-          {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
+          {keyword ? t('community.job.emptySearch') : t('community.job.empty')}
         </div>
       )}
     </>

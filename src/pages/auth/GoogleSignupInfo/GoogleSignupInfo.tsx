@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 
 import { NATIONALITIES } from '@/constants/nationalities';
 import { SIGNUP_LANGUAGES as LANGUAGES } from '@/constants/languages';
 
 function GoogleSignupInfo() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '',
@@ -41,63 +43,63 @@ function GoogleSignupInfo() {
               type="button"
               className="auth-icon"
               onClick={() => navigate(-1)}
-              aria-label="뒤로 가기"
+              aria-label={t('auth.googleSignup.backButton')}
             >
               ‹
             </button>
-            <div className="auth-title">추가 정보 입력</div>
+            <div className="auth-title">{t('auth.googleSignup.title')}</div>
             <div style={{ width: 40 }} />
           </div>
 
           <div className="auth-card ok">
-            <div className="auth-card-title">Google 계정 연결 완료</div>
-            <div className="auth-card-text">서비스 이용을 위해 아래 정보를 추가 입력해주세요.</div>
+            <div className="auth-card-title">{t('auth.googleSignup.connectedTitle')}</div>
+            <div className="auth-card-text">{t('auth.googleSignup.connectedDescription')}</div>
           </div>
 
           <form id="google-signup-form" onSubmit={handleSubmit}>
             <div className="auth-field">
-              <label htmlFor="gs-name">이름</label>
+              <label htmlFor="gs-name">{t('auth.googleSignup.nameLabel')}</label>
               <input
                 id="gs-name"
                 type="text"
                 className="auth-input"
-                placeholder="Google Name"
+                placeholder={t('auth.googleSignup.namePlaceholder')}
                 value={form.name}
                 onChange={set('name')}
               />
             </div>
 
             <div className="auth-field">
-              <label htmlFor="gs-nickname">닉네임</label>
+              <label htmlFor="gs-nickname">{t('auth.googleSignup.nicknameLabel')}</label>
               <div className="auth-input-row">
                 <input
                   id="gs-nickname"
                   type="text"
-                  placeholder="nickname"
+                  placeholder={t('auth.googleSignup.nicknamePlaceholder')}
                   value={form.nickname}
                   onChange={set('nickname')}
                 />
                 <button type="button" className="auth-duplicate-btn" onClick={checkNickname}>
-                  중복확인
+                  {t('auth.googleSignup.checkDuplicate')}
                 </button>
               </div>
               {nicknameStatus === 'ok' && (
-                <p className="auth-field-ok">✓ 사용 가능한 닉네임입니다</p>
+                <p className="auth-field-ok">{t('auth.googleSignup.nicknameAvailable')}</p>
               )}
               {nicknameStatus === 'fail' && (
-                <p className="auth-field-fail">✗ 이미 사용 중인 닉네임입니다</p>
+                <p className="auth-field-fail">{t('auth.googleSignup.nicknameTaken')}</p>
               )}
             </div>
 
             <div className="auth-field">
-              <label htmlFor="gs-nationality">국적</label>
+              <label htmlFor="gs-nationality">{t('auth.googleSignup.nationalityLabel')}</label>
               <select
                 id="gs-nationality"
                 className="auth-select"
                 value={form.nationality}
                 onChange={set('nationality')}
               >
-                <option value="">중국 / 베트남 / 태국 / 미국 ▾</option>
+                <option value="">{t('auth.googleSignup.nationalityPlaceholder')}</option>
                 {NATIONALITIES.map((n) => (
                   <option key={n} value={n}>
                     {n}
@@ -107,14 +109,14 @@ function GoogleSignupInfo() {
             </div>
 
             <div className="auth-field">
-              <label htmlFor="gs-language">주 사용 언어</label>
+              <label htmlFor="gs-language">{t('auth.googleSignup.languageLabel')}</label>
               <select
                 id="gs-language"
                 className="auth-select"
                 value={form.language}
                 onChange={set('language')}
               >
-                <option value="">언어 선택 ▾</option>
+                <option value="">{t('auth.googleSignup.languagePlaceholder')}</option>
                 {LANGUAGES.map((l) => (
                   <option key={l} value={l}>
                     {l}
@@ -127,7 +129,7 @@ function GoogleSignupInfo() {
               className="auth-row"
               onClick={() => setForm((prev) => ({ ...prev, agreeAll: !prev.agreeAll }))}
             >
-              <span>약관 및 개인정보 처리방침 동의</span>
+              <span>{t('auth.googleSignup.agreeAll')}</span>
               <div className={`auth-checkbox ${form.agreeAll ? 'checked' : ''}`}>
                 {form.agreeAll && '✓'}
               </div>
@@ -137,7 +139,7 @@ function GoogleSignupInfo() {
 
         <div className="auth-fixed">
           <button type="submit" form="google-signup-form" className="auth-primary">
-            가입 완료하기
+            {t('auth.googleSignup.submitButton')}
           </button>
         </div>
       </div>

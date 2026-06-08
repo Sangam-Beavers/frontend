@@ -1,0 +1,30 @@
+/* 재사용 번역 버튼 — 게시글/댓글 양쪽에서 사용 (이슈 #160). */
+
+/* 게시글 상세: 좋아요 버튼과 같은 .btnRow에 들어가 .secondary 스타일을 상속해 함께 정렬된다. */
+
+/* 댓글: meta 라인(작성시각 옆)에 인라인으로 들어가는 컴팩트 버튼. */
+.commentTranslate {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit; /* commentMeta(12px)와 동일 */
+  font-weight: 700;
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.commentTranslate::before {
+  content: '·';
+  margin: 0 6px;
+  color: #8a97aa;
+}
+
+.commentTranslate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.commentTranslate:hover:not(:disabled) {
+  text-decoration: underline;
+}

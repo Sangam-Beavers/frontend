@@ -22,6 +22,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiException, walletApi, type ExchangeQuoteResponse } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
@@ -32,6 +33,7 @@ import styles from './ExchangeFormPage.module.css';
 type Phase = 'INPUT' | 'QUOTING' | 'LOCKED' | 'EXECUTING';
 
 export default function ExchangeFormPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: currenciesData } = useSupportedCurrencies();
   // KRW 제외한 지원 통화만 드롭다운에 노출. 데이터 도착 전엔 빈 배열.
@@ -85,13 +87,13 @@ export default function ExchangeFormPage() {
         setQuote(null);
         idempotencyKeyRef.current = null;
         setPhase('INPUT');
-        setError('견적이 만료되었습니다. 다시 견적을 받아주세요.');
+        setError(t('exchange.form.errQuoteExpired'));
       }
     };
     tick();
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
-  }, [quote]);
+  }, [quote, t]);
 
   const numericAmount = parseFloat(amount);
   const canQuote = phase === 'INPUT' && foreignList.length > 0 && !!toCurrency && numericAmount > 0;
@@ -113,13 +115,12 @@ export default function ExchangeFormPage() {
     } catch (e) {
       setPhase('INPUT');
       if (e instanceof ApiException) {
-        if (e.code === 'TRANSFER4002') setError('지원하지 않는 통화입니다.');
-        else if (e.code === 'COMMON4001') setError(e.message || '입력값을 확인해주세요.');
-        else if (e.code === 'NETWORK_ERROR')
-          setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-        else setError(e.message || '견적 조회에 실패했습니다.');
+        if (e.code === 'TRANSFER4002') setError(t('exchange.form.errUnsupportedCurrency'));
+        else if (e.code === 'COMMON4001') setError(e.message || t('exchange.form.errInvalidInput'));
+        else if (e.code === 'NETWORK_ERROR') setError(t('exchange.form.errNetwork'));
+        else setError(e.message || t('exchange.form.errQuoteFailed'));
       } else {
-        setError('견적 조회에 실패했습니다.');
+        setError(t('exchange.form.errQuoteFailed'));
       }
     }
   }
@@ -139,21 +140,21 @@ export default function ExchangeFormPage() {
       if (e instanceof ApiException) {
         if (e.code === 'EXCHANGE4002') {
           // 견적 만료 — 잠금 해제하고 다시 견적 받게 유도.
-          setError('견적이 만료되었습니다. 다시 견적을 받아주세요.');
+          setError(t('exchange.form.errQuoteExpired'));
           setQuote(null);
           idempotencyKeyRef.current = null;
           setPhase('INPUT');
           return;
         }
         if (e.code === 'WALLET4002') {
-          setError(e.message || '잔액이 부족합니다. 충전 후 다시 시도해주세요.');
+          setError(e.message || t('exchange.form.errInsufficient'));
         } else if (e.code === 'NETWORK_ERROR') {
-          setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+          setError(t('exchange.form.errNetwork'));
         } else {
-          setError(e.message || '환전 실행에 실패했습니다.');
+          setError(e.message || t('exchange.form.errExecuteFailed'));
         }
       } else {
-        setError('환전 실행에 실패했습니다.');
+        setError(t('exchange.form.errExecuteFailed'));
       }
       // 잠금 유지 — 같은 idempotency key로 재시도 가능.
       setPhase('LOCKED');
@@ -166,28 +167,28 @@ export default function ExchangeFormPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="환전하기" onBack={() => navigate(ROUTES.EXCHANGE)} />
+        <TopBar title={t('exchange.form.title')} onBack={() => navigate(ROUTES.EXCHANGE)} />
 
         <div className={`${styles.card} ${styles.cardInfo}`}>
-          <div className={styles.cardTitle}>원화 → 외화 환전</div>
-          <div className={styles.cardText}>원화를 원하는 외화로 환전합니다.</div>
+          <div className={styles.cardTitle}>{t('exchange.form.headerTitle')}</div>
+          <div className={styles.cardText}>{t('exchange.form.headerText')}</div>
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>보낼 통화</label>
-          <div className={styles.inputReadonly}>KRW 원화</div>
+          <label className={styles.label}>{t('exchange.form.fromLabel')}</label>
+          <div className={styles.inputReadonly}>{t('exchange.form.krwReadonly')}</div>
         </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="exch-amount">
-            환전 금액
+            {t('exchange.form.amountLabel')}
           </label>
           <input
             id="exch-amount"
             type="number"
             inputMode="decimal"
             className={styles.input}
-            placeholder="₩0"
+            placeholder={t('exchange.form.amountPlaceholder')}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             disabled={inputsDisabled}
@@ -196,7 +197,7 @@ export default function ExchangeFormPage() {
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="exch-to">
-            받을 통화
+            {t('exchange.form.toLabel')}
           </label>
           <select
             id="exch-to"
@@ -216,28 +217,31 @@ export default function ExchangeFormPage() {
         {quote && phase === 'LOCKED' && (
           <div className={styles.card}>
             <div className={styles.row}>
-              <span>적용 환율</span>
+              <span>{t('exchange.form.rateLabel')}</span>
               <b>
                 1 {quote.receive_currency_code} = ₩{Number(quote.exchange_rate).toLocaleString()}
               </b>
             </div>
             <div className={styles.row}>
-              <span>수수료</span>
+              <span>{t('exchange.form.feeLabel')}</span>
               <b>
                 ₩{Number(quote.fee).toLocaleString()} ({quote.fee_currency_code})
               </b>
             </div>
             <div className={styles.row}>
-              <span>예상 수령</span>
+              <span>{t('exchange.form.receiveLabel')}</span>
               <b>
                 {toSymbol}
                 {Number(quote.receive_amount).toLocaleString()}
               </b>
             </div>
             <div className={styles.row}>
-              <span>견적 유효시간</span>
+              <span>{t('exchange.form.expiresLabel')}</span>
               <b>
-                {Math.floor(secondsLeft / 60)}분 {secondsLeft % 60}초 남음
+                {t('exchange.form.expiresValue', {
+                  minutes: Math.floor(secondsLeft / 60),
+                  seconds: secondsLeft % 60,
+                })}
               </b>
             </div>
           </div>
@@ -258,7 +262,7 @@ export default function ExchangeFormPage() {
             disabled={secondsLeft <= 0}
             onClick={handleExecute}
           >
-            환전 확정
+            {t('exchange.form.confirmCta')}
           </button>
         ) : (
           <button
@@ -267,7 +271,7 @@ export default function ExchangeFormPage() {
             disabled={!canQuote || inputsDisabled}
             onClick={handleGetQuote}
           >
-            {phase === 'QUOTING' ? '조회 중...' : '환전 견적 보기'}
+            {phase === 'QUOTING' ? t('exchange.form.quoting') : t('exchange.form.quoteCta')}
           </button>
         )}
       </div>

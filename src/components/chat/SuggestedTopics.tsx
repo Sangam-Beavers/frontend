@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styles from './SuggestedTopics.module.css';
 
 export interface SuggestedTopic {
@@ -16,8 +17,11 @@ interface SuggestedTopicsProps {
  *
  * <p>각 분석 이슈(예: "임금 분석 / 최저임금보다 낮을 가능성")를 클릭하면
  * 컨텍스트가 박힌 첫 질문이 입력창에 자동 세팅된다.
+ *
+ * <p>이슈 #153 — 라벨/프롬프트 i18n 키화.
  */
 export default function SuggestedTopics({ topics, onPick }: SuggestedTopicsProps) {
+  const { t } = useTranslation();
   if (topics.length === 0) return null;
 
   return (
@@ -27,7 +31,7 @@ export default function SuggestedTopics({ topics, onPick }: SuggestedTopicsProps
         <span className={styles.labelIcon} aria-hidden>
           📌
         </span>
-        이 결과에 대해 바로 묻기
+        {t('chat.suggestedLabel')}
       </div>
       <div className={styles.chips}>
         {topics.map((topic) => (
@@ -38,8 +42,8 @@ export default function SuggestedTopics({ topics, onPick }: SuggestedTopicsProps
             onClick={() =>
               onPick(
                 topic.meta
-                  ? `${topic.title}에 대해 더 자세히 알려주세요. ${topic.meta} 관련해서.`
-                  : `${topic.title}에 대해 더 자세히 알려주세요.`
+                  ? `${t('chat.chipMore', { title: topic.title })} ${topic.meta}`
+                  : t('chat.chipMore', { title: topic.title })
               )
             }
           >
@@ -47,7 +51,7 @@ export default function SuggestedTopics({ topics, onPick }: SuggestedTopicsProps
               🤖
             </span>
             <span className={styles.chipBody}>
-              <span className={styles.chipTitle}>{topic.title} 자세히</span>
+              <span className={styles.chipTitle}>{t('chat.chipMore', { title: topic.title })}</span>
               {topic.meta && <span className={styles.chipMeta}>{topic.meta}</span>}
             </span>
           </button>

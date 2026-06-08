@@ -117,6 +117,27 @@ export interface ProfileResponse {
   created_at: string;
 }
 
+/**
+ * PATCH /api/v1/members/me 요청 body (백엔드 ProfileUpdateRequest — api-spec §9).
+ *
+ * 모든 필드 필수(@NotBlank) — 닉네임/언어 빈 값은 400 COMMON4001. 자기소개(bio)만 선택값(빈 문자열 가능).
+ * 부분 수정 의미라도 클라가 변경 안 한 필드는 현재 값을 그대로 다시 보내야 한다(백엔드 SSOT).
+ */
+export interface ProfileUpdateBody {
+  /** 닉네임 (1~50자, NotBlank). 다른 회원이 사용 중이면 409 MEMBER4003. */
+  nickname: string;
+  /** 주 사용 언어 (BCP 47, 1~10자, 예: "ko" / "vi"). NotBlank. */
+  language: string;
+  /** 자기소개 (최대 200자, nullable). 빈 문자열 또는 미입력 가능. */
+  bio: string | null;
+}
+
+/** GET/PATCH /api/v1/members/me/language 응답 본문. */
+export interface LanguageResponse {
+  /** BCP 47 코드 (예: "ko"). */
+  language: string;
+}
+
 // ---------- API 함수 ----------
 
 export const memberApi = {
@@ -150,6 +171,18 @@ export const memberApi = {
   getMyProfile: () => apiClient.get<unknown, ProfileResponse>('/members/me'),
 
   /**
+   * 내 프로필 수정 — 마이페이지 프로필 편집 (api-spec §9).
+   *
+   * <p>닉네임/주 사용 언어/자기소개를 수정한다. 닉네임 사전 중복 확인은 {@link checkNickname}으로
+   * 별도 호출; 본 API는 저장 시점에 백엔드가 다시 검증한다(다른 사용자가 그 사이 같은 닉네임을 채갔을 수 있음).
+   *
+   * <p>응답은 갱신된 ProfileResponse — 호출 측은 ['member','me'] 캐시를 invalidate해 화면 동기화.
+   * 에러: 400 COMMON4001 / 401 AUTH4011 / 404 MEMBER4001 / 409 MEMBER4003(닉네임 중복) → ApiException.
+   */
+  updateMyProfile: (body: ProfileUpdateBody) =>
+    apiClient.patch<unknown, ProfileResponse>('/members/me', body),
+
+  /**
    * 비밀번호 재설정 메일 요청 (가입 이메일로 토큰 링크 발송).
    *
    * <p>응답은 가입 여부와 무관하게 항상 200 (보안: 가입 여부 비노출).
@@ -167,7 +200,35 @@ export const memberApi = {
   resetPassword: (body: ResetPasswordBody) =>
     apiClient.post<unknown, void>('/auth/password/reset', body),
 
-  // TODO: 다음 사이클 — withdraw, updateLanguage 등
+  /**
+   * 내 주 사용 언어 조회 (200) — BCP 47 코드(소문자, 예: `ko`/`en`/`vi`/`fil`).
+   *
+   * <p>인증 필요. JWT public_id claim으로 본인 식별.
+   * 본 응답값은 "선호 언어 메타데이터"이며 실제 화면 다국어 전환(i18n)은 별도 트랙.
+   * 401 AUTH4011 / 404 MEMBER4001 → ApiException.
+   */
+  getLanguage: () => apiClient.get<unknown, LanguageResponse>('/members/me/language'),
+
+  /**
+   * 내 주 사용 언어 변경 (200) — BCP 47 코드 전송, 변경된 코드 반환.
+   *
+   * <p>프론트는 MVP 4개(`ko`/`en`/`vi`/`fil`) 화이트리스트를 `<select>`로 강제.
+   * 백엔드 DB 컬럼은 VARCHAR(10) 자유문자열(확장 여지). 빈 문자열은 400 COMMON4001.
+   * 401 AUTH4011 / 404 MEMBER4001 → ApiException.
+   */
+  updateLanguage: (language: string) =>
+    apiClient.patch<unknown, LanguageResponse>('/members/me/language', { language }),
+
+  /**
+   * 회원 탈퇴 (200) — 로컬 soft-delete(deleted_at) + IdP(Authentik) 비활성화(방식 B).
+   *
+   * <p>탈퇴 후 호출 측은 로컬 토큰 정리 + Authentik end_session 호출(`startLogout`).
+   * IdP 연동 실패 시 500 COMMON5000(로컬 무변경) → ApiException으로 throw돼
+   * 사용자에게 다시 시도 안내. 인증 누락 401 AUTH4011 / 회원 없음 404 MEMBER4001.
+   */
+  withdraw: () => apiClient.delete<unknown, void>('/members/me'),
+
+  // TODO: 다음 사이클 — 프로필 수정(PATCH /members/me) 등
 };
 
 /**

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CommunityMenu from '@/components/community/CommunityMenu';
 import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
@@ -10,6 +11,7 @@ import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityPage.module.css';
 
 export default function CommunityPage() {
+  const { t } = useTranslation();
   const [showSearch, setShowSearch] = useState(false);
   // 전체 탭 → category 미지정. 페이지·검색 상태는 URL(?page=&keyword=)로 관리(뒤로 가기 복원).
   const { data, isLoading, error, page, goToPage, searchQuery, setSearchQuery, keyword } =
@@ -19,19 +21,23 @@ export default function CommunityPage() {
 
   return (
     <>
-      <TopBar title="커뮤니티" showBack={false} rightAction={<div style={{ width: 40 }} />} />
+      <TopBar
+        title={t('community.title')}
+        showBack={false}
+        rightAction={<div style={{ width: 40 }} />}
+      />
 
       <CommunityTabs active="all" />
 
       <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
       {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
 
-      <div className={styles.section}>전체 게시글</div>
+      <div className={styles.section}>{t('community.allPosts')}</div>
 
       {isLoading ? (
-        <div className={styles.empty}>게시글을 불러오는 중…</div>
+        <div className={styles.empty}>{t('community.loading')}</div>
       ) : error ? (
-        <div className={styles.empty}>게시글을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>
+        <div className={styles.empty}>{t('community.loadError')}</div>
       ) : posts.length > 0 ? (
         <>
           {posts.map((item) => (
@@ -41,7 +47,7 @@ export default function CommunityPage() {
         </>
       ) : (
         <div className={styles.empty}>
-          {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
+          {keyword ? t('community.emptySearch') : t('community.empty')}
         </div>
       )}
     </>

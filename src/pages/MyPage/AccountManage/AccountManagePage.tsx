@@ -1,22 +1,38 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
+import Toast, { type ToastVariant } from '@/components/common/Toast';
 import { ROUTES } from '@/constants/routes';
 import { useMyAccounts } from '@/hooks/useMyAccounts';
-import type { AccountListResponse } from '@/api/wallet';
+import { useDeleteAccount } from '@/hooks/useDeleteAccount';
+import { useSetPrimaryAccount } from '@/hooks/useSetPrimaryAccount';
+import { accountErrorMessage } from '@/utils/accountErrorMessage';
 import styles from './AccountManagePage.module.css';
 
 /**
  * 계좌 관리 화면.
  *
- * <p>실 API 연동(#102) 후 {@link useMyAccounts}로 서버 목록 표시. 이슈 #108 — 계좌가 0건이면
- * 단순 "등록된 계좌 없음" 대신 "계좌를 연동해주세요" 안내 카드 + 계좌 추가 CTA로 유도한다.
- * 전자지갑 1계정 1개 보장(BE #152)은 백엔드에서 처리하므로 프론트는 계좌 유무만 분기한다.
+ * <p>실 API 연동: 목록 조회({@link useMyAccounts}) + 주 계좌 변경({@link useSetPrimaryAccount})
+ * + 계좌 삭제({@link useDeleteAccount}). 백엔드는 wallet-service AccountController.
+ *
+ * <p>UX (카카오페이/Toss 패턴):
+ * <ul>
+ *   <li>계좌 카드: 은행명·마스킹 계좌번호. 주 계좌엔 별 배지.</li>
+ *   <li>각 카드 아래에 두 액션: "주 계좌로 지정"(주 계좌일 땐 hidden) / "계좌 해제".</li>
+ *   <li>해제는 위험 동작 — {@link ConfirmDialog} 한 번 거친다.</li>
+ *   <li>성공/에러는 {@link Toast}로 짧게 알림. 에러 메시지는 {@link accountErrorMessage}로 매핑.</li>
+ * </ul>
+ *
+ * <p>이슈 #108 — 계좌가 0건이면 단순 "등록된 계좌 없음" 대신 "계좌를 연동해주세요" 안내 카드 + 계좌 추가 CTA.
+ * 전자지갑 1계정 1개 보장(BE #152)은 백엔드에서 처리하므로 프론트는 계좌 유무만 분기.
+ *
+ * <p>이슈 #153 — 모든 텍스트 i18n 키화.
  */
 export default function AccountManagePage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { data, isLoading, error } = useMyAccounts();
   const accounts = data?.accounts ?? [];
 
@@ -24,53 +40,102 @@ export default function AccountManagePage() {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const target = accounts.find((a) => a.account_public_id === confirmId);
 
-  // TODO: DELETE /accounts/{id}(deleteAccount) 연동 시 useMutation으로 교체하고
-  //   onSuccess에서 invalidateQueries(['wallet','accounts'])로 서버 기준 갱신할 것.
-  //   현재는 캐시에서만 제거(미영속) — 새로고침하면 서버 목록으로 복원된다.
-  const handleDisconnect = () => {
+  // 토스트 상태 — 성공/에러 피드백.
+  const [toast, setToast] = useState<{ msg: string; variant: ToastVariant } | null>(null);
+  const showToast = (msg: string, variant: ToastVariant = 'success') => setToast({ msg, variant });
+
+  const deleteAccount = useDeleteAccount();
+  const setPrimary = useSetPrimaryAccount();
+
+  // ─── 액션 핸들러 ───────────────────────────────────────────
+  const handleConfirmDelete = () => {
     if (!confirmId) return;
-    queryClient.setQueryData<AccountListResponse>(['wallet', 'accounts'], (prev) =>
-      prev ? { accounts: prev.accounts.filter((a) => a.account_public_id !== confirmId) } : prev
-    );
-    setConfirmId(null);
+    deleteAccount.mutate(confirmId, {
+      onSuccess: () => {
+        setConfirmId(null);
+        showToast(t('account.releaseSuccess'), 'success');
+      },
+      onError: (e) => {
+        // 다이얼로그를 닫지 않고 error prop으로 안에서 표시.
+        showToast(accountErrorMessage(e), 'error');
+      },
+    });
   };
+
+  const handleSetPrimary = (accountId: string) => {
+    setPrimary.mutate(accountId, {
+      onSuccess: () => showToast(t('account.setPrimarySuccess'), 'success'),
+      onError: (e) => showToast(accountErrorMessage(e), 'error'),
+    });
+  };
+
+  // 다이얼로그 에러는 ConfirmDialog 안에서 표시할 텍스트 — 진행 중인 시도가 실패한 경우만.
+  const deleteDialogError =
+    deleteAccount.isError && deleteAccount.variables === confirmId
+      ? accountErrorMessage(deleteAccount.error)
+      : undefined;
 
   return (
     <>
-      <TopBar title="계좌 관리" onBack={() => navigate(-1)} />
+      <TopBar title={t('account.title')} onBack={() => navigate(-1)} />
 
-      {isLoading && <div className={styles.state}>계좌를 불러오는 중…</div>}
-      {error && (
-        <div className={styles.state}>계좌를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>
-      )}
+      {isLoading && <div className={styles.state}>{t('account.loading')}</div>}
+      {error && <div className={styles.state}>{t('account.loadError')}</div>}
       {!isLoading && !error && accounts.length === 0 && (
         <div className={styles.card}>
-          <div className={styles.cardTitle}>계좌를 연동해주세요</div>
-          <div className={styles.cardText}>
-            전자지갑은 개설되었지만 아직 연동된 계좌가 없습니다. 계좌를 연동하면 충전·송금을 시작할
-            수 있어요.
-          </div>
+          <div className={styles.cardTitle}>{t('account.emptyTitle')}</div>
+          <div className={styles.cardText}>{t('account.emptyBody')}</div>
         </div>
       )}
 
       {accounts.length > 0 && (
         <div className={styles.list}>
-          {accounts.map((acc) => (
-            <div
-              key={acc.account_public_id}
-              className={styles.item}
-              onClick={() => setConfirmId(acc.account_public_id)}
-            >
-              <div className={styles.itemMain}>
-                <div className={styles.itemTitle}>{acc.bank_name}</div>
-                <div className={styles.itemMeta}>
-                  {acc.account_number_masked}
-                  {acc.is_primary && ' · 주 계좌'}
+          {accounts.map((acc) => {
+            const isPrimaryPending =
+              setPrimary.isPending && setPrimary.variables === acc.account_public_id;
+            const isDeletePending =
+              deleteAccount.isPending && deleteAccount.variables === acc.account_public_id;
+
+            return (
+              <div key={acc.account_public_id} className={styles.item}>
+                <div className={styles.itemHeader}>
+                  <div className={styles.itemMain}>
+                    <div className={styles.itemTitle}>
+                      {acc.bank_name}
+                      {acc.is_primary && (
+                        <span className={styles.primaryBadge} aria-label={t('account.primary')}>
+                          {t('account.primaryBadge')}
+                        </span>
+                      )}
+                    </div>
+                    <div className={styles.itemMeta}>{acc.account_number_masked}</div>
+                  </div>
+                  <span className={styles.pill}>{t('account.connected')}</span>
+                </div>
+
+                <div className={styles.itemActions}>
+                  {!acc.is_primary && (
+                    <button
+                      type="button"
+                      className={styles.actionGhost}
+                      disabled={isPrimaryPending || setPrimary.isPending}
+                      onClick={() => handleSetPrimary(acc.account_public_id)}
+                    >
+                      {isPrimaryPending ? t('account.setPrimaryPending') : t('account.setPrimary')}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className={styles.actionDanger}
+                    disabled={isDeletePending}
+                    onClick={() => setConfirmId(acc.account_public_id)}
+                  >
+                    {t('account.release')}
+                  </button>
                 </div>
               </div>
-              <span className={styles.pill}>연결됨</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -79,25 +144,31 @@ export default function AccountManagePage() {
         className={styles.primaryBtn}
         onClick={() => navigate(ROUTES.CHARGE_ADD_ACCOUNT)}
       >
-        계좌 추가
+        {t('account.addAccount')}
       </button>
 
       {target && (
-        <div className={`${styles.card} ${styles.cardDanger}`}>
-          <div className={styles.cardTitle}>계좌 연결 해제 확인</div>
-          <div className={styles.cardText}>
-            {target.bank_name} {target.account_number_masked} 계좌를 해제하시겠습니까?
-          </div>
-          <div className={styles.btnRow}>
-            <button type="button" className={styles.ghostBtn} onClick={() => setConfirmId(null)}>
-              취소
-            </button>
-            <button type="button" className={styles.dangerBtn} onClick={handleDisconnect}>
-              해제
-            </button>
-          </div>
-        </div>
+        <ConfirmDialog
+          title={t('account.releaseConfirmTitle')}
+          message={t('account.releaseConfirmMessage', {
+            bank: target.bank_name,
+            number: target.account_number_masked,
+          })}
+          confirmLabel={t('account.releaseConfirmLabel')}
+          cancelLabel={t('common.cancel')}
+          danger
+          loading={deleteAccount.isPending}
+          error={deleteDialogError}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => {
+            if (deleteAccount.isPending) return;
+            setConfirmId(null);
+            deleteAccount.reset(); // 다음에 열 때 이전 에러 표시 안 되도록
+          }}
+        />
       )}
+
+      <Toast message={toast?.msg ?? null} variant={toast?.variant} onClose={() => setToast(null)} />
     </>
   );
 }

@@ -81,6 +81,43 @@ export interface ExchangeListResponse {
 }
 
 /**
+ * 송금 확인증 응답 (백엔드 TransferReceiptResponse — api-spec §7-1).
+ *
+ * INTERNAL_TRANSFER / REMITTANCE 두 유형의 완료 송금 한 건의 확인증.
+ * - INTERNAL: `bank_name`/`account_number`는 null (앱 사용자 송금이라 외부 계좌 정보 없음)
+ * - REMITTANCE: `bank_name`/`account_number` 채워짐 (해외 송금 수취 계좌)
+ * - 1·2단계 same-currency: `exchange_rate` null, `receive_amount` === `amount`
+ * - 3단계+ 다통화: `exchange_rate`/`receive_currency_code` 다른 값
+ */
+export interface TransferReceiptResponse {
+  public_id: string;
+  /** 송금인 본명. MemberClient 장애 시 null. */
+  sender_name: string | null;
+  /** 수취인 본명. INTERNAL=수신자 본명(장애 시 null), REMITTANCE=등록 시 예금주(컬럼 추가 전 구 계좌면 null). */
+  receiver_name: string | null;
+  /** 수취 은행명. REMITTANCE만, INTERNAL은 null. */
+  bank_name: string | null;
+  /** 수취 계좌번호(마스킹 앞3+별표+뒤2). REMITTANCE만, INTERNAL은 null. */
+  account_number: string | null;
+  /** 송금 금액 — string 소수 4자리. */
+  amount: string;
+  /** 출금 통화 코드. */
+  currency_code: string;
+  /** 수수료 — string 소수 4자리. */
+  fee: string;
+  /** 적용 환율 — same-currency는 null, 다통화부터 값. */
+  exchange_rate: string | null;
+  /** 수취 금액 — 1·2단계는 amount와 동일. */
+  receive_amount: string;
+  /** 수취 통화 코드. */
+  receive_currency_code: string;
+  /** 거래 상태 (COMPLETED/PENDING/PROCESSING/FAILED/CANCELLED). */
+  status: string;
+  /** 송금 시각 (ISO 8601 UTC Z). */
+  created_at: string;
+}
+
+/**
  * 거래 유형 (백엔드 TransactionType enum SSOT).
  * - CHARGE: 외부 은행계좌에서 전자지갑으로 충전
  * - INTERNAL_TRANSFER: 앱 사용자 간 송금 (송신/수신 모두 해당)
@@ -331,6 +368,261 @@ export interface RecentRecipientsResponse {
   receivers: RecentRecipientItem[];
 }
 
+/** 앱 사용자 유효성 검증 응답 (백엔드 ValidateMemberResponse).
+ *  receiver_public_id는 송금 실행 API 호출 시 사용 — 검증 성공 시 state에 보관. */
+export interface ValidateMemberResponse {
+  receiver_public_id: string;
+  nickname: string;
+  is_verified: boolean;
+}
+
+/** 송금 방식 (백엔드 TransferType enum). 정기송금에도 동일 enum 사용. */
+export type TransferTypeCode = 'INTERNAL_TRANSFER' | 'REMITTANCE';
+
+/**
+ * 송금 실행 요청 공통 필드 — discriminated union의 base (api-spec §6).
+ *
+ * 1·2단계 same-currency 강제 — currency_code !== receive_currency_code면 TRANSFER4005.
+ * 다통화는 3단계로 이연.
+ */
+interface TransferExecuteCommonFields {
+  /** 송금 금액 — string 십진수, 양수, 정수부 ≤14자리·소수점 ≤4자리. */
+  amount: string;
+  currency_code: string;
+  /** 수취 통화 — 1·2단계는 currency_code와 동일해야 함(다르면 TRANSFER4005). */
+  receive_currency_code: string;
+  /** 메모(선택, 최대 255자). */
+  memo?: string | null;
+}
+
+/**
+ * 송금 실행 요청 (POST /api/v1/transfers).
+ *
+ * transfer_type별로 필수 식별자가 다른 점을 타입으로 강제:
+ * - INTERNAL_TRANSFER → receiver_public_id 필수, bank_account_public_id 금지
+ * - REMITTANCE        → bank_account_public_id 필수, receiver_public_id 금지
+ *
+ * 잘못된 조합이 컴파일 단계에서 차단되므로 호출부 런타임 400(COMMON4001)을 사전 방지한다.
+ * (ValidateScheduledRequest와 동일 패턴 — CodeRabbit 리뷰 정합)
+ */
+export type TransferExecuteRequest =
+  | ({
+      transfer_type: 'INTERNAL_TRANSFER';
+      /** INTERNAL_TRANSFER 필수 — 수신자 회원 UUID. */
+      receiver_public_id: string;
+      bank_account_public_id?: never;
+    } & TransferExecuteCommonFields)
+  | ({
+      transfer_type: 'REMITTANCE';
+      /** REMITTANCE 필수 — 수신 은행 계좌 UUID. */
+      bank_account_public_id: string;
+      receiver_public_id?: never;
+    } & TransferExecuteCommonFields);
+
+/**
+ * 송금 실행 응답 (201) — 거래 1건 스냅샷 (백엔드 TransferExecuteResponse, api-spec §6).
+ *
+ * 1단계(same-currency)에서 exchange_rate는 항상 null이며 receive_amount는 amount와 동일.
+ */
+export interface TransferExecuteResponse {
+  public_id: string;
+  transfer_type: TransferTypeCode;
+  amount: string;
+  currency_code: string;
+  fee: string;
+  /** 1·2단계는 항상 null (same-currency). */
+  exchange_rate: string | null;
+  receive_amount: string;
+  receive_currency_code: string;
+  /** COMPLETED (현 단계에서 즉시 완료). */
+  status: string;
+  /** ISO 8601 UTC Z. */
+  created_at: string;
+}
+
+/**
+ * 정기 송금 공통 필드 — discriminated union의 base.
+ *
+ * 1·2단계는 same-currency 강제 — currency_code !== receive_currency_code면 is_valid=false + reason.
+ */
+interface ScheduledTransferCommonFields {
+  /** 회차당 송금액 — string 십진수, 양수. */
+  amount: string;
+  currency_code: string;
+  receive_currency_code: string;
+}
+
+/**
+ * 정기 송금 대상 유효성 검증 요청 (POST /transfers/scheduled/validate).
+ *
+ * transfer_type별로 필수 식별자가 다른 점을 타입으로 강제 (CodeRabbit 리뷰 반영):
+ * - INTERNAL_TRANSFER → receiver_public_id 필수, bank_account_public_id 금지
+ * - REMITTANCE        → bank_account_public_id 필수, receiver_public_id 금지
+ *
+ * 잘못된 조합이 컴파일 단계에서 차단되므로 호출부 런타임 400(COMMON4001)을 사전 방지한다.
+ */
+export type ValidateScheduledRequest =
+  | ({
+      transfer_type: 'INTERNAL_TRANSFER';
+      /** INTERNAL_TRANSFER 필수 — 수신자 회원 UUID. */
+      receiver_public_id: string;
+      bank_account_public_id?: never;
+    } & ScheduledTransferCommonFields)
+  | ({
+      transfer_type: 'REMITTANCE';
+      /** REMITTANCE 필수 — 수신 은행 계좌 UUID. */
+      bank_account_public_id: string;
+      receiver_public_id?: never;
+    } & ScheduledTransferCommonFields);
+
+/** 검증 결과 — 통과 여부 + 미통과 사유(통과면 null). */
+export interface ValidateScheduledResponse {
+  is_valid: boolean;
+  reason: string | null;
+}
+
+/**
+ * 정기 송금 설정 요청 (POST /transfers/scheduled).
+ * ValidateScheduledRequest의 union을 보존하면서 빈도/일자/메모를 더한다.
+ * MONTHLY는 1~31, WEEKLY는 1(월)~7(일) ISO.
+ */
+export type CreateScheduledTransferRequest = ValidateScheduledRequest & {
+  /** 반복 주기 (WEEKLY / MONTHLY). */
+  frequency: ScheduledTransferFrequency;
+  /** 실행 기준일 (MONTHLY=1~31, WEEKLY=1~7 ISO). */
+  schedule_day: number;
+  /** 메모(선택, 최대 255자). */
+  memo?: string | null;
+};
+
+/** 정기 송금 설정 응답 (201) — 등록된 정기 송금 한 건의 스냅샷. */
+export interface ScheduledTransferResponse {
+  public_id: string;
+  transfer_type: TransferTypeCode;
+  amount: string;
+  currency_code: string;
+  receive_currency_code: string;
+  frequency: ScheduledTransferFrequency;
+  schedule_day: number;
+  /** 다음 실행 예정일 (ISO 8601 date, KST). */
+  next_run_date: string;
+  /** 마지막 실행 시각 — 최초 실행 전이면 null. */
+  last_run_at: string | null;
+  status: ScheduledTransferStatus;
+  created_at: string;
+}
+
+/** 정기 송금 회차 실행 이력 한 건 (GET /scheduled/{id}/history의 items[]). */
+export interface ScheduledTransferHistoryItem {
+  public_id: string;
+  amount: string;
+  currency_code: string;
+  fee: string;
+  receive_amount: string;
+  receive_currency_code: string;
+  /** 거래 상태 (현 단계는 COMPLETED만). */
+  status: string;
+  /** 실행 시각 (ISO 8601 UTC Z) — transactions.created_at. */
+  executed_at: string;
+}
+
+/** 정기 송금 회차 이력 목록 응답 — 페이지 메타 + items 배열. */
+export interface ScheduledTransferHistoryResponse {
+  items: ScheduledTransferHistoryItem[];
+  page: number;
+  size: number;
+  total_elements: number;
+  total_pages: number;
+}
+
+/** 정기송금 상태. */
+export type ScheduledTransferStatus = 'ACTIVE' | 'PAUSED' | 'CANCELLED';
+
+/** 정기송금 반복 주기. */
+export type ScheduledTransferFrequency = 'WEEKLY' | 'MONTHLY';
+
+/** 정기송금 목록 한 건 (백엔드 ScheduledTransferListItem). */
+export interface ScheduledTransferItem {
+  /** 정기송금 식별자(UUID). */
+  public_id: string;
+  /** 수취인명 (설정 시 snapshot, nullable). */
+  receiver_name: string | null;
+  /** 회차당 송금액 (string 소수 4자리). */
+  amount: string;
+  /** 출금 통화 코드. */
+  currency_code: string;
+  /** 수취 통화 코드. */
+  receive_currency_code: string;
+  /** 반복 주기 (WEEKLY / MONTHLY). */
+  frequency: ScheduledTransferFrequency;
+  /** 실행 기준일 (MONTHLY=1~31, WEEKLY=1~7 ISO). */
+  schedule_day: number;
+  /** 다음 실행 예정일 (ISO 8601 date, KST 기준, 예: "2026-06-25"). */
+  next_run_date: string;
+  /** 마지막 실행 시각 (ISO 8601 UTC Z). 최초 실행 전이면 null. */
+  last_run_at: string | null;
+  status: ScheduledTransferStatus;
+  /** 정기송금 설정 시각 (ISO 8601 UTC Z). */
+  created_at: string;
+}
+
+/** 정기송금 목록 응답 — 페이지 메타 + 항목 배열 (백엔드 ScheduledTransferListResponse). */
+export interface ScheduledTransferListResponse {
+  scheduled_transfers: ScheduledTransferItem[];
+  page: number;
+  size: number;
+  total_elements: number;
+  total_pages: number;
+}
+
+/** 최근 송금한 외부 계좌 한 건 (백엔드 RecentAccountsResponse.AccountItem). */
+export interface RecentRemittanceAccountItem {
+  /** 은행 코드 (예: "KOOKMIN"). */
+  bank_code: string;
+  /** 은행명 (예: "국민은행"). */
+  bank_name: string;
+  /** 마스킹된 계좌번호 (앞 3 + 별표 + 뒤 2). */
+  account_number: string;
+  /** 수취인명 (송금 시점 transactions.receiver_name snapshot). */
+  account_holder: string;
+  /** 가장 최근 송금의 통화 코드 (KRW/USD/PHP/VND 중 1). */
+  currency_code: string;
+  /** 가장 최근 송금 금액 (string 소수 4자리, 예: "200000.0000"). */
+  last_amount: string;
+  /** 가장 최근 송금 시각 (ISO 8601 UTC Z). */
+  last_transferred_at: string;
+}
+
+/** 최근 송금 계좌 목록 응답 (GET /transfers/recent-accounts).
+ *  계좌별 최신 송금 1건씩, 최근순. 이력 없으면 빈 배열. */
+export interface RecentRemittanceAccountsResponse {
+  accounts: RecentRemittanceAccountItem[];
+}
+
+/** 송금 종류 — 백엔드 TransactionType enum과 일치. */
+export type TransferKind = 'INTERNAL_TRANSFER' | 'REMITTANCE';
+
+/** 송금 수수료 조회 요청 (POST /transfers/fee). */
+export interface TransferFeeRequest {
+  /** 송금 방식 — INTERNAL_TRANSFER(앱 내, 수수료 0) / REMITTANCE(타행, amount × 0.5%). */
+  transfer_type: TransferKind;
+  /** 송금 통화 코드 (KRW/USD/PHP/VND). */
+  currency_code: string;
+  /** 송금 금액 (string 십진수, 정수 ≤14자리·소수 ≤4자리, 양수). 예: "10000.0000". */
+  amount: string;
+}
+
+/** 송금 수수료 조회 응답 (백엔드 TransferFeeResponse).
+ *  금액은 모두 소수 4자리 string. */
+export interface TransferFeeResponse {
+  /** 수수료. INTERNAL은 "0.0000". */
+  fee: string;
+  /** 수수료 통화 (송금 통화와 동일). */
+  fee_currency_code: string;
+  /** 총 출금 금액 = amount + fee. */
+  total_deduct_amount: string;
+}
+
 // ---------- API 함수 ----------
 
 export const walletApi = {
@@ -436,6 +728,47 @@ export const walletApi = {
    * 사용자는 JWT의 public_id claim으로 식별 — 인증 누락은 AUTH4011(interceptor가 로그인 이동).
    */
   getMyAccounts: () => apiClient.get<unknown, AccountListResponse>('/accounts'),
+
+  // ===== 정기 송금 =====
+  // getScheduledTransfers(목록 조회)는 develop의 다른 PR에서 추가됨(아래에 정의) — 중복 제거.
+
+  /**
+   * 정기 송금 대상 유효성 검증 (200) — POST /transfers/scheduled/validate.
+   *
+   * <p>설정 직전 사전 검증. 응답의 {@code is_valid=false}면 {@code reason}으로 사용자에게 안내,
+   * {@code is_valid=true}면 그대로 createScheduled를 이어 호출한다. HTTP 200이라도 비즈니스
+   * 검증 실패는 응답 본문(reason)으로 표현되므로 호출 측은 ApiException이 아니라 응답을 봐야 한다.
+   *
+   * <p>형식 오류(amount/currency 등)는 백엔드가 400 COMMON4001로 던짐 → ApiException으로 throw.
+   */
+  validateScheduled: (body: ValidateScheduledRequest) =>
+    apiClient.post<unknown, ValidateScheduledResponse>('/transfers/scheduled/validate', body),
+
+  /**
+   * 정기 송금 설정 (201) — POST /transfers/scheduled. 검증 통과 후 호출.
+   *
+   * <p>등록 시점엔 송금이 즉시 일어나지 않는다 — 백엔드 스케줄러가 next_run_date에 도래하면
+   * 자동 실행. 응답의 public_id로 이력 조회({@link getScheduledHistory})에 사용.
+   *
+   * <p>에러: 400 COMMON4001(형식) / COMMON4221(currency 미일치, schedule_day 범위) / 401 AUTH4011
+   * / 404 MEMBER4001(수신자 없음) / 409 등 → ApiException으로 throw.
+   */
+  createScheduled: (body: CreateScheduledTransferRequest) =>
+    apiClient.post<unknown, ScheduledTransferResponse>('/transfers/scheduled', body),
+
+  /**
+   * 정기 송금 회차 이력 조회 (200) — GET /transfers/scheduled/{id}/history.
+   *
+   * <p>한 정기송금의 회차별 실행 이력. 본인 정기송금만 조회 가능, 본인 아니면 TRANSFER4001로 모호 매핑.
+   * 현 단계는 모든 회차 status === 'COMPLETED'(스케줄러는 성공 회차만 기록).
+   *
+   * @param transferPublicId 정기송금 식별자(scheduled_transfers.public_id)
+   */
+  getScheduledHistory: (transferPublicId: string, page = 0, size = 20) =>
+    apiClient.get<unknown, ScheduledTransferHistoryResponse>(
+      `/transfers/scheduled/${transferPublicId}/history`,
+      { params: { page, size } }
+    ),
 
   /**
    * 추가 지원 은행 목록 조회 (200) — 계좌 등록 시 선택 가능한 활성 국내 은행(이름 가나다순).
@@ -547,6 +880,107 @@ export const walletApi = {
     apiClient.get<unknown, RecentRecipientsResponse>('/transfers/recent-recipients/members'),
 
   /**
+   * 앱 사용자 유효성 검증 (200) — 이메일로 받는 사람 존재/식별.
+   *
+   * <p>송금 화면에서 사용자가 받는 사람 이메일 입력 후 "확인" 누를 때 호출.
+   * 성공 시 receiver_public_id 받아 송금 실행 API에 식별자로 사용.
+   *
+   * <p>에러: COMMON4001(400, 이메일 형식 위반) / MEMBER4001(가능성, 존재하지 않는 회원) /
+   * AUTH4011(401 — interceptor 처리).
+   *
+   * <p>경로 주의: 노션 표는 POST /receivers/search로 잘못 표기됐었음 → 실제는 GET /validate-member.
+   */
+  validateMember: (email: string) =>
+    apiClient.get<unknown, ValidateMemberResponse>('/transfers/validate-member', {
+      params: { email },
+    }),
+
+  /**
+   * 정기송금 목록 조회 (200) — 본인이 설정한 정기송금 페이지 조회.
+   *
+   * <p>RecurringList 화면용. created_at DESC 정렬 (최신 설정 우선).
+   *
+   * <p>status 필터 — ACTIVE/PAUSED/CANCELLED 중 1, 미지정 시 전체. 잘못된 값은 COMMON4001.
+   *
+   * @param status 상태 필터 (선택)
+   * @param page 페이지 번호 (0부터)
+   * @param size 페이지당 건수 (기본 20, 최대 100)
+   */
+  getScheduledTransfers: (status?: ScheduledTransferStatus, page = 0, size = 20) =>
+    apiClient.get<unknown, ScheduledTransferListResponse>('/transfers/scheduled', {
+      params: status ? { status, page, size } : { page, size },
+    }),
+
+  /**
+   * 최근 송금한 계좌 조회 (200) — TransferBank 화면 "최근 송금한 계좌" 섹션용.
+   *
+   * <p>내가 과거에 타인 계좌로 보낸 송금의 최신 1건씩 계좌별로 묶어 최근순으로 반환.
+   * 송금 이력 없거나 외부 송금만 한 적이 없으면 빈 배열.
+   *
+   * <p>에러: COMMON4001(400, size 1~50 범위 위반) / AUTH4011(401, interceptor 처리)
+   * / WALLET4001(404, 지갑 없음 — UI에서 섹션 숨김 처리).
+   *
+   * @param size 조회 건수 (1~50, 기본 10)
+   */
+  getRecentRemittanceAccounts: (size?: number) =>
+    apiClient.get<unknown, RecentRemittanceAccountsResponse>('/transfers/recent-accounts', {
+      params: size !== undefined ? { size } : undefined,
+    }),
+
+  /**
+   * 송금 수수료 조회 (200) — TransferConfirm 화면 수수료 표시용.
+   *
+   * <p>입력(송금 종류·통화·금액)으로 수수료를 계산해 반환. DB·외부 호출 없는 순수 계산.
+   * 정책: INTERNAL_TRANSFER=0, REMITTANCE=amount × 0.5% (HALF_UP 4자리).
+   *
+   * <p>에러: COMMON4001(400, body 검증 — 음수/형식) / TRANSFER4002(400, 미지원 통화)
+   * / TRANSFER4003(400, 미지원 송금 유형) / AUTH4011(401, interceptor 처리).
+   */
+  getTransferFee: (body: TransferFeeRequest) =>
+    apiClient.post<unknown, TransferFeeResponse>('/transfers/fee', body),
+
+  /**
+   * 송금 실행 (201) — POST /api/v1/transfers (api-spec §6).
+   *
+   * <p>1·2단계 범위: same-currency 송금만(`currency_code === receive_currency_code`). 다통화는 3단계.
+   * INTERNAL_TRANSFER는 같은 통화 송금만, REMITTANCE는 외부 계좌로 같은 통화 송금.
+   *
+   * <p>TX-PIN 흐름: 직전에 `verifyTransferPin` 성공으로 서버에 단명·단일사용 마커
+   * (`pin:verified:{userPublicId}`, TTL 180초)가 있어야 한다. 마커 없으면 TRANSFER4010(428),
+   * PIN 자체 미설정이면 TRANSFER4009(400).
+   *
+   * <p>Idempotency-Key 헤더 필수: 호출 측은 결제 흐름 진입(TransferConfirm)에서 `crypto.randomUUID()`로
+   * 키를 한 번 고정하고, 뒤로가기·네트워크 재시도에도 같은 키를 그대로 보내야 멱등성이 보장된다.
+   * 동일 키 재요청 시 백엔드가 첫 결과(2xx)를 그대로 재반환(3-layer: Redis 캐시 → DB UNIQUE → race 시 재조회).
+   *
+   * <p>주요 에러 (모두 ApiException으로 throw):
+   * - 400 COMMON4001 — Body 검증 실패
+   * - 400 TRANSFER4002/4003/4004/4005 — 통화/유형/자기송금/통화조합
+   * - 400 TRANSFER4009 / 428 TRANSFER4010 — PIN 관련(TX-PIN)
+   * - 422 WALLET4002 / WALLET4003 — 잔액 부족 / 비활성 지갑
+   * - 429 TRANSFER4006 / TRANSFER4008 — rate-limit / PIN 5회 잠금
+   * - 503 COMMON5031 — 락 경합·Mock 은행 일시 장애(REMITTANCE)
+   */
+  executeTransfer: (body: TransferExecuteRequest, idempotencyKey: string) =>
+    apiClient.post<unknown, TransferExecuteResponse>('/transfers', body, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    }),
+
+  /**
+   * 송금 확인증 단건 조회 (200) — 완료된 INTERNAL_TRANSFER 또는 REMITTANCE 한 건 (api-spec §7-1).
+   *
+   * <p>본인 검증: 송신자(거래 wallet 주인) 본인만 조회 가능. 본인 아님·미존재·미지원 유형 실패는
+   * 모두 TRANSFER4001로 모호 매핑됨(cross-user 응답 노출 방지 정책). 화면은 단일 에러 메시지로 처리.
+   *
+   * <p>에러: 400 COMMON4001(path 형식) / 401 AUTH4011(interceptor 처리) / TRANSFER4001(본인 아님·미존재·유형)
+   * / 500 COMMON5000 → 모두 ApiException으로 throw.
+   *
+   * @param transferPublicId 송금 거래 식별자(UUID, transactions.public_id)
+   */
+  getReceipt: (transferPublicId: string) =>
+    apiClient.get<unknown, TransferReceiptResponse>(`/transfers/${transferPublicId}/receipt`),
+
+  /**
    * 내 거래내역 목록 조회 (200) — 본인이 송신자 또는 수신자인 전 유형 거래를 최근순으로 페이지 조회.
    *
    * <p>INTERNAL_TRANSFER는 transactions 테이블에 송신자 row 1건만 INSERT되고 수신자는
@@ -563,8 +997,32 @@ export const walletApi = {
       params: { page, size },
     }),
 
+  /**
+   * 주 계좌 변경 (200) — 활성 계좌 중 하나를 주 계좌로 지정한다. 기존 주 계좌는 자동 해제되어
+   * 사용자당 주 계좌가 항상 1개로 유지된다. 이미 주 계좌인 계좌를 다시 지정하면 멱등 성공.
+   *
+   * <p>응답으로 변경된 AccountResponse(is_primary=true)를 반환. 호출 측은 onSuccess에서
+   * ['wallet','accounts']를 invalidate해 목록 정렬(주 계좌 우선)을 서버 기준으로 갱신한다.
+   *
+   * <p>존재하지 않는 계좌(미존재/타인/비활성) ACCOUNT4001(404), 분산락 실패 COMMON5031(503),
+   * 인증 누락 AUTH4011(401, interceptor 처리) → 모두 ApiException으로 throw.
+   */
+  setPrimaryAccount: (accountId: string) =>
+    apiClient.patch<unknown, AccountItem>(`/accounts/${accountId}/primary`),
+
+  /**
+   * 계좌 삭제 (200) — 지정한 계좌를 soft-delete(is_active=false)한다. 주 계좌를 삭제하면
+   * 남은 활성 계좌 중 가장 최근 등록 1건이 자동으로 주 계좌로 승격된다(마지막 1개면 주 계좌
+   * 없는 상태 허용). 응답 data는 null.
+   *
+   * <p>호출 측은 onSuccess에서 ['wallet','accounts']를 invalidate해 목록을 서버 기준으로 갱신.
+   *
+   * <p>존재하지 않는 계좌(미존재/타인/이미 비활성) ACCOUNT4001(404), 분산락 실패 COMMON5031(503),
+   * 인증 누락 AUTH4011(401) → 모두 ApiException으로 throw.
+   */
+  deleteAccount: (accountId: string) => apiClient.delete<unknown, void>(`/accounts/${accountId}`),
+
   // TODO: 다음 사이클에서 추가
-  //   계좌: deleteAccount (DELETE /accounts/{id}), setPrimary (PATCH /accounts/{id}/primary)
   //   송금: validateMember, validateBank, execute, getReceipt, getRecentRecipients
   //   정기송금: validateScheduled, createScheduled, listScheduled, getHistory
 };

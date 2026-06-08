@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { useRecentInternalRecipients } from '@/hooks/useRecentInternalRecipients';
+import { useValidateMember } from '@/hooks/useValidateMember';
 import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
 import styles from './TransferAppPage.module.css';
 
@@ -28,6 +31,7 @@ interface RecipientDisplay {
 
 export default function TransferAppPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // 통화 드롭다운 (#120 패턴)
   const {
@@ -62,16 +66,45 @@ export default function TransferAppPage() {
 
   const [recipient, setRecipient] = useState('');
   const [verified, setVerified] = useState<RecipientDisplay | null>(null);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  // 검증 mutation (#131) — 사용자가 "확인" 누를 때 1회 호출.
+  const validateMutation = useValidateMember();
   const [currency, setCurrency] = useState('VND');
   const [amount, setAmount] = useState('');
   const [memo, setMemo] = useState('');
 
   function handleVerify() {
-    // 임시: 최근 수신자 리스트에서 닉네임 매칭. 진짜 검증은 다음 PR(POST /transfers/receivers/search).
-    const found = recentRecipients.find(
-      (u) => u.identifier.toLowerCase() === recipient.toLowerCase()
-    );
-    setVerified(found ?? null);
+    setVerifyError(null);
+    const trimmed = recipient.trim();
+    if (!trimmed) {
+      setVerifyError(t('transfer.app.errorEmailRequired'));
+      return;
+    }
+    validateMutation.mutate(trimmed, {
+      onSuccess: (res) => {
+        // 응답엔 닉네임/is_verified/receiver_public_id가 들어옴. 화면 모델로 변환.
+        // receiver_public_id는 verified state의 identifier 필드에 저장 — 송금 실행 시 식별자로 사용 예정.
+        setVerified({
+          identifier: res.receiver_public_id,
+          name: res.nickname,
+          initial: res.nickname.charAt(0).toUpperCase() || '?',
+          // 통화는 백엔드 응답에 없음 → 현재 selectedCurrency 유지 (사용자가 따로 선택).
+          currency,
+          tone: 'good',
+        });
+      },
+      onError: (err) => {
+        setVerified(null);
+        if (err instanceof ApiException) {
+          if (err.code === 'COMMON4001') setVerifyError(t('transfer.app.errorInvalidEmail'));
+          else if (err.code === 'MEMBER4001') setVerifyError(t('transfer.app.errorMemberNotFound'));
+          else if (err.code === 'NETWORK_ERROR') setVerifyError(t('transfer.app.errorNetwork'));
+          else setVerifyError(err.message || t('transfer.app.errorVerifyFailed'));
+        } else {
+          setVerifyError(t('transfer.app.errorVerifyFailed'));
+        }
+      },
+    });
   }
 
   function handleRecentSelect(user: RecipientDisplay) {
@@ -82,25 +115,57 @@ export default function TransferAppPage() {
 
   const canSubmit = verified !== null && Number(amount) > 0;
 
+  /**
+   * "다음" 버튼 — TransferConfirm으로 송금 정보를 state로 전달.
+   *
+   * <p>기존 TransferConfirm/Auth가 받던 표시용 필드(currency/amount/recipientName 등)는 그대로 유지하면서
+   * 송금 실행 body 조립에 필요한 신규 옵셔널 필드(transferType/receiverPublicId/amountDecimal/memo)를
+   * 같이 보낸다. 사용자가 정수만 입력했지만 백엔드는 소수 4자리 string이라 amountDecimal로 정규화.
+   * REMITTANCE 흐름(TransferBank)은 신규 필드 없이 기존 흐름대로 동작 — 다음 사이클에 같이 정리.
+   */
+  function handleNext() {
+    if (!verified) return;
+    // 방어적 NaN 가드 — canSubmit이 Number(amount) > 0을 체크하지만,
+    // 비정상 입력(빈 문자열·문자 등)이 들어왔을 때 NaN.toFixed(4) → "NaN"이 백엔드로 가는 것을 막는다.
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) return;
+    const amountDecimal = numericAmount.toFixed(4);
+    navigate('/transfer/confirm', {
+      state: {
+        // 표시용 (기존 컨벤션 유지)
+        recipientName: verified.name,
+        recipientInitial: verified.initial,
+        recipientKind: 'user' as const,
+        currency,
+        amount, // 사용자 입력 그대로 ("10000") — TransferConfirm이 통화 기호 붙여 표시
+        // 송금 실행 body 조립용 (신규 필드)
+        transferType: 'INTERNAL_TRANSFER' as const,
+        receiverPublicId: verified.identifier,
+        amountDecimal,
+        memo: memo.trim() ? memo.trim() : null,
+      },
+    });
+  }
+
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="앱 사용자 송금" onBack={() => navigate('/transfer')} />
+        <TopBar title={t('transfer.app.title')} onBack={() => navigate('/transfer')} />
 
-        <div className={styles.section}>최근 송금한 대상</div>
+        <div className={styles.section}>{t('transfer.app.recentSection')}</div>
 
         {/* 최근 수신자 칩 — 로딩/에러/빈 상태 처리 (#120 패턴) */}
         {recipientsLoading ? (
-          <div className={styles.emptyText}>불러오는 중...</div>
+          <div className={styles.emptyText}>{t('transfer.app.loading')}</div>
         ) : hasRecipientsError ? (
           <div className={styles.emptyText}>
-            최근 송금 기록을 불러오지 못했어요.
+            {t('transfer.app.recentLoadError')}
             <button type="button" className={styles.retryBtn} onClick={() => refetchRecipients()}>
-              다시 시도
+              {t('transfer.app.retry')}
             </button>
           </div>
         ) : recentRecipients.length === 0 ? (
-          <div className={styles.emptyText}>아직 송금 기록이 없습니다.</div>
+          <div className={styles.emptyText}>{t('transfer.app.recentEmpty')}</div>
         ) : (
           <div className={styles.scrollRow}>
             {recentRecipients.map((user) => (
@@ -118,21 +183,32 @@ export default function TransferAppPage() {
         )}
 
         <div className={styles.field}>
-          <label className={styles.label}>받는 사람 닉네임</label>
+          <label className={styles.label}>{t('transfer.app.recipientEmailLabel')}</label>
           <div className={styles.inputRow}>
             <input
-              type="text"
-              placeholder="닉네임 입력"
+              type="email"
+              placeholder={t('transfer.app.recipientEmailPlaceholder')}
               value={recipient}
               onChange={(e) => {
                 setRecipient(e.target.value);
                 setVerified(null);
+                setVerifyError(null);
               }}
             />
-            <button type="button" className={styles.inputAction} onClick={handleVerify}>
-              확인
+            <button
+              type="button"
+              className={styles.inputAction}
+              onClick={handleVerify}
+              disabled={validateMutation.isPending}
+            >
+              {validateMutation.isPending ? t('transfer.app.verifying') : t('transfer.app.verify')}
             </button>
           </div>
+          {verifyError && (
+            <div className={styles.errorText} role="alert">
+              {verifyError}
+            </div>
+          )}
         </div>
 
         {verified && (
@@ -143,16 +219,16 @@ export default function TransferAppPage() {
             <div className={styles.verifiedInfo}>
               <div className={styles.verifiedName}>
                 {verified.name}
-                <span className={styles.pill}>인증</span>
+                <span className={styles.pill}>{t('transfer.app.verifiedBadge')}</span>
               </div>
-              <div className={styles.verifiedMeta}>최근 송금했던 사용자</div>
+              <div className={styles.verifiedMeta}>{t('transfer.app.verifiedMeta')}</div>
             </div>
           </div>
         )}
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="transfer-currency">
-            보낼 통화
+            {t('transfer.app.currencyLabel')}
           </label>
           <select
             id="transfer-currency"
@@ -161,8 +237,8 @@ export default function TransferAppPage() {
             onChange={(e) => setCurrency(e.target.value)}
             disabled={currenciesLoading || hasCurrenciesError || currencies.length === 0}
           >
-            {currenciesLoading && <option value="">불러오는 중...</option>}
-            {hasCurrenciesError && <option value="">통화 불러오기 실패</option>}
+            {currenciesLoading && <option value="">{t('transfer.app.loading')}</option>}
+            {hasCurrenciesError && <option value="">{t('transfer.app.currencyLoadError')}</option>}
             {!currenciesLoading &&
               !hasCurrenciesError &&
               currencies.map((c) => (
@@ -173,14 +249,14 @@ export default function TransferAppPage() {
           </select>
           {hasCurrenciesError && (
             <button type="button" className={styles.retryBtn} onClick={() => refetchCurrencies()}>
-              다시 시도
+              {t('transfer.app.retry')}
             </button>
           )}
         </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="transfer-amount">
-            보낼 금액
+            {t('transfer.app.amountLabel')}
           </label>
           <input
             id="transfer-amount"
@@ -194,13 +270,13 @@ export default function TransferAppPage() {
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="transfer-memo">
-            메모
+            {t('transfer.app.memoLabel')}
           </label>
           <input
             id="transfer-memo"
             type="text"
             className={styles.input}
-            placeholder="메모 (선택)"
+            placeholder={t('transfer.app.memoPlaceholder')}
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
           />
@@ -208,12 +284,8 @@ export default function TransferAppPage() {
       </div>
 
       <div className={styles.fixedBtn}>
-        <button
-          className={styles.primaryBtn}
-          disabled={!canSubmit}
-          onClick={() => navigate('/transfer/confirm')}
-        >
-          다음
+        <button className={styles.primaryBtn} disabled={!canSubmit} onClick={handleNext}>
+          {t('transfer.app.next')}
         </button>
       </div>
     </>

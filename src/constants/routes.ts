@@ -38,6 +38,7 @@ export const ROUTES = {
   MYPAGE_WALLET_HISTORY: '/mypage/wallet-history',
   MYPAGE_EXCHANGE_HISTORY: '/mypage/exchange-history',
   MYPAGE_DOC_ANALYSIS_HISTORY: '/mypage/doc-analysis-history',
+  MYPAGE_WITHDRAW: '/mypage/withdraw',
 
   // ===== Service: Charge =====
   CHARGE: '/charge',
@@ -56,6 +57,7 @@ export const ROUTES = {
   RECURRING: '/recurring',
   RECURRING_SETUP: '/recurring/setup',
   RECURRING_COMPLETE: '/recurring/complete',
+  RECURRING_HISTORY: '/recurring/:transferPublicId/history',
 
   // ===== Service: Transfer =====
   TRANSFER: '/transfer',
@@ -65,7 +67,7 @@ export const ROUTES = {
   TRANSFER_AUTH: '/transfer/auth',
   TRANSFER_PIN_SETUP: '/transfer/pin-setup', // 송금 PIN 최초 등록 (PIN은 새 설계라 와이어프레임에 없음)
   TRANSFER_COMPLETE: '/transfer/complete',
-  TRANSFER_RECEIPT: '/transfer/receipt',
+  TRANSFER_RECEIPT: '/transfer/receipt/:transferPublicId',
 
   // ===== Service: Document analysis =====
   DOC_ANALYSIS: '/doc-analysis',
@@ -81,3 +83,9 @@ export const buildCommunityPostPath = (postId: string): string => `/community/po
 
 export const buildCommunityPostEditPath = (postId: string): string =>
   `/community/posts/${postId}/edit`;
+
+export const buildTransferReceiptPath = (transferPublicId: string): string =>
+  `/transfer/receipt/${transferPublicId}`;
+
+export const buildRecurringHistoryPath = (transferPublicId: string): string =>
+  `/recurring/${transferPublicId}/history`;

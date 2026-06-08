@@ -1,28 +1,28 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import { PAYMENT_METHODS } from '@/constants/paymentMethods';
 import styles from './DocAnalysisPaymentPage.module.css';
 
 export default function DocAnalysisPaymentPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [method, setMethod] = useState<string>(PAYMENT_METHODS[0]);
   const [agreed, setAgreed] = useState(false);
 
   return (
     <>
-      <TopBar title="결제하기" onBack={() => navigate(-1)} />
+      <TopBar title={t('doc.payment.title')} onBack={() => navigate(-1)} />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
-        <div className={styles.cardTitle}>총 15,000원</div>
-        <div className={styles.cardText}>
-          최근 문서 분석 기록보다 이미지 파일로 최대 10문서를 확인할 수 있습니다.
-        </div>
+        <div className={styles.cardTitle}>{t('doc.payment.totalAmount')}</div>
+        <div className={styles.cardText}>{t('doc.payment.description')}</div>
       </div>
 
       <div className={styles.field}>
         <label className={styles.label} htmlFor="pay-method">
-          결제 방법
+          {t('doc.payment.methodLabel')}
         </label>
         <select
           id="pay-method"
@@ -39,7 +39,7 @@ export default function DocAnalysisPaymentPage() {
       </div>
 
       <div className={styles.agreeRow} onClick={() => setAgreed((v) => !v)}>
-        <span className={styles.agreeLabel}>약관 및 개인정보 동의</span>
+        <span className={styles.agreeLabel}>{t('doc.payment.agreeLabel')}</span>
         <div className={`${styles.checkbox} ${agreed ? styles.checkboxChecked : ''}`}>
           {agreed && '✓'}
         </div>
@@ -51,7 +51,7 @@ export default function DocAnalysisPaymentPage() {
         disabled={!agreed}
         onClick={() => navigate('/doc-analysis/loading')}
       >
-        총 15,000원 결제하기
+        {t('doc.payment.payButton')}
       </button>
     </>
   );

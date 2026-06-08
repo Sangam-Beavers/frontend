@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
@@ -19,10 +20,24 @@ const TABS = ['전체', '즐겨찾기', '아시아', '미주'] as const;
 type Tab = (typeof TABS)[number];
 
 export default function ExchangeRateFullPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('전체');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const { data, isLoading, isFetching, error, refetch } = useExchangeRatesWidget();
+
+  const tabLabels: Record<Tab, string> = {
+    전체: t('exchange.rateFull.tabAll'),
+    즐겨찾기: t('exchange.rateFull.tabFavorites'),
+    아시아: t('exchange.rateFull.tabAsia'),
+    미주: t('exchange.rateFull.tabAmericas'),
+  };
+
+  const unitLabels: Record<string, string> = {
+    USD: t('exchange.rateFull.unitUsd'),
+    PHP: t('exchange.rateFull.unitPhp'),
+    VND: t('exchange.rateFull.unitVnd'),
+  };
 
   const toggleFavorite = (code: string) => {
     setFavorites((prev) => {
@@ -42,24 +57,27 @@ export default function ExchangeRateFullPage() {
     return rates.map((r) => {
       const meta = CURRENCY_META[r.currency_code] ?? {
         region: '아시아' as Region,
-        unit: '1단위 기준',
+        unit: t('exchange.rateFull.unitDefault'),
       };
       const isUp = r.change_rate >= 0;
       const changeLabel = `${isUp ? '▲' : '▼'} ${Math.abs(r.change_rate).toFixed(2)}%`;
       const rateLabel = Number(r.exchange_rate).toLocaleString(undefined, {
         maximumFractionDigits: 4,
       });
+      const localizedUnit = unitLabels[r.currency_code] ?? meta.unit;
       return {
         code: r.currency_code,
-        country: r.currency_name,
-        unit: meta.unit,
+        // 통화명은 i18n 매핑(이슈 #153) — 사전에 없는 코드는 백엔드 응답 그대로.
+        country: t(`home.currencies.${r.currency_code}`, { defaultValue: r.currency_name }),
+        unit: localizedUnit,
         rate: rateLabel,
         change: changeLabel,
         isUp,
         region: meta.region,
       };
     });
-  }, [data]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, t]);
 
   const filtered = items.filter((item) => {
     if (activeTab === '즐겨찾기') return favorites.has(item.code);
@@ -72,21 +90,21 @@ export default function ExchangeRateFullPage() {
   const errorMessage =
     error instanceof ApiException
       ? error.code === 'TRANSFER4002'
-        ? '환율을 불러올 수 없습니다.'
-        : error.message || '환율 조회에 실패했습니다.'
+        ? t('exchange.rateFull.errUnsupported')
+        : error.message || t('exchange.rateFull.errFailed')
       : error
-        ? '환율 조회에 실패했습니다.'
+        ? t('exchange.rateFull.errFailed')
         : null;
 
   return (
     <>
       <TopBar
-        title="실시간 환율"
+        title={t('exchange.rateFull.title')}
         onBack={() => navigate('/')}
         rightAction={
           <button
             className={styles.iconBtn}
-            aria-label="새로고침"
+            aria-label={t('exchange.rateFull.refresh')}
             onClick={() => refetch()}
             disabled={isFetching}
           >
@@ -96,10 +114,8 @@ export default function ExchangeRateFullPage() {
       />
 
       <div className={styles.softbox}>
-        <div className={styles.softboxTitle}>기준 통화 KRW</div>
-        <div className={styles.softboxText}>
-          현재 시점 기준 환율입니다. 환전 시점에 따라 실제 적용 환율은 달라질 수 있습니다.
-        </div>
+        <div className={styles.softboxTitle}>{t('exchange.rateFull.baseCurrency')}</div>
+        <div className={styles.softboxText}>{t('exchange.rateFull.baseCurrencyText')}</div>
       </div>
 
       <div className={styles.tabs}>
@@ -110,19 +126,21 @@ export default function ExchangeRateFullPage() {
             className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ''}`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab}
+            {tabLabels[tab]}
           </button>
         ))}
       </div>
 
       <div className={styles.list}>
         {isLoading ? (
-          <div className={styles.empty}>불러오는 중...</div>
+          <div className={styles.empty}>{t('exchange.rateFull.loading')}</div>
         ) : errorMessage ? (
           <div className={styles.empty}>{errorMessage}</div>
         ) : filtered.length === 0 ? (
           <div className={styles.empty}>
-            {activeTab === '즐겨찾기' ? '즐겨찾기한 통화가 없습니다' : '표시할 환율이 없습니다'}
+            {activeTab === '즐겨찾기'
+              ? t('exchange.rateFull.emptyFavorites')
+              : t('exchange.rateFull.emptyRates')}
           </div>
         ) : (
           filtered.map((item) => (
@@ -141,7 +159,11 @@ export default function ExchangeRateFullPage() {
                 type="button"
                 className={`${styles.starBtn} ${favorites.has(item.code) ? styles.starOn : ''}`}
                 onClick={() => toggleFavorite(item.code)}
-                aria-label={favorites.has(item.code) ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+                aria-label={
+                  favorites.has(item.code)
+                    ? t('exchange.rateFull.unfavorite')
+                    : t('exchange.rateFull.favorite')
+                }
               >
                 {favorites.has(item.code) ? '★' : '☆'}
               </button>

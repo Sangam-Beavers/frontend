@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { useSupportedBanks } from '@/hooks/useSupportedBanks';
@@ -8,6 +9,7 @@ import type { AccountRegisterDraft } from '@/types/charge';
 import styles from './AddAccountPage.module.css';
 
 export default function AddAccountPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: bankData, isLoading: banksLoading, error: banksError } = useSupportedBanks();
   const banks = bankData?.banks ?? [];
@@ -55,10 +57,10 @@ export default function AddAccountPage() {
 
   return (
     <>
-      <TopBar title="계좌 추가" />
+      <TopBar title={t('charge.addAccount.title')} />
 
       <div className={styles.field}>
-        <label htmlFor="bank-name">은행명</label>
+        <label htmlFor="bank-name">{t('charge.addAccount.bankLabel')}</label>
         <select
           id="bank-name"
           className={styles.select}
@@ -69,9 +71,9 @@ export default function AddAccountPage() {
             resetHolder();
           }}
         >
-          {banksLoading && <option value="">은행 목록을 불러오는 중…</option>}
-          {banksError && <option value="">은행 목록을 불러오지 못했어요</option>}
-          {banksEmpty && <option value="">지원하는 은행이 없어요</option>}
+          {banksLoading && <option value="">{t('charge.addAccount.banksLoading')}</option>}
+          {banksError && <option value="">{t('charge.addAccount.banksError')}</option>}
+          {banksEmpty && <option value="">{t('charge.addAccount.banksEmpty')}</option>}
           {banks.map((bank) => (
             <option key={bank.bank_code} value={bank.bank_code}>
               {bank.bank_name}
@@ -81,13 +83,13 @@ export default function AddAccountPage() {
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="account-number">계좌번호</label>
+        <label htmlFor="account-number">{t('charge.addAccount.accountNumberLabel')}</label>
         <input
           id="account-number"
           type="text"
           inputMode="numeric"
           className={styles.input}
-          placeholder="- 없이 숫자만 입력"
+          placeholder={t('charge.addAccount.accountNumberPlaceholder')}
           value={accountNumber}
           onChange={(event) => {
             setAccountNumber(event.target.value.replace(/[^0-9]/g, ''));
@@ -97,10 +99,14 @@ export default function AddAccountPage() {
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="account-holder-lookup">예금주</label>
+        <label htmlFor="account-holder-lookup">{t('charge.addAccount.holderLabel')}</label>
         <div className={styles.holderRow}>
           <div className={styles.holderName}>
-            {verifiedName || <span className={styles.holderPlaceholder}>조회 전</span>}
+            {verifiedName || (
+              <span className={styles.holderPlaceholder}>
+                {t('charge.addAccount.holderNotYet')}
+              </span>
+            )}
           </div>
           <button
             id="account-holder-lookup"
@@ -109,23 +115,27 @@ export default function AddAccountPage() {
             disabled={!canLookup}
             onClick={handleLookup}
           >
-            {holder.isPending ? '조회 중…' : '예금주 조회'}
+            {holder.isPending
+              ? t('charge.addAccount.lookupLoading')
+              : t('charge.addAccount.lookupCta')}
           </button>
         </div>
         {holder.error && (
           <div className={styles.holderError}>{accountErrorMessage(holder.error)}</div>
         )}
-        {verifiedName && <div className={styles.holderOk}>✓ 예금주가 확인됐어요.</div>}
+        {verifiedName && (
+          <div className={styles.holderOk}>{t('charge.addAccount.holderConfirmed')}</div>
+        )}
       </div>
 
       <div className={`${styles.card} ${styles.cardWarn}`}>
-        <div className={styles.cardTitle}>자동이체 인증 필요</div>
-        <div className={styles.cardText}>계좌 연결을 위해 자동이체 인증 화면으로 이동합니다.</div>
+        <div className={styles.cardTitle}>{t('charge.addAccount.autoDebitTitle')}</div>
+        <div className={styles.cardText}>{t('charge.addAccount.autoDebitText')}</div>
       </div>
 
       <div className={styles.primaryFixed}>
         <button type="button" className={styles.primary} disabled={!canSubmit} onClick={handleNext}>
-          다음
+          {t('charge.addAccount.next')}
         </button>
       </div>
     </>

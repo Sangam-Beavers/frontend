@@ -14,6 +14,7 @@
 
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ApiException, walletApi } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { ROUTES } from '@/constants/routes';
@@ -36,6 +37,7 @@ type IncomingState = AuthState | OnboardingState | null;
 
 export default function TransferPinSetupPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const location = useLocation();
   const incomingState = (location.state as IncomingState) ?? null;
   // 송금 인증에서 PIN 미설정으로 튕긴 경우 — 등록 후 송금 인증 화면으로 복귀하기 위해 들고 옴.
@@ -69,11 +71,11 @@ export default function TransferPinSetupPage() {
     setError(null);
 
     if (pin.length !== 6) {
-      setError('PIN은 숫자 6자리로 입력해주세요.');
+      setError(t('transfer.pinSetup.errorPinLength'));
       return;
     }
     if (pin !== confirm) {
-      setError('PIN이 서로 일치하지 않습니다. 다시 확인해주세요.');
+      setError(t('transfer.pinSetup.errorPinMismatch'));
       return;
     }
 
@@ -97,20 +99,18 @@ export default function TransferPinSetupPage() {
             if (retryErr instanceof ApiException && retryErr.code === 'COMMON4091') {
               setAlreadySet(true);
             } else if (retryErr instanceof ApiException) {
-              setError(
-                retryErr.message || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.'
-              );
+              setError(retryErr.message || t('transfer.pinSetup.errorRequest'));
             } else {
-              setError('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+              setError(t('transfer.pinSetup.errorRequest'));
             }
           }
         } else if (e.code === 'NETWORK_ERROR') {
-          setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+          setError(t('transfer.pinSetup.errorNetwork'));
         } else {
-          setError(e.message || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+          setError(e.message || t('transfer.pinSetup.errorRequest'));
         }
       } else {
-        setError('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        setError(t('transfer.pinSetup.errorRequest'));
       }
     } finally {
       setSubmitting(false);
@@ -122,21 +122,21 @@ export default function TransferPinSetupPage() {
     return (
       <>
         <div className={styles.contentExtraPad}>
-          <TopBar title="송금 PIN 설정" onBack={goNext} />
+          <TopBar title={t('transfer.pinSetup.title')} onBack={goNext} />
           <div className={`${styles.card} ${styles.cardOk}`}>
             <div className={styles.cardTitle}>
-              {done ? '송금 PIN이 등록되었습니다' : '이미 송금 PIN이 등록되어 있습니다'}
+              {done ? t('transfer.pinSetup.doneTitle') : t('transfer.pinSetup.alreadySetTitle')}
             </div>
             <div className={styles.cardText}>
               {transferState
-                ? '진행 중이던 송금으로 돌아가 PIN을 입력해주세요.'
-                : '송금할 때 등록한 PIN 6자리를 입력하면 됩니다.'}
+                ? t('transfer.pinSetup.doneTextResume')
+                : t('transfer.pinSetup.doneTextGeneric')}
             </div>
           </div>
         </div>
         <div className={styles.fixedBtn}>
           <button type="button" className={styles.primaryBtn} onClick={goNext}>
-            {transferState ? '송금 계속하기' : '확인'}
+            {transferState ? t('transfer.pinSetup.continueTransfer') : t('transfer.pinSetup.ok')}
           </button>
         </div>
       </>
@@ -146,20 +146,20 @@ export default function TransferPinSetupPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="송금 PIN 설정" onBack={() => navigate(-1)} />
+        <TopBar title={t('transfer.pinSetup.title')} onBack={() => navigate(-1)} />
 
         <div className={`${styles.card} ${styles.cardWarn}`}>
-          <div className={styles.cardTitle}>송금 PIN 등록</div>
+          <div className={styles.cardTitle}>{t('transfer.pinSetup.registerTitle')}</div>
           <div className={styles.cardText}>
-            앞으로 송금할 때 입력할 숫자 6자리를 정해주세요.
+            {t('transfer.pinSetup.registerText1')}
             <br />
-            5회 잘못 입력하면 10분 동안 잠깁니다.
+            {t('transfer.pinSetup.registerText2')}
           </div>
         </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="pin-setup">
-            송금 PIN (숫자 6자리)
+            {t('transfer.pinSetup.pinLabel')}
           </label>
           <input
             id="pin-setup"
@@ -168,7 +168,7 @@ export default function TransferPinSetupPage() {
             autoComplete="off"
             maxLength={6}
             className={styles.input}
-            placeholder="6자리 숫자"
+            placeholder={t('transfer.pinSetup.pinPlaceholder')}
             value={pin}
             onChange={(e) => setPin(sanitizePinInput(e.target.value))}
           />
@@ -176,7 +176,7 @@ export default function TransferPinSetupPage() {
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="pin-setup-confirm">
-            송금 PIN 확인
+            {t('transfer.pinSetup.pinConfirmLabel')}
           </label>
           <input
             id="pin-setup-confirm"
@@ -185,7 +185,7 @@ export default function TransferPinSetupPage() {
             autoComplete="off"
             maxLength={6}
             className={styles.input}
-            placeholder="한 번 더 입력"
+            placeholder={t('transfer.pinSetup.pinConfirmPlaceholder')}
             value={confirm}
             onChange={(e) => setConfirm(sanitizePinInput(e.target.value))}
           />
@@ -205,10 +205,10 @@ export default function TransferPinSetupPage() {
           disabled={pin.length !== 6 || confirm.length !== 6 || submitting}
           onClick={handleSubmit}
         >
-          {submitting ? '등록 중...' : 'PIN 등록하기'}
+          {submitting ? t('transfer.pinSetup.submitting') : t('transfer.pinSetup.submit')}
         </button>
         <button type="button" className={styles.ghostBtn} onClick={() => navigate(-1)}>
-          이전으로 돌아가기
+          {t('transfer.pinSetup.back')}
         </button>
       </div>
     </>

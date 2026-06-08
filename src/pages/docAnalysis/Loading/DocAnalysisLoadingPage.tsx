@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import { documentApi } from '@/api';
 import { useDocAnalysisStore } from '@/stores/docAnalysisStore';
@@ -13,10 +14,10 @@ import styles from './DocAnalysisLoadingPage.module.css';
  * 1단계(업로드)는 이 페이지 진입 자체가 완료 증거라 startAt 0 + 즉시 완료.
  */
 const STEPS = [
-  { label: '문서 업로드', startAt: 0 },
-  { label: '텍스트 추출 · 개인정보 보호 처리', startAt: 0 },
-  { label: 'AI 분석 및 번역', startAt: 0.3 },
-  { label: '결과 정리', startAt: 0.85 },
+  { labelKey: 'doc.loading.steps.upload', startAt: 0 },
+  { labelKey: 'doc.loading.steps.extract', startAt: 0 },
+  { labelKey: 'doc.loading.steps.analyze', startAt: 0.3 },
+  { labelKey: 'doc.loading.steps.compile', startAt: 0.85 },
 ];
 
 /** 상태 폴링 주기(ms). 분석이 분 단위로 걸려 과한 폴링은 불필요. */
@@ -44,6 +45,7 @@ const LABEL_CLASS = {
 } as const;
 
 export default function DocAnalysisLoadingPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { docType, publicId } = (location.state as { docType?: string; publicId?: string }) ?? {};
@@ -116,15 +118,21 @@ export default function DocAnalysisLoadingPage() {
 
   return (
     <>
-      <TopBar title="AI 분석 중" onBack={() => navigate(-1)} />
+      <TopBar title={t('doc.loading.title')} onBack={() => navigate(-1)} />
 
       <div className={styles.preview}>
         {imageUrl ? (
-          <img className={styles.previewImage} src={imageUrl} alt={`${docType ?? '문서'} 이미지`} />
+          <img
+            className={styles.previewImage}
+            src={imageUrl}
+            alt={t('doc.loading.imageLabel', { type: docType ?? t('doc.loading.defaultDocType') })}
+          />
         ) : (
           <>
             <span className={styles.previewIcon}>🖼️</span>
-            <span className={styles.previewLabel}>{docType ?? '문서'} 이미지</span>
+            <span className={styles.previewLabel}>
+              {t('doc.loading.imageLabel', { type: docType ?? t('doc.loading.defaultDocType') })}
+            </span>
           </>
         )}
       </div>
@@ -137,7 +145,9 @@ export default function DocAnalysisLoadingPage() {
               <span className={`${styles.dot} ${DOT_CLASS[state]}`}>
                 {state === 'done' ? '✓' : state === 'failed' ? '!' : i + 1}
               </span>
-              <span className={`${styles.stepLabel} ${LABEL_CLASS[state]}`}>{step.label}</span>
+              <span className={`${styles.stepLabel} ${LABEL_CLASS[state]}`}>
+                {t(step.labelKey)}
+              </span>
             </div>
           );
         })}
@@ -145,26 +155,26 @@ export default function DocAnalysisLoadingPage() {
 
       {failed ? (
         <div className={`${styles.card} ${styles.cardInfo}`} role="alert">
-          <div className={styles.cardTitle}>분석에 실패했어요</div>
+          <div className={styles.cardTitle}>{t('doc.loading.failTitle')}</div>
           <div className={styles.cardText}>
-            {error ? '상태 확인 중 오류가 발생했습니다.' : '문서 분석에 실패했습니다.'} 처음
-            화면에서 다시 시도해주세요.
+            {error ? t('doc.loading.failStatusError') : t('doc.loading.failAnalysisError')}{' '}
+            {t('doc.loading.failRetryHint')}
           </div>
           <button
             type="button"
             className={styles.retryBtn}
             onClick={() => navigate('/doc-analysis', { replace: true })}
           >
-            처음으로 돌아가기
+            {t('doc.loading.backToStart')}
           </button>
         </div>
       ) : (
         <div className={`${styles.card} ${styles.cardInfo}`}>
-          <div className={styles.cardTitle}>분석 중입니다</div>
+          <div className={styles.cardTitle}>{t('doc.loading.analyzingTitle')}</div>
           <div className={styles.cardText}>
             {status?.estimated_minutes
-              ? `예상 소요 시간 약 ${status.estimated_minutes}분 — 잠시만 기다려주세요.`
-              : '잠시만 기다려주세요.'}
+              ? t('doc.loading.estimatedMinutes', { minutes: status.estimated_minutes })
+              : t('doc.loading.pleaseWait')}
           </div>
         </div>
       )}

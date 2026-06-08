@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import { buildCommunityPostPath } from '@/constants/routes';
 import { useCreatePost } from '@/hooks/useCreatePost';
@@ -8,20 +9,21 @@ import { useUpdatePost } from '@/hooks/useUpdatePost';
 import { communityErrorMessage } from '@/utils/communityErrorMessage';
 import styles from './CommunityWritePage.module.css';
 
-// 백엔드 PostCreateRequest.category enum(value) ↔ 표시 라벨. API는 category 하나만 받는다(세부 카테고리 없음).
+// 백엔드 PostCreateRequest.category enum(value)
 // FREE(자유게시판)는 백엔드 create enum 추가 작업 중 — 추가되면 작성 동작.
-const CATEGORIES = [
-  { value: 'RESIDENCE', label: '거주' },
-  { value: 'LIFE_INFO', label: '생활' },
-  { value: 'JOB', label: '취업' },
-  { value: 'VISA', label: '비자' },
-  { value: 'COUNTRY', label: '국가별 정보' },
-  { value: 'QUESTION', label: '질문' },
-  { value: 'FREE', label: '자유게시판' },
+const CATEGORY_VALUES = [
+  'RESIDENCE',
+  'LIFE_INFO',
+  'JOB',
+  'VISA',
+  'COUNTRY',
+  'QUESTION',
+  'FREE',
 ] as const;
 
 export default function CommunityWritePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   // 편집 모드: /community/posts/:postId/edit 로 진입 시 postId가 있음.
   const { postId } = useParams<{ postId: string }>();
   const isEdit = Boolean(postId);
@@ -30,7 +32,8 @@ export default function CommunityWritePage() {
   const [category, setCategory] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [body, setBody] = useState<string>('');
-  const [allowAutoTranslate, setAllowAutoTranslate] = useState<boolean>(false);
+  // 이슈 #160 — autoTranslate(작성 시점 자동 번역) 토글은 제거되었다.
+  // 번역은 게시글 상세 화면에서 "번역 보기" 버튼 클릭 시 동적으로 호출(lazy).
 
   // 편집 모드에서 기존 글을 한 번만 폼에 채운다(이후 사용자가 수정해도 덮어쓰지 않음).
   const { data: existingPost } = usePostDetail(isEdit ? (postId as string) : '');
@@ -69,10 +72,13 @@ export default function CommunityWritePage() {
 
   return (
     <>
-      <TopBar title={isEdit ? '글 수정' : '글쓰기'} onBack={() => navigate(-1)} />
+      <TopBar
+        title={isEdit ? t('community.writePage.editTitle') : t('community.writePage.title')}
+        onBack={() => navigate(-1)}
+      />
 
       <div className={styles.field}>
-        <label htmlFor="write-category">카테고리</label>
+        <label htmlFor="write-category">{t('community.writePage.categoryLabel')}</label>
         <select
           id="write-category"
           className={styles.select}
@@ -80,50 +86,37 @@ export default function CommunityWritePage() {
           onChange={(e) => setCategory(e.target.value)}
         >
           <option value="" disabled>
-            카테고리를 선택하세요
+            {t('community.writePage.categoryPlaceholder')}
           </option>
-          {CATEGORIES.map((c) => (
-            <option key={c.value} value={c.value}>
-              {c.label}
+          {CATEGORY_VALUES.map((value) => (
+            <option key={value} value={value}>
+              {t(`community.writePage.cats.${value}`)}
             </option>
           ))}
         </select>
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="write-title">제목</label>
+        <label htmlFor="write-title">{t('community.writePage.titleLabel')}</label>
         <input
           id="write-title"
           type="text"
           className={styles.input}
-          placeholder="제목을 입력하세요"
+          placeholder={t('community.writePage.titlePlaceholder')}
           value={title}
           onChange={(event) => setTitle(event.target.value)}
         />
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="write-body">본문</label>
+        <label htmlFor="write-body">{t('community.writePage.bodyLabel')}</label>
         <textarea
           id="write-body"
           className={styles.textarea}
-          placeholder="내용을 입력하세요"
+          placeholder={t('community.writePage.bodyPlaceholder')}
           value={body}
           onChange={(event) => setBody(event.target.value)}
         />
-      </div>
-
-      <div className={styles.toggleRow}>
-        <span>자동 번역 허용</span>
-        <button
-          type="button"
-          aria-pressed={allowAutoTranslate}
-          aria-label="자동 번역 허용"
-          className={`${styles.checkbox} ${allowAutoTranslate ? styles.checkboxChecked : ''}`}
-          onClick={() => setAllowAutoTranslate((prev) => !prev)}
-        >
-          {allowAutoTranslate ? '✓' : ''}
-        </button>
       </div>
 
       {errorMessage && <div className={styles.errorText}>{errorMessage}</div>}
@@ -137,11 +130,11 @@ export default function CommunityWritePage() {
         >
           {mutation.isPending
             ? isEdit
-              ? '수정 중…'
-              : '작성 중…'
+              ? t('community.writePage.editing')
+              : t('community.writePage.submitting')
             : isEdit
-              ? '수정 완료'
-              : '작성 완료'}
+              ? t('community.writePage.editSubmit')
+              : t('community.writePage.submit')}
         </button>
       </div>
     </>
