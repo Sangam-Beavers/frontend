@@ -63,10 +63,11 @@ pipeline {
     stage('2) SonarQube 분석') {
       steps {
         container('scanner') {
-          dir('source') {
-            withSonarQubeEnv('sonarqube') {
-              sh 'sonar-scanner'
-            }
+          withSonarQubeEnv('sonarqube') {
+            sh '''
+              chmod -R 777 source
+              cd source && sonar-scanner
+            '''
           }
         }
       }
