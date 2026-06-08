@@ -143,7 +143,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
   finishStreaming: (sessionId) =>
     set((s) => {
       const messages = s.messages.map((m, i) =>
-        i === s.messages.length - 1 && m.role === 'assistant' ? { ...m, streaming: false } : m
+        i === s.messages.length - 1 && m.role === 'assistant'
+          ? {
+              ...m,
+              // 토큰 없이 done만 온 경우(중계 단계에서 오류가 삼켜진 경우 등) 빈 말풍선 방지.
+              text: m.text || '답변을 받지 못했어요. 잠시 후 다시 시도해주세요.',
+              streaming: false,
+            }
+          : m
       );
       return {
         messages,
