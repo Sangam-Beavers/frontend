@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { COMMUNITY_TABS, type CommunityCategory } from '@/types/community';
 import styles from './CommunityTabs.module.css';
 
@@ -9,6 +10,7 @@ interface CommunityTabsProps {
 
 export default function CommunityTabs({ active }: CommunityTabsProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLButtonElement>(null);
 
@@ -37,7 +39,7 @@ export default function CommunityTabs({ active }: CommunityTabsProps) {
             className={className}
             onClick={() => navigate(tab.path)}
           >
-            {tab.label}
+            {t(`community.categories.${tab.category}`)}
           </button>
         );
       })}

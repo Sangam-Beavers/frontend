@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
@@ -20,6 +21,7 @@ const formatKRW = (value: number) => `₩${value.toLocaleString('ko-KR')}`;
  * 계좌 추가 CTA로 유도한다(잘못된 선택 차단).
  */
 export default function ChargePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data, isLoading, error } = useMyAccounts();
   const accounts = data?.accounts ?? [];
@@ -80,21 +82,18 @@ export default function ChargePage() {
   if (!isLoading && !error && !hasAccounts) {
     return (
       <>
-        <TopBar title="가져오기" />
+        <TopBar title={t('charge.main.title')} />
 
         <div className={`${styles.card} ${styles.cardInfo}`}>
-          <div className={styles.cardTitle}>현재 전자지갑 잔액</div>
+          <div className={styles.cardTitle}>{t('charge.main.currentBalance')}</div>
           <div className={styles.cardBalance}>
             {balancesLoading ? '—' : formatKRW(walletBalance)}
           </div>
         </div>
 
         <div className={`${styles.card}`}>
-          <div className={styles.cardTitle}>계좌를 연동해주세요</div>
-          <div className={styles.cardText}>
-            전자지갑은 개설되었지만 아직 연동된 계좌가 없습니다. 계좌를 연동하면 전자지갑을 충전할
-            수 있어요.
-          </div>
+          <div className={styles.cardTitle}>{t('charge.main.linkAccountTitle')}</div>
+          <div className={styles.cardText}>{t('charge.main.linkAccountText')}</div>
         </div>
 
         <div className={styles.primaryFixed}>
@@ -103,7 +102,7 @@ export default function ChargePage() {
             className={styles.primary}
             onClick={() => navigate(ROUTES.CHARGE_ADD_ACCOUNT)}
           >
-            계좌 연동하기
+            {t('charge.main.linkAccountCta')}
           </button>
         </div>
       </>
@@ -112,26 +111,26 @@ export default function ChargePage() {
 
   return (
     <>
-      <TopBar title="가져오기" />
+      <TopBar title={t('charge.main.title')} />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
-        <div className={styles.cardTitle}>현재 전자지갑 잔액</div>
+        <div className={styles.cardTitle}>{t('charge.main.currentBalance')}</div>
         <div className={styles.cardBalance}>{balancesLoading ? '—' : formatKRW(walletBalance)}</div>
       </div>
 
-      <div className={styles.section}>등록된 내 계좌</div>
+      <div className={styles.section}>{t('charge.main.myAccounts')}</div>
       <div className={styles.list}>
         {isLoading && (
           <div className={styles.item}>
             <div className={styles.itemMain}>
-              <div className={styles.itemMeta}>계좌를 불러오는 중…</div>
+              <div className={styles.itemMeta}>{t('charge.main.accountsLoading')}</div>
             </div>
           </div>
         )}
         {error && (
           <div className={styles.item}>
             <div className={styles.itemMain}>
-              <div className={styles.itemMeta}>계좌를 불러오지 못했어요.</div>
+              <div className={styles.itemMeta}>{t('charge.main.accountsError')}</div>
             </div>
           </div>
         )}
@@ -146,11 +145,11 @@ export default function ChargePage() {
               <div className={styles.itemTitle}>{account.bank_name}</div>
               <div className={styles.itemMeta}>
                 {account.account_number_masked}
-                {account.is_primary ? ' · 주 계좌' : ''}
+                {account.is_primary ? ` · ${t('charge.main.primaryAccount')}` : ''}
               </div>
             </div>
             {selectedAccountId === account.account_public_id && (
-              <span className={styles.pill}>선택</span>
+              <span className={styles.pill}>{t('charge.main.selected')}</span>
             )}
           </button>
         ))}
@@ -160,22 +159,22 @@ export default function ChargePage() {
           onClick={() => navigate(ROUTES.CHARGE_ADD_ACCOUNT)}
         >
           <div className={styles.itemMain}>
-            <div className={styles.itemTitle}>계좌 추가</div>
-            <div className={styles.itemMeta}>충전 계좌를 새로 등록합니다</div>
+            <div className={styles.itemTitle}>{t('charge.main.addAccount')}</div>
+            <div className={styles.itemMeta}>{t('charge.main.addAccountMeta')}</div>
           </div>
           <div className={styles.iconBtn}>＋</div>
         </button>
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="charge-amount">충전할 금액 (₩)</label>
+        <label htmlFor="charge-amount">{t('charge.main.amountLabel')}</label>
         <input
           id="charge-amount"
           type="number"
           min={0}
           step={1000}
           className={styles.input}
-          placeholder="충전할 금액을 입력하세요"
+          placeholder={t('charge.main.amountPlaceholder')}
           value={chargeAmount || ''}
           onChange={(e) => setChargeAmount(Math.max(0, Number(e.target.value)))}
         />
@@ -183,7 +182,7 @@ export default function ChargePage() {
 
       <div className={styles.card}>
         <div className={styles.row}>
-          <span>충전 후 전자지갑</span>
+          <span>{t('charge.main.afterCharge')}</span>
           <b>{balancesLoading ? '—' : formatKRW(afterBalance)}</b>
         </div>
       </div>
@@ -197,7 +196,7 @@ export default function ChargePage() {
           disabled={!canCharge}
           onClick={handleCharge}
         >
-          {charge.isPending ? '충전 중…' : '충전하기'}
+          {charge.isPending ? t('charge.main.charging') : t('charge.main.chargeCta')}
         </button>
       </div>
     </>

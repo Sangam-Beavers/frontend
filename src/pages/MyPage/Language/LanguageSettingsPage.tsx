@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import Toast, { type ToastVariant } from '@/components/common/Toast';
 import {
@@ -25,11 +26,12 @@ const DEFAULT_LABEL: (typeof LANGUAGES)[number] = '한국어';
  * 저장 성공 시 토스트 띄우고 자동으로 뒤로 가기. 4개 외 코드(예: 기존 `zh`)가
  * 와도 fallback으로 표시(그대로 노출) — 사용자가 4개 중 하나로 바꿔야 정상화.
  *
- * <p>⚠️ 본 화면은 "선호 언어 메타데이터의 저장/조회"까지만 담당.
- * 실제 화면 다국어 전환(i18next 도입)은 별도 트랙(이슈 B-2 — 커뮤니티 글 AI 자동번역과 함께).
+ * <p>이슈 #153 — 저장 성공 시 useUpdateLanguage 훅이 i18n.changeLanguage()도 함께 호출해
+ * 즉시 화면이 새 언어로 전환된다. 라벨은 t()로 현재 언어 기준 노출.
  */
 export default function LanguageSettingsPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data, isLoading } = useMyLanguage();
   const update = useUpdateLanguage();
 
@@ -55,7 +57,7 @@ export default function LanguageSettingsPage() {
     if (!selectedCode || !isDirty) return;
     update.mutate(selectedCode, {
       onSuccess: () => {
-        showToast('언어가 변경되었습니다.', 'success');
+        showToast(t('language.successToast'), 'success');
         // 토스트가 보이고 살짝 뒤 자연스럽게 이동.
         window.setTimeout(() => navigate(-1), 700);
       },
@@ -63,22 +65,31 @@ export default function LanguageSettingsPage() {
         const code = e instanceof ApiException ? e.code : null;
         const msg =
           code === 'COMMON4001'
-            ? '언어 값이 비어 있어요.'
+            ? t('language.errorEmpty')
             : code === 'MEMBER4001'
-              ? '회원 정보를 찾을 수 없어요.'
-              : '변경에 실패했어요. 잠시 후 다시 시도해 주세요.';
+              ? t('language.errorMemberNotFound')
+              : t('language.errorGeneric');
         showToast(msg, 'error');
       },
     });
   };
 
+  // 라벨 라디오용 — 한국어 라벨 -> 현재 언어 i18n 라벨로 노출.
+  // SETTING_LANGUAGES(4개, MVP 확정 — ko/en/vi/fil)와 1:1.
+  const LABEL_TO_OPTION_KEY: Record<(typeof LANGUAGES)[number], string> = {
+    한국어: 'language.options.ko',
+    영어: 'language.options.en',
+    베트남어: 'language.options.vi',
+    필리핀어: 'language.options.fil',
+  };
+
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="언어 설정" onBack={() => navigate(-1)} />
+        <TopBar title={t('language.title')} onBack={() => navigate(-1)} />
 
         {isLoading ? (
-          <div className={styles.loading}>불러오는 중…</div>
+          <div className={styles.loading}>{t('common.loading')}</div>
         ) : (
           <div className={styles.list}>
             {LANGUAGES.map((lang) => (
@@ -87,9 +98,9 @@ export default function LanguageSettingsPage() {
                 className={`${styles.item} ${selected === lang ? styles.itemSelected : ''}`}
                 onClick={() => setOverride(lang)}
               >
-                <span className={styles.itemLabel}>{lang}</span>
+                <span className={styles.itemLabel}>{t(LABEL_TO_OPTION_KEY[lang])}</span>
                 {selected === lang ? (
-                  <span className={styles.pill}>선택</span>
+                  <span className={styles.pill}>{t('language.select')}</span>
                 ) : (
                   <div className={styles.radio} />
                 )}
@@ -106,7 +117,7 @@ export default function LanguageSettingsPage() {
           disabled={!isDirty || update.isPending}
           onClick={handleSave}
         >
-          {update.isPending ? '저장 중…' : '저장'}
+          {update.isPending ? t('language.saving') : t('language.save')}
         </button>
       </div>
 

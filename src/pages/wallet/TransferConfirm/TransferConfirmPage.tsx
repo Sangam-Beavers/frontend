@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { useTransferFee } from '@/hooks/useTransferFee';
@@ -65,18 +66,31 @@ function formatMoney(currency: string, amount: string): string {
   })}`;
 }
 
-/** ApiException code 별 사용자 메시지. */
-function feeErrorMessage(err: unknown): string {
-  if (err instanceof ApiException) {
-    if (err.code === 'TRANSFER4002') return '지원하지 않는 통화입니다.';
-    if (err.code === 'TRANSFER4003') return '지원하지 않는 송금 유형입니다.';
-    if (err.code === 'COMMON4001') return '입력값을 확인해주세요.';
-  }
-  return '수수료를 계산하지 못했어요.';
-}
-
 export default function TransferConfirmPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  /** ApiException code 별 사용자 메시지. */
+  function feeErrorMessage(err: unknown): string {
+    if (err instanceof ApiException) {
+      if (err.code === 'TRANSFER4002')
+        return t('transfer.confirm.errorUnsupportedCurrency', {
+          defaultValue: '지원하지 않는 통화입니다.',
+        });
+      if (err.code === 'TRANSFER4003')
+        return t('transfer.confirm.errorUnsupportedType', {
+          defaultValue: '지원하지 않는 송금 유형입니다.',
+        });
+      if (err.code === 'COMMON4001')
+        return t('transfer.confirm.errorInvalidInput', {
+          defaultValue: '입력값을 확인해주세요.',
+        });
+    }
+    return t('transfer.confirm.errorFeeCalcFailed', {
+      defaultValue: '수수료를 계산하지 못했어요.',
+    });
+  }
+
   const location = useLocation();
   const state = (location.state as TransferState) ?? FALLBACK;
   const [confirmed, setConfirmed] = useState(false);
@@ -113,7 +127,7 @@ export default function TransferConfirmPage() {
 
   return (
     <>
-      <TopBar title="송금 확인" onBack={() => navigate(-1)} />
+      <TopBar title={t('transfer.confirm.title')} onBack={() => navigate(-1)} />
 
       <div className={styles.card}>
         <div className={styles.recipientRow}>
@@ -139,10 +153,10 @@ export default function TransferConfirmPage() {
           <div className={styles.recipientInfo}>
             <div className={styles.recipientName}>
               {state.recipientName}
-              <span className={styles.pill}>인증</span>
+              <span className={styles.pill}>{t('transfer.confirm.verifiedBadge')}</span>
             </div>
             <div className={styles.recipientMeta}>
-              {state.recipientMeta ?? '앱 사용자에게 보내기'}
+              {state.recipientMeta ?? t('transfer.confirm.defaultRecipientMeta')}
             </div>
           </div>
         </div>
@@ -150,18 +164,18 @@ export default function TransferConfirmPage() {
 
       <div className={styles.card}>
         <div className={styles.row}>
-          <span>보낼 통화</span>
+          <span>{t('transfer.confirm.currency')}</span>
           <b>{state.currency}</b>
         </div>
         <div className={styles.row}>
-          <span>보낼 금액</span>
+          <span>{t('transfer.confirm.amount')}</span>
           <b>{state.amount}</b>
         </div>
         <div className={styles.row}>
-          <span>수수료</span>
+          <span>{t('transfer.confirm.fee')}</span>
           <b>
             {feeLoading
-              ? '계산 중…'
+              ? t('transfer.confirm.calculating')
               : feeError
                 ? feeErrorMessage(feeError)
                 : feeData
@@ -170,10 +184,10 @@ export default function TransferConfirmPage() {
           </b>
         </div>
         <div className={styles.row}>
-          <span>최종 차감</span>
+          <span>{t('transfer.confirm.totalDeduct')}</span>
           <b>
             {feeLoading
-              ? '계산 중…'
+              ? t('transfer.confirm.calculating')
               : feeData
                 ? formatMoney(feeData.fee_currency_code, feeData.total_deduct_amount)
                 : state.amount}
@@ -188,19 +202,19 @@ export default function TransferConfirmPage() {
               style={{ flex: 'none', padding: '6px 14px', fontSize: 12 }}
               onClick={() => refetchFee()}
             >
-              다시 시도
+              {t('transfer.confirm.retry')}
             </button>
           </div>
         )}
       </div>
 
       <div className={`${styles.card} ${styles.cardOk}`}>
-        <div className={styles.cardTitle}>이상거래 탐지 결과</div>
-        <div className={styles.cardText}>안전한 거래로 확인되었습니다.</div>
+        <div className={styles.cardTitle}>{t('transfer.confirm.fraudCheckTitle')}</div>
+        <div className={styles.cardText}>{t('transfer.confirm.fraudCheckText')}</div>
       </div>
 
       <div className={styles.checkRow} onClick={() => setConfirmed((v) => !v)}>
-        <span>송금 정보를 확인했습니다</span>
+        <span>{t('transfer.confirm.confirmCheckbox')}</span>
         <div className={`${styles.checkbox} ${confirmed ? styles.checkboxChecked : ''}`}>
           {confirmed && '✓'}
         </div>
@@ -208,7 +222,7 @@ export default function TransferConfirmPage() {
 
       <div className={styles.btnRow}>
         <button type="button" className={styles.secondaryBtn} onClick={() => navigate(-1)}>
-          수정하기
+          {t('transfer.confirm.edit')}
         </button>
         <button
           type="button"
@@ -235,7 +249,7 @@ export default function TransferConfirmPage() {
             })
           }
         >
-          송금하기
+          {t('transfer.confirm.submit')}
         </button>
       </div>
     </>

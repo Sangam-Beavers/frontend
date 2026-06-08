@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { ApiException } from '@/api';
@@ -8,6 +9,7 @@ import type { AuthStep, AccountRegisterDraft, RegisteredAccountView } from '@/ty
 import styles from './AutoDebitAuthPage.module.css';
 
 export default function AutoDebitAuthPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { state } = useLocation();
   const draft = state as AccountRegisterDraft | null;
@@ -24,17 +26,17 @@ export default function AutoDebitAuthPage() {
   if (!draft) {
     return (
       <>
-        <TopBar title="자동이체 인증" />
+        <TopBar title={t('charge.autoDebit.title')} />
         <div className={`${styles.card} ${styles.cardInfo}`}>
-          <div className={styles.cardTitle}>계좌 정보가 없어요</div>
-          <div className={styles.cardText}>계좌 추가 화면에서 다시 시작해 주세요.</div>
+          <div className={styles.cardTitle}>{t('charge.autoDebit.noDraftTitle')}</div>
+          <div className={styles.cardText}>{t('charge.autoDebit.noDraftText')}</div>
         </div>
         <button
           type="button"
           className={styles.primary}
           onClick={() => navigate('/charge/add-account')}
         >
-          계좌 추가로 가기
+          {t('charge.autoDebit.goAddAccount')}
         </button>
       </>
     );
@@ -71,19 +73,19 @@ export default function AutoDebitAuthPage() {
   };
 
   const steps: AuthStep[] = [
-    { index: 1, label: '인증 요청', done: verified || verify.isPending },
-    { index: 2, label: '계좌 확인', done: verified },
-    { index: 3, label: '인증 완료', done: verified },
+    { index: 1, label: t('charge.autoDebit.stepRequest'), done: verified || verify.isPending },
+    { index: 2, label: t('charge.autoDebit.stepConfirm'), done: verified },
+    { index: 3, label: t('charge.autoDebit.stepDone'), done: verified },
   ];
 
   return (
     <>
-      <TopBar title="자동이체 인증" />
+      <TopBar title={t('charge.autoDebit.title')} />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
-        <div className={styles.cardTitle}>계좌 연결 인증</div>
+        <div className={styles.cardTitle}>{t('charge.autoDebit.linkAuthTitle')}</div>
         <div className={styles.cardText}>
-          {draft.bankName} · 예금주 {draft.holderName} 계좌의 자동이체를 인증합니다.
+          {draft.bankName} · {t('charge.autoDebit.linkAuthText', { holderName: draft.holderName })}
         </div>
       </div>
 
@@ -108,7 +110,7 @@ export default function AutoDebitAuthPage() {
           className={styles.primary}
           onClick={() => navigate('/mypage/accounts')}
         >
-          계좌 목록 보기
+          {t('charge.autoDebit.viewAccounts')}
         </button>
       ) : (
         <>
@@ -118,7 +120,11 @@ export default function AutoDebitAuthPage() {
             disabled={verify.isPending || verified}
             onClick={handleVerify}
           >
-            {verify.isPending ? '인증 중…' : verified ? '인증 완료됨' : '인증 요청하기'}
+            {verify.isPending
+              ? t('charge.autoDebit.verifying')
+              : verified
+                ? t('charge.autoDebit.verified')
+                : t('charge.autoDebit.requestVerify')}
           </button>
           <button
             type="button"
@@ -126,7 +132,9 @@ export default function AutoDebitAuthPage() {
             disabled={!verified || register.isPending}
             onClick={handleRegister}
           >
-            {register.isPending ? '등록 중…' : '계좌 등록 완료'}
+            {register.isPending
+              ? t('charge.autoDebit.registering')
+              : t('charge.autoDebit.completeRegister')}
           </button>
         </>
       )}

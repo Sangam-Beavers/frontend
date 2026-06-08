@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { ROUTES } from '@/constants/routes';
@@ -16,20 +17,18 @@ import styles from './AdditionalCertCompletePage.module.css';
  * PIN 등록 완료 시 홈으로 바로 가게 한다(TransferPinSetupPage).
  */
 export default function AdditionalCertCompletePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
     <>
-      <TopBar title="인증 완료" showBack={false} />
+      <TopBar title={t('mypage2.certComplete.title')} showBack={false} />
 
       <div className={styles.checkOnly}>✓</div>
 
       <div className={styles.card}>
-        <div className={styles.cardTitle}>인증 완료 — 전자지갑이 개설되었습니다</div>
-        <div className={styles.cardText}>
-          프로필에 인증 배지가 표시되고, 이제 충전·송금을 시작할 수 있습니다. 마지막으로 송금 시
-          입력할 PIN(숫자 6자리)을 등록해주세요.
-        </div>
+        <div className={styles.cardTitle}>{t('mypage2.certComplete.cardTitle')}</div>
+        <div className={styles.cardText}>{t('mypage2.certComplete.cardText')}</div>
       </div>
 
       <button
@@ -37,10 +36,10 @@ export default function AdditionalCertCompletePage() {
         className={styles.primaryBtn}
         onClick={() => navigate(ROUTES.TRANSFER_PIN_SETUP, { state: { fromOnboarding: true } })}
       >
-        송금 PIN 설정하기
+        {t('mypage2.certComplete.setupPin')}
       </button>
       <button type="button" className={styles.ghostBtn} onClick={() => navigate(ROUTES.HOME)}>
-        나중에 하기
+        {t('mypage2.certComplete.later')}
       </button>
     </>
   );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CommunityMenu from '@/components/community/CommunityMenu';
 import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
@@ -10,6 +11,7 @@ import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityLifePage.module.css';
 
 export default function CommunityLifePage() {
+  const { t } = useTranslation();
   const [showSearch, setShowSearch] = useState(false);
   const { data, isLoading, error, page, goToPage, searchQuery, setSearchQuery, keyword } =
     usePagedPosts({ category: 'LIFE_INFO' });
@@ -18,7 +20,7 @@ export default function CommunityLifePage() {
 
   return (
     <>
-      <TopBar title="커뮤니티" />
+      <TopBar title={t('community.title')} />
 
       <CommunityTabs active="life" />
 
@@ -26,14 +28,14 @@ export default function CommunityLifePage() {
       {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
 
       <div className={styles.banner}>
-        <b>생활 게시판</b>
-        <span>고향의 맛 · 동호회 · 병원/마트 · 지역 정보</span>
+        <b>{t('community.boards.life.title')}</b>
+        <span>{t('community.boards.life.sub')}</span>
       </div>
 
       {isLoading ? (
-        <div className={styles.empty}>게시글을 불러오는 중…</div>
+        <div className={styles.empty}>{t('community.loading')}</div>
       ) : error ? (
-        <div className={styles.empty}>게시글을 불러오지 못했어요.</div>
+        <div className={styles.empty}>{t('community.loadError')}</div>
       ) : posts.length > 0 ? (
         <>
           {posts.map((item) => (
@@ -43,7 +45,7 @@ export default function CommunityLifePage() {
         </>
       ) : (
         <div className={styles.empty}>
-          {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
+          {keyword ? t('community.emptySearch') : t('community.empty')}
         </div>
       )}
     </>

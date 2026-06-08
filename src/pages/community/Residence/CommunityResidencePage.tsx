@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CommunityMenu from '@/components/community/CommunityMenu';
 import CommunitySearchBar from '@/components/community/CommunitySearchBar';
 import CommunityTabs from '@/components/community/CommunityTabs';
@@ -10,19 +11,20 @@ import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityResidencePage.module.css';
 
 interface TemperatureChip {
-  label: string;
+  labelKey: string;
   toneClass: string;
 }
 
 const TEMPERATURES: TemperatureChip[] = [
-  { label: '주의', toneClass: styles.tempRed },
-  { label: '보통 이하', toneClass: styles.tempYellow },
-  { label: '보통', toneClass: styles.tempGreen },
-  { label: '좋음', toneClass: styles.tempPurple },
-  { label: '매우 좋음', toneClass: styles.tempBlue },
+  { labelKey: 'community.temp.caution', toneClass: styles.tempRed },
+  { labelKey: 'community.temp.belowAverage', toneClass: styles.tempYellow },
+  { labelKey: 'community.temp.average', toneClass: styles.tempGreen },
+  { labelKey: 'community.temp.good', toneClass: styles.tempPurple },
+  { labelKey: 'community.temp.veryGood', toneClass: styles.tempBlue },
 ];
 
 export default function CommunityResidencePage() {
+  const { t } = useTranslation();
   const [showSearch, setShowSearch] = useState(false);
   const { data, isLoading, error, page, goToPage, searchQuery, setSearchQuery, keyword } =
     usePagedPosts({ category: 'RESIDENCE' });
@@ -31,7 +33,7 @@ export default function CommunityResidencePage() {
 
   return (
     <>
-      <TopBar title="커뮤니티" />
+      <TopBar title={t('community.title')} />
 
       <CommunityTabs active="residence" />
 
@@ -39,22 +41,22 @@ export default function CommunityResidencePage() {
       {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
 
       <div className={styles.banner}>
-        <b>거주 게시판</b>
-        <span>부동산 · 급매 · 룸메 구하기 · 생활온도</span>
+        <b>{t('community.boards.residence.title')}</b>
+        <span>{t('community.boards.residence.sub')}</span>
       </div>
 
       <div className={styles.tempStrip}>
         {TEMPERATURES.map((chip) => (
-          <span key={chip.label} className={`${styles.temp} ${chip.toneClass}`}>
-            {chip.label}
+          <span key={chip.labelKey} className={`${styles.temp} ${chip.toneClass}`}>
+            {t(chip.labelKey)}
           </span>
         ))}
       </div>
 
       {isLoading ? (
-        <div className={styles.empty}>게시글을 불러오는 중…</div>
+        <div className={styles.empty}>{t('community.loading')}</div>
       ) : error ? (
-        <div className={styles.empty}>게시글을 불러오지 못했어요.</div>
+        <div className={styles.empty}>{t('community.loadError')}</div>
       ) : posts.length > 0 ? (
         <>
           {posts.map((item) => (
@@ -64,7 +66,7 @@ export default function CommunityResidencePage() {
         </>
       ) : (
         <div className={styles.empty}>
-          {keyword ? '검색 결과가 없습니다' : '등록된 게시글이 없습니다'}
+          {keyword ? t('community.emptySearch') : t('community.empty')}
         </div>
       )}
     </>

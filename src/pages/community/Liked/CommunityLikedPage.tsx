@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import FeedPost from '@/components/community/FeedPost';
 import Pagination from '@/components/community/Pagination';
 import TopBar from '@/components/navigation/TopBar';
@@ -13,6 +14,7 @@ import styles from './CommunityLikedPage.module.css';
  * 인증 필요 — 비로그인은 조회 시 401 → 로그인으로 이동(client 인터셉터).
  */
 export default function CommunityLikedPage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   // URL은 1-index(사람 친화), 내부/백엔드는 0-index.
   const rawPage = Number(searchParams.get('page'));
@@ -40,12 +42,12 @@ export default function CommunityLikedPage() {
 
   return (
     <>
-      <TopBar title="내 관심글" />
+      <TopBar title={t('community.likedPage.title')} />
 
       {isLoading ? (
-        <div className={styles.empty}>관심글을 불러오는 중…</div>
+        <div className={styles.empty}>{t('community.likedPage.loading')}</div>
       ) : error ? (
-        <div className={styles.empty}>관심글을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>
+        <div className={styles.empty}>{t('community.likedPage.loadError')}</div>
       ) : posts.length > 0 ? (
         <>
           {posts.map((item) => {
@@ -64,13 +66,13 @@ export default function CommunityLikedPage() {
         // 빈 페이지인데 첫 페이지가 아님 — 좋아요 취소/삭제로 페이지가 줄었거나 직접 URL 진입.
         // 막다른 빈 화면 대신 처음으로 돌아갈 수단을 준다.
         <div className={styles.empty}>
-          이 페이지에는 관심글이 없어요.
+          {t('community.likedPage.emptyPage')}
           <button type="button" className={styles.backFirst} onClick={() => goToPage(0)}>
-            처음으로
+            {t('community.likedPage.backToFirst')}
           </button>
         </div>
       ) : (
-        <div className={styles.empty}>아직 관심글이 없어요. 마음에 드는 글에 ♥를 눌러보세요.</div>
+        <div className={styles.empty}>{t('community.likedPage.empty')}</div>
       )}
     </>
   );

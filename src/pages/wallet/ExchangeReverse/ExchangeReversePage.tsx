@@ -7,6 +7,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiException, walletApi, type ExchangeQuoteResponse } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
@@ -17,6 +18,7 @@ import styles from './ExchangeReversePage.module.css';
 type Phase = 'INPUT' | 'QUOTING' | 'LOCKED' | 'EXECUTING';
 
 export default function ExchangeReversePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: currenciesData } = useSupportedCurrencies();
   const foreignList = useMemo(
@@ -60,13 +62,13 @@ export default function ExchangeReversePage() {
         setQuote(null);
         idempotencyKeyRef.current = null;
         setPhase('INPUT');
-        setError('견적이 만료되었습니다. 다시 견적을 받아주세요.');
+        setError(t('exchange.reverse.errQuoteExpired'));
       }
     };
     tick();
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
-  }, [quote]);
+  }, [quote, t]);
 
   const numericAmount = parseFloat(amount);
   const canQuote =
@@ -88,13 +90,13 @@ export default function ExchangeReversePage() {
     } catch (e) {
       setPhase('INPUT');
       if (e instanceof ApiException) {
-        if (e.code === 'TRANSFER4002') setError('지원하지 않는 통화입니다.');
-        else if (e.code === 'COMMON4001') setError(e.message || '입력값을 확인해주세요.');
-        else if (e.code === 'NETWORK_ERROR')
-          setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-        else setError(e.message || '견적 조회에 실패했습니다.');
+        if (e.code === 'TRANSFER4002') setError(t('exchange.reverse.errUnsupportedCurrency'));
+        else if (e.code === 'COMMON4001')
+          setError(e.message || t('exchange.reverse.errInvalidInput'));
+        else if (e.code === 'NETWORK_ERROR') setError(t('exchange.reverse.errNetwork'));
+        else setError(e.message || t('exchange.reverse.errQuoteFailed'));
       } else {
-        setError('견적 조회에 실패했습니다.');
+        setError(t('exchange.reverse.errQuoteFailed'));
       }
     }
   }
@@ -112,21 +114,21 @@ export default function ExchangeReversePage() {
     } catch (e) {
       if (e instanceof ApiException) {
         if (e.code === 'EXCHANGE4002') {
-          setError('견적이 만료되었습니다. 다시 견적을 받아주세요.');
+          setError(t('exchange.reverse.errQuoteExpired'));
           setQuote(null);
           idempotencyKeyRef.current = null;
           setPhase('INPUT');
           return;
         }
         if (e.code === 'WALLET4002') {
-          setError(e.message || '잔액이 부족합니다.');
+          setError(e.message || t('exchange.reverse.errInsufficient'));
         } else if (e.code === 'NETWORK_ERROR') {
-          setError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+          setError(t('exchange.reverse.errNetwork'));
         } else {
-          setError(e.message || '재환전 실행에 실패했습니다.');
+          setError(e.message || t('exchange.reverse.errExecuteFailed'));
         }
       } else {
-        setError('재환전 실행에 실패했습니다.');
+        setError(t('exchange.reverse.errExecuteFailed'));
       }
       setPhase('LOCKED');
     }
@@ -137,16 +139,16 @@ export default function ExchangeReversePage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="재환전하기" onBack={() => navigate(ROUTES.EXCHANGE)} />
+        <TopBar title={t('exchange.reverse.title')} onBack={() => navigate(ROUTES.EXCHANGE)} />
 
         <div className={`${styles.card} ${styles.cardInfo}`}>
-          <div className={styles.cardTitle}>외화 → 원화 재환전</div>
-          <div className={styles.cardText}>전자지갑에 보관된 외화를 원화로 바꿉니다.</div>
+          <div className={styles.cardTitle}>{t('exchange.reverse.headerTitle')}</div>
+          <div className={styles.cardText}>{t('exchange.reverse.headerText')}</div>
         </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="rev-from">
-            보낼 통화
+            {t('exchange.reverse.fromLabel')}
           </label>
           <select
             id="rev-from"
@@ -165,14 +167,14 @@ export default function ExchangeReversePage() {
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="rev-amount">
-            재환전 금액
+            {t('exchange.reverse.amountLabel')}
           </label>
           <input
             id="rev-amount"
             type="number"
             inputMode="decimal"
             className={styles.input}
-            placeholder="0.00"
+            placeholder={t('exchange.reverse.amountPlaceholder')}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             disabled={inputsDisabled}
@@ -180,32 +182,35 @@ export default function ExchangeReversePage() {
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>받을 통화</label>
-          <div className={styles.inputReadonly}>KRW 원화</div>
+          <label className={styles.label}>{t('exchange.reverse.toLabel')}</label>
+          <div className={styles.inputReadonly}>{t('exchange.reverse.krwReadonly')}</div>
         </div>
 
         {quote && phase === 'LOCKED' && (
           <div className={styles.card}>
             <div className={styles.row}>
-              <span>적용 환율</span>
+              <span>{t('exchange.reverse.rateLabel')}</span>
               <b>
                 1 {fromCurrency} = ₩{Number(quote.exchange_rate).toLocaleString()}
               </b>
             </div>
             <div className={styles.row}>
-              <span>수수료</span>
+              <span>{t('exchange.reverse.feeLabel')}</span>
               <b>
                 ₩{Number(quote.fee).toLocaleString()} ({quote.fee_currency_code})
               </b>
             </div>
             <div className={styles.row}>
-              <span>예상 수령</span>
+              <span>{t('exchange.reverse.receiveLabel')}</span>
               <b>₩{Number(quote.receive_amount).toLocaleString()}</b>
             </div>
             <div className={styles.row}>
-              <span>견적 유효시간</span>
+              <span>{t('exchange.reverse.expiresLabel')}</span>
               <b>
-                {Math.floor(secondsLeft / 60)}분 {secondsLeft % 60}초 남음
+                {t('exchange.reverse.expiresValue', {
+                  minutes: Math.floor(secondsLeft / 60),
+                  seconds: secondsLeft % 60,
+                })}
               </b>
             </div>
           </div>
@@ -226,7 +231,7 @@ export default function ExchangeReversePage() {
             disabled={secondsLeft <= 0}
             onClick={handleExecute}
           >
-            재환전 확정
+            {t('exchange.reverse.confirmCta')}
           </button>
         ) : (
           <button
@@ -235,7 +240,7 @@ export default function ExchangeReversePage() {
             disabled={!canQuote || inputsDisabled}
             onClick={handleGetQuote}
           >
-            {phase === 'QUOTING' ? '조회 중...' : '재환전 견적 보기'}
+            {phase === 'QUOTING' ? t('exchange.reverse.quoting') : t('exchange.reverse.quoteCta')}
           </button>
         )}
       </div>

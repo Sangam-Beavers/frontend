@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
@@ -65,10 +66,10 @@ interface NationalIdMeta {
   /** 백엔드 IdentityDocumentType enum 코드로 매핑 — 요청 body에 그대로. */
   serverCode: IdentityDocumentTypeCode;
   flag: string;
-  title: string;
-  placeholder: string;
+  titleKey: string;
+  placeholderKey: string;
   pattern: RegExp;
-  formatHint: string;
+  formatHintKey: string;
   /** 자동 포맷 함수(타입별). */
   format: (raw: string) => string;
   /** input maxLength — 포맷된 값 기준 자릿수. */
@@ -80,11 +81,11 @@ const NATIONAL_IDS: NationalIdMeta[] = [
     code: 'KR',
     serverCode: 'NATIONAL_ID_KR',
     flag: '🇰🇷',
-    title: '한국 주민등록번호',
-    placeholder: '예: 900101-1234567',
+    titleKey: 'mypage2.cert.national.KR.title',
+    placeholderKey: 'mypage2.cert.national.KR.placeholder',
     // BE: ^\d{6}-[0-49]\d{6}$ (한국 시민 — 7번째 자리 0~4 또는 9)
     pattern: /^\d{6}-[0-49]\d{6}$/,
-    formatHint: '주민등록번호 형식(총 13자리, YYMMDD-Sxxxxxx, S는 0~4 또는 9)으로 입력해주세요.',
+    formatHintKey: 'mypage2.cert.national.KR.formatHint',
     format: formatRrnLike,
     maxLength: 14,
   },
@@ -92,11 +93,11 @@ const NATIONAL_IDS: NationalIdMeta[] = [
     code: 'US',
     serverCode: 'NATIONAL_ID_US',
     flag: '🇺🇸',
-    title: '미국 SSN',
-    placeholder: '예: 123-45-6789',
+    titleKey: 'mypage2.cert.national.US.title',
+    placeholderKey: 'mypage2.cert.national.US.placeholder',
     // BE strict: 첫 3자리 000/666/9xx 금지, 중간 00 금지, 끝 0000 금지.
     pattern: /^(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}$/,
-    formatHint: 'SSN 형식(총 9자리, XXX-XX-XXXX)으로 입력해주세요. 000/666/9xx로 시작 불가.',
+    formatHintKey: 'mypage2.cert.national.US.formatHint',
     format: formatSsn,
     maxLength: 11,
   },
@@ -104,11 +105,11 @@ const NATIONAL_IDS: NationalIdMeta[] = [
     code: 'VN',
     serverCode: 'NATIONAL_ID_VN',
     flag: '🇻🇳',
-    title: '베트남 CCCD',
-    placeholder: '예: 079199012345',
+    titleKey: 'mypage2.cert.national.VN.title',
+    placeholderKey: 'mypage2.cert.national.VN.placeholder',
     // BE: ^\d{12}$
     pattern: /^\d{12}$/,
-    formatHint: '베트남 CCCD 형식(숫자 12자리)으로 입력해주세요.',
+    formatHintKey: 'mypage2.cert.national.VN.formatHint',
     format: formatDigitsOnly12,
     maxLength: 12,
   },
@@ -116,11 +117,11 @@ const NATIONAL_IDS: NationalIdMeta[] = [
     code: 'PH',
     serverCode: 'NATIONAL_ID_PH',
     flag: '🇵🇭',
-    title: '필리핀 PhilSys PCN',
-    placeholder: '예: A1B2C3D4E5F6G7H8',
+    titleKey: 'mypage2.cert.national.PH.title',
+    placeholderKey: 'mypage2.cert.national.PH.placeholder',
     // BE: ^[A-Z0-9]{16}$ (대문자 정규화 후 매칭)
     pattern: /^[A-Z0-9]{16}$/,
-    formatHint: 'PhilSys PCN 형식(영숫자 16자리, 대문자)으로 입력해주세요.',
+    formatHintKey: 'mypage2.cert.national.PH.formatHint',
     format: formatPhilSys,
     maxLength: 16,
   },
@@ -129,11 +130,11 @@ const NATIONAL_IDS: NationalIdMeta[] = [
 /** 외국인 등록증(고정 1종). */
 const ALIEN_META = {
   serverCode: 'ALIEN_REGISTRATION' as IdentityDocumentTypeCode,
-  title: '외국인 등록증',
-  placeholder: '예: 990101-5678901',
+  titleKey: 'mypage2.cert.alien.title',
+  placeholderKey: 'mypage2.cert.alien.placeholder',
   // BE: ^\d{6}-[5-8]\d{6}$ (외국인등록번호 — 뒤 첫자리 5~8)
   pattern: /^\d{6}-[5-8]\d{6}$/,
-  formatHint: '외국인등록번호 형식(총 13자리, YYMMDD-Sxxxxxx, S는 5~8)으로 입력해주세요.',
+  formatHintKey: 'mypage2.cert.alien.formatHint',
   format: formatRrnLike,
   maxLength: 14,
 };
@@ -142,6 +143,7 @@ const ALIEN_META = {
 type IdKind = 'ALIEN' | 'NATIONAL';
 
 export default function AdditionalCertPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   // 인증 직후 ['member','me'] 캐시를 강제 refetch — 안 그러면 useMyProfile staleTime(5분) 때문에
   // VerifiedRoute가 is_verified=false 캐시를 그대로 읽어 PIN 설정 페이지(금융 라우트)로 못 들어간다.
@@ -189,7 +191,7 @@ export default function AdditionalCertPage() {
     setErrorMsg(null);
 
     if (!isFormatValid) {
-      setErrorMsg(selectedMeta.formatHint);
+      setErrorMsg(t(selectedMeta.formatHintKey));
       return;
     }
 
@@ -220,14 +222,14 @@ export default function AdditionalCertPage() {
     } catch (e) {
       if (e instanceof ApiException) {
         if (e.code === 'COMMON4001') {
-          setErrorMsg(selectedMeta.formatHint);
+          setErrorMsg(t(selectedMeta.formatHintKey));
         } else if (e.code === 'COMMON4091') {
-          setErrorMsg('이미 진행중이거나 완료된 인증이 있습니다.');
+          setErrorMsg(t('mypage2.cert.errors.alreadyInProgress'));
         } else {
-          setErrorMsg(e.message || '인증 요청 중 오류가 발생했습니다.');
+          setErrorMsg(e.message || t('mypage2.cert.errors.requestFailed'));
         }
       } else {
-        setErrorMsg('인증 요청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        setErrorMsg(t('mypage2.cert.errors.requestFailedRetry'));
       }
     } finally {
       setSubmitting(false);
@@ -237,14 +239,11 @@ export default function AdditionalCertPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="추가 인증" onBack={() => navigate(-1)} />
+        <TopBar title={t('mypage2.cert.title')} onBack={() => navigate(-1)} />
 
         <div className={`${styles.card} ${styles.cardInfo}`}>
-          <div className={styles.cardTitle}>안전한 송금을 위한 인증</div>
-          <div className={styles.cardText}>
-            신분증 번호로 본인 인증을 완료하면 프로필에 인증 배지가 표시되고, 전자지갑이 자동으로
-            개설됩니다.
-          </div>
+          <div className={styles.cardTitle}>{t('mypage2.cert.infoTitle')}</div>
+          <div className={styles.cardText}>{t('mypage2.cert.infoText')}</div>
         </div>
 
         {/* 1단계: 신분증 분류 */}
@@ -254,8 +253,8 @@ export default function AdditionalCertPage() {
             onClick={() => selectKind('ALIEN')}
           >
             <div className={styles.itemMain}>
-              <div className={styles.itemTitle}>외국인 등록증</div>
-              <div className={styles.itemMeta}>한국 거주 외국인 사용자</div>
+              <div className={styles.itemTitle}>{t('mypage2.cert.kind.alien.title')}</div>
+              <div className={styles.itemMeta}>{t('mypage2.cert.kind.alien.meta')}</div>
             </div>
             <span className={`${styles.chevron} ${kind === 'ALIEN' ? styles.chevronActive : ''}`}>
               ›
@@ -266,8 +265,8 @@ export default function AdditionalCertPage() {
             onClick={() => selectKind('NATIONAL')}
           >
             <div className={styles.itemMain}>
-              <div className={styles.itemTitle}>본국 신분증</div>
-              <div className={styles.itemMeta}>한국 · 미국 · 베트남 · 필리핀</div>
+              <div className={styles.itemTitle}>{t('mypage2.cert.kind.national.title')}</div>
+              <div className={styles.itemMeta}>{t('mypage2.cert.kind.national.meta')}</div>
             </div>
             <span
               className={`${styles.chevron} ${kind === 'NATIONAL' ? styles.chevronActive : ''}`}
@@ -288,7 +287,9 @@ export default function AdditionalCertPage() {
                 onClick={() => selectNational(m.code)}
               >
                 <span className={styles.countryFlag}>{m.flag}</span>
-                <span className={styles.countryLabel}>{m.code}</span>
+                <span className={styles.countryLabel}>
+                  {t(`mypage2.cert.countryLabel.${m.code}`)}
+                </span>
               </button>
             ))}
           </div>
@@ -298,13 +299,13 @@ export default function AdditionalCertPage() {
         {selectedMeta && (
           <div className={styles.inputBlock}>
             <label className={styles.inputLabel} htmlFor="documentNumber">
-              {selectedMeta.title} 번호
+              {t('mypage2.cert.numberLabel', { title: t(selectedMeta.titleKey) })}
             </label>
             <input
               id="documentNumber"
               type="text"
               className={styles.input}
-              placeholder={selectedMeta.placeholder}
+              placeholder={t(selectedMeta.placeholderKey)}
               value={documentNumber}
               onChange={(e) => {
                 // 자동 포맷팅: 사용자가 숫자/영문만 입력해도 표준 표기(하이픈 등)로 변환된다.
@@ -318,7 +319,7 @@ export default function AdditionalCertPage() {
               spellCheck={false}
               maxLength={selectedMeta.maxLength}
             />
-            <p className={styles.inputHint}>{selectedMeta.formatHint}</p>
+            <p className={styles.inputHint}>{t(selectedMeta.formatHintKey)}</p>
             {errorMsg && <p className={styles.errorMsg}>{errorMsg}</p>}
           </div>
         )}
@@ -331,7 +332,7 @@ export default function AdditionalCertPage() {
           disabled={!selectedMeta || !isFormatValid || submitting}
           onClick={handleSubmit}
         >
-          {submitting ? '인증 요청 중…' : '인증 요청'}
+          {submitting ? t('mypage2.cert.submitting') : t('mypage2.cert.submit')}
         </button>
       </div>
     </>

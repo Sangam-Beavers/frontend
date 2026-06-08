@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useChatStore } from '@/stores/chatStore';
 import styles from './AskMoreChip.module.css';
 
@@ -20,12 +21,20 @@ export default function AskMoreChip({
   topicMeta,
   className,
 }: AskMoreChipProps) {
+  const { t } = useTranslation();
   const open = useChatStore((s) => s.open);
 
   const handleClick = () => {
     const prompt = topicMeta
-      ? `${topicTitle}에 대해 더 자세히 알려주세요. ${topicMeta} 관련해서.`
-      : `${topicTitle}에 대해 더 자세히 알려주세요.`;
+      ? t('chat.askMorePromptWithMeta', {
+          title: topicTitle,
+          meta: topicMeta,
+          defaultValue: `${topicTitle}에 대해 더 자세히 알려주세요. ${topicMeta} 관련해서.`,
+        })
+      : t('chat.askMorePrompt', {
+          title: topicTitle,
+          defaultValue: `${topicTitle}에 대해 더 자세히 알려주세요.`,
+        });
     open(documentPublicId, prompt);
   };
 
@@ -34,12 +43,15 @@ export default function AskMoreChip({
       type="button"
       className={`${styles.chip}${className ? ` ${className}` : ''}`}
       onClick={handleClick}
-      aria-label={`${topicTitle} AI에게 더 묻기`}
+      aria-label={t('chat.askMoreAria', {
+        title: topicTitle,
+        defaultValue: `${topicTitle} AI에게 더 묻기`,
+      })}
     >
       <span className={styles.icon} aria-hidden>
         🤖
       </span>
-      더 묻기
+      {t('chat.askMore', { defaultValue: '더 묻기' })}
     </button>
   );
 }

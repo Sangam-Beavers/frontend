@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
-import { DOC_TYPES, type DocType } from '@/constants/docTypes';
+import { DOC_TYPES, DOC_TYPE_TO_ENUM, type DocType } from '@/constants/docTypes';
 import { useDocAnalysisStore } from '@/stores/docAnalysisStore';
 import { useDocuments } from '@/hooks/useDocuments';
 import { docDateLabel, docStatusLabel, docTypeLabel } from '@/utils/docAnalysisDisplay';
@@ -12,6 +13,7 @@ const RECENT_SIZE = 3;
 
 export default function DocAnalysisSelectPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<DocType | null>(null);
   // document_submissions + document_results join 목록 (최근순).
   // 실패(FAILED) 내역은 서버 status 필터로 숨긴다 — History 페이지와 동일 정책.
@@ -31,13 +33,11 @@ export default function DocAnalysisSelectPage() {
 
   return (
     <>
-      <TopBar title="AI 문서 분석" showBack={false} />
+      <TopBar title={t('docAnalysis.title')} showBack={false} />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
-        <div className={styles.cardTitle}>문서를 업로드하세요</div>
-        <div className={styles.cardText}>
-          근로계약서, 급여명세서, 고용계약서를 AI가 다국어로 분석합니다.
-        </div>
+        <div className={styles.cardTitle}>{t('docAnalysis.uploadTitle')}</div>
+        <div className={styles.cardText}>{t('docAnalysis.uploadSub')}</div>
       </div>
 
       <select
@@ -46,11 +46,12 @@ export default function DocAnalysisSelectPage() {
         onChange={(e) => setSelected(e.target.value as DocType)}
       >
         <option value="" disabled>
-          문서 종류 선택
+          {t('docAnalysis.selectType')}
         </option>
-        {DOC_TYPES.map((t) => (
-          <option key={t} value={t}>
-            {t}
+        {DOC_TYPES.map((dt) => (
+          // value는 백엔드 매핑용 한국어 키 그대로(DOC_TYPE_TO_ENUM 변환 일관성), 라벨만 다국어로.
+          <option key={dt} value={dt}>
+            {t(`docAnalysis.types.${DOC_TYPE_TO_ENUM[dt]}`)}
           </option>
         ))}
       </select>
@@ -72,7 +73,7 @@ export default function DocAnalysisSelectPage() {
           disabled={!selected}
           onClick={() => cameraInputRef.current?.click()}
         >
-          카메라 촬영
+          {t('docAnalysis.camera')}
         </button>
         <button
           type="button"
@@ -80,17 +81,17 @@ export default function DocAnalysisSelectPage() {
           disabled={!selected}
           onClick={() => fileInputRef.current?.click()}
         >
-          이미지 업로드
+          {t('docAnalysis.uploadImage')}
         </button>
       </div>
 
-      <div className={styles.section}>최근 분석 내역</div>
+      <div className={styles.section}>{t('docAnalysis.recentTitle')}</div>
 
       <div className={styles.list}>
         {recent.length === 0 && (
           <div className={styles.item}>
             <div className={styles.itemMain}>
-              <div className={styles.itemMeta}>아직 분석한 문서가 없어요.</div>
+              <div className={styles.itemMeta}>{t('docAnalysis.noRecent')}</div>
             </div>
           </div>
         )}

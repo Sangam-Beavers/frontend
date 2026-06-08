@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
@@ -24,6 +25,7 @@ function formatBalance(code: string, balance: string): string {
 }
 
 export default function ExchangeSelectPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: currenciesData } = useSupportedCurrencies();
   const { data: balancesData, isLoading: balancesLoading, error: balancesError } = useBalances();
@@ -44,48 +46,52 @@ export default function ExchangeSelectPage() {
 
   return (
     <>
-      <TopBar title="환전 선택" />
+      <TopBar title={t('exchange.select.title')} />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
-        <div className={styles.cardTitle}>원하는 환전 방식을 선택하세요</div>
-        <div className={styles.cardText}>
-          환전은 언제든지 가능하며, 결과는 전자지갑에 통화별로 보관됩니다.
-        </div>
+        <div className={styles.cardTitle}>{t('exchange.select.headerTitle')}</div>
+        <div className={styles.cardText}>{t('exchange.select.headerText')}</div>
       </div>
 
       <div className={styles.list}>
         <div className={styles.item} onClick={() => navigate('/exchange/form')}>
           <div className={styles.itemMain}>
-            <div className={styles.itemTitle}>환전</div>
-            <div className={styles.itemMeta}>원화 KRW → 외화 {foreignCodes}</div>
+            <div className={styles.itemTitle}>{t('exchange.select.exchange')}</div>
+            <div className={styles.itemMeta}>
+              {t('exchange.select.exchangeMeta', { foreignCodes })}
+            </div>
           </div>
           <div className={styles.arrowIcon}>›</div>
         </div>
         <div className={styles.item} onClick={() => navigate('/exchange/reverse')}>
           <div className={styles.itemMain}>
-            <div className={styles.itemTitle}>재환전</div>
-            <div className={styles.itemMeta}>외화 {foreignCodes} → 원화 KRW</div>
+            <div className={styles.itemTitle}>{t('exchange.select.reverse')}</div>
+            <div className={styles.itemMeta}>
+              {t('exchange.select.reverseMeta', { foreignCodes })}
+            </div>
           </div>
           <div className={styles.arrowIcon}>›</div>
         </div>
       </div>
 
       <div className={styles.card}>
-        <div className={styles.cardTitle}>보유 통화</div>
+        <div className={styles.cardTitle}>{t('exchange.select.heldTitle')}</div>
         <div className={styles.cardText}>
           {balancesLoading
-            ? '불러오는 중...'
+            ? t('exchange.select.heldLoading')
             : hasWalletError
-              ? '전자지갑이 아직 생성되지 않았어요.'
+              ? t('exchange.select.heldNoWallet')
               : heldBalances.length === 0
-                ? '보유한 통화가 없습니다. 충전 후 이용해주세요.'
+                ? t('exchange.select.heldEmpty')
                 : heldBalances
                     .map((b) => `${b.currency_code} ${formatBalance(b.currency_code, b.balance)}`)
                     .join(' · ')}
         </div>
         {balancesData?.updated_at && (
           <div className={styles.cardSubtle}>
-            업데이트 {new Date(balancesData.updated_at).toLocaleString()}
+            {t('exchange.select.updatedAt', {
+              time: new Date(balancesData.updated_at).toLocaleString(),
+            })}
           </div>
         )}
       </div>

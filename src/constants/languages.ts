@@ -1,33 +1,28 @@
-// 회원가입/Google 추가정보: 네이티브 표기 + 기타
-export const SIGNUP_LANGUAGES = [
-  '中文',
-  'Tiếng Việt',
-  'ภาษาไทย',
-  'English',
-  'Filipino',
-  'Bahasa Indonesia',
-  '기타',
-] as const;
+// 회원가입/Google 추가정보 + 마이페이지: 이슈 A 결정문에 따라 4개 국가 MVP 확정
+// (한국·미국·베트남·필리핀)
+//
+// LANGUAGE_LABEL_TO_CODE / LANGUAGE_CODE_TO_LABEL:
+//   서버는 ko/en/vi/fil 4종 코드만 사용. UI는 한국어 라벨로 노출.
 
-// 마이페이지/프로필 설정: 한국어 라벨
-export const SETTING_LANGUAGES = ['한국어', '중국어', '베트남어', '태국어', '영어'] as const;
+export const SIGNUP_LANGUAGES = ['한국어', 'English', 'Tiếng Việt', 'Filipino'] as const;
+export type SignupLanguage = (typeof SIGNUP_LANGUAGES)[number];
 
-/**
- * 백엔드 BCP 47 언어 코드 → 화면 한국어 라벨 매핑.
- * LanguageSettingsPage / ProfileEditPage에서 공유.
- */
-export const LANGUAGE_CODE_TO_LABEL: Record<string, string> = {
-  ko: '한국어',
-  zh: '중국어',
-  vi: '베트남어',
-  th: '태국어',
-  en: '영어',
+// 마이페이지/프로필 설정: 한국어 라벨 (UI 표시용)
+export const SETTING_LANGUAGES = ['한국어', '영어', '베트남어', '필리핀어'] as const;
+export type SettingLanguage = (typeof SETTING_LANGUAGES)[number];
+
+// 언어 코드 ↔ 한국어 라벨 양방향 매핑
+// 서버 PATCH /members/me/language 의 body는 코드, UI는 라벨
+export const LANGUAGE_LABEL_TO_CODE: Record<SettingLanguage, string> = {
+  한국어: 'ko',
+  영어: 'en',
+  베트남어: 'vi',
+  필리핀어: 'fil',
 };
 
-/**
- * 화면 한국어 라벨 → 백엔드 BCP 47 코드 역매핑 (저장 시 사용).
- * CODE_TO_LABEL에서 자동 생성 — 정합 깨질 일 없음.
- */
-export const LANGUAGE_LABEL_TO_CODE: Record<string, string> = Object.fromEntries(
-  Object.entries(LANGUAGE_CODE_TO_LABEL).map(([code, label]) => [label, code])
-);
+export const LANGUAGE_CODE_TO_LABEL: Record<string, SettingLanguage> = {
+  ko: '한국어',
+  en: '영어',
+  vi: '베트남어',
+  fil: '필리핀어',
+};

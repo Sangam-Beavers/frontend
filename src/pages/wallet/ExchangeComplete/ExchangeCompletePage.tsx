@@ -6,6 +6,7 @@
 // fallback 안내를 보여준다(거래는 이미 일어난 상태일 수 있으니 내역 화면 안내).
 // ─────────────────────────────────────────────────────────────
 
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { ExchangeResponse } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
@@ -37,6 +38,7 @@ function formatAmount(currency: string, amount: string): string {
 }
 
 export default function ExchangeCompletePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as CompleteState | null;
@@ -47,15 +49,15 @@ export default function ExchangeCompletePage() {
 
   return (
     <>
-      <TopBar title="환전 완료" showBack={false} />
+      <TopBar title={t('exchange.complete.title')} showBack={false} />
 
       <div className={styles.checkOnly}>✓</div>
 
       <div className={styles.card}>
         <div className={styles.cardTitle}>
           {result?.exchange_type === 'RE_EXCHANGE'
-            ? '재환전이 완료되었습니다'
-            : '환전이 완료되었습니다'}
+            ? t('exchange.complete.reverseDone')
+            : t('exchange.complete.exchangeDone')}
         </div>
         <div className={styles.cardText}>
           {result ? (
@@ -64,11 +66,14 @@ export default function ExchangeCompletePage() {
               {formatAmount(result.to_currency_code, result.receive_amount)}{' '}
               {result.to_currency_code}
               <br />
-              적용 환율 1 {rateDisplayCurrency} = ₩{Number(result.exchange_rate).toLocaleString()} ·
-              수수료 ₩{Number(result.fee).toLocaleString()}
+              {t('exchange.complete.rateAndFee', {
+                currency: rateDisplayCurrency,
+                rate: Number(result.exchange_rate).toLocaleString(),
+                fee: Number(result.fee).toLocaleString(),
+              })}
             </>
           ) : (
-            '환전이 정상적으로 처리되었습니다. 내역에서 자세한 정보를 확인하실 수 있습니다.'
+            t('exchange.complete.fallback')
           )}
         </div>
       </div>
@@ -77,10 +82,10 @@ export default function ExchangeCompletePage() {
         className={styles.primaryBtn}
         onClick={() => navigate(ROUTES.MYPAGE_EXCHANGE_HISTORY)}
       >
-        환전 내역 보기
+        {t('exchange.complete.viewHistory')}
       </button>
       <button className={styles.ghostBtn} onClick={() => navigate(ROUTES.HOME)}>
-        홈으로 돌아가기
+        {t('exchange.complete.backHome')}
       </button>
     </>
   );

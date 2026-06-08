@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import App from './App.tsx';
 import './index.css';
+import './i18n'; // i18next 전역 초기화 (이슈 #153) — 사이드이펙트만 import
 
 /**
  * TanStack Query 전역 클라이언트.

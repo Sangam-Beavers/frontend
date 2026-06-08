@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
+import { useTranslation } from 'react-i18next';
 import type { ChatMessage as ChatMessageModel } from '@/stores/chatStore';
 import styles from './ChatMessage.module.css';
 
@@ -32,6 +33,7 @@ const MARKDOWN_COMPONENTS: Components = {
  * <p>raw HTML은 react-markdown 기본 정책상 자동 escape — XSS 안전.
  */
 export default function ChatMessage({ message }: ChatMessageProps) {
+  const { t } = useTranslation();
   const isUser = message.role === 'user';
   const isTyping = message.streaming && message.text.length === 0;
 
@@ -39,7 +41,10 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     <div className={`${styles.row} ${isUser ? styles.rowUser : styles.rowAssistant}`}>
       <div className={`${styles.bubble} ${isUser ? styles.user : styles.assistant}`}>
         {isTyping ? (
-          <span className={styles.typing} aria-label="응답 생성 중">
+          <span
+            className={styles.typing}
+            aria-label={t('chat.typingAria', { defaultValue: '응답 생성 중' })}
+          >
             <span />
             <span />
             <span />

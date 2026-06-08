@@ -18,6 +18,7 @@
 
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import type { TransferExecuteRequest } from '@/api/wallet';
 import TopBar from '@/components/navigation/TopBar';
@@ -61,6 +62,7 @@ function parseAmount(display: string): string {
 
 export default function TransferAuthPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const location = useLocation();
   const state = (location.state as AuthState) ?? FALLBACK;
   const [pin, setPin] = useState('');
@@ -194,16 +196,16 @@ export default function TransferAuthPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="송금 PIN 확인" onBack={() => navigate(-1)} />
+        <TopBar title={t('transfer.auth.title')} onBack={() => navigate(-1)} />
 
         <div className={`${styles.card} ${styles.cardWarn}`}>
-          <div className={styles.cardTitle}>송금 전 이중 인증</div>
-          <div className={styles.cardText}>안전한 거래를 위해 송금 PIN 6자리를 입력해주세요.</div>
+          <div className={styles.cardTitle}>{t('transfer.auth.warningTitle')}</div>
+          <div className={styles.cardText}>{t('transfer.auth.warningText')}</div>
         </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="auth-pin">
-            송금 PIN (숫자 6자리)
+            {t('transfer.auth.pinLabel')}
           </label>
           <input
             id="auth-pin"
@@ -212,7 +214,7 @@ export default function TransferAuthPage() {
             autoComplete="off"
             maxLength={6}
             className={styles.input}
-            placeholder="6자리 숫자"
+            placeholder={t('transfer.auth.pinPlaceholder')}
             value={pin}
             onChange={(e) => setPin(sanitizePinInput(e.target.value))}
           />
@@ -226,17 +228,17 @@ export default function TransferAuthPage() {
 
         <div className={styles.card}>
           <div className={styles.row}>
-            <span>받는 사람</span>
+            <span>{t('transfer.auth.recipient')}</span>
             <b>{state.recipientName}</b>
           </div>
           {state.recipientMeta && (
             <div className={styles.row}>
-              <span>받는 계좌</span>
+              <span>{t('transfer.auth.recipientAccount')}</span>
               <b>{state.recipientMeta}</b>
             </div>
           )}
           <div className={styles.row}>
-            <span>송금 금액</span>
+            <span>{t('transfer.auth.amount')}</span>
             <b>
               {state.currency} {state.amount}
             </b>
@@ -251,14 +253,16 @@ export default function TransferAuthPage() {
           disabled={pin.length !== 6 || busy}
           onClick={handleVerifyAndExecute}
         >
+          {/* develop의 3상태(verify pending / execute pending / idle)를 유지하되 i18n 키 사용.
+              transfer.auth.executing 키가 아직 없어 execute pending도 verifying 키로 대체 — 후속 PR에서 분리. */}
           {verifyPin.isPending
-            ? '확인 중...'
+            ? t('transfer.auth.verifying')
             : executeTransfer.isPending
-              ? '송금 중...'
-              : '인증 후 송금하기'}
+              ? t('transfer.auth.verifying')
+              : t('transfer.auth.submit')}
         </button>
         <button type="button" className={styles.ghostBtn} onClick={() => navigate(-1)}>
-          이전으로 돌아가기
+          {t('transfer.auth.back')}
         </button>
       </div>
     </>

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { useRecentInternalRecipients } from '@/hooks/useRecentInternalRecipients';
@@ -30,6 +31,7 @@ interface RecipientDisplay {
 
 export default function TransferAppPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // 통화 드롭다운 (#120 패턴)
   const {
@@ -75,7 +77,7 @@ export default function TransferAppPage() {
     setVerifyError(null);
     const trimmed = recipient.trim();
     if (!trimmed) {
-      setVerifyError('이메일을 입력해주세요.');
+      setVerifyError(t('transfer.app.errorEmailRequired'));
       return;
     }
     validateMutation.mutate(trimmed, {
@@ -94,14 +96,12 @@ export default function TransferAppPage() {
       onError: (err) => {
         setVerified(null);
         if (err instanceof ApiException) {
-          if (err.code === 'COMMON4001') setVerifyError('이메일 형식을 확인해주세요.');
-          else if (err.code === 'MEMBER4001')
-            setVerifyError('해당 이메일의 회원을 찾을 수 없습니다.');
-          else if (err.code === 'NETWORK_ERROR')
-            setVerifyError('네트워크 오류. 잠시 후 다시 시도해주세요.');
-          else setVerifyError(err.message || '확인에 실패했습니다.');
+          if (err.code === 'COMMON4001') setVerifyError(t('transfer.app.errorInvalidEmail'));
+          else if (err.code === 'MEMBER4001') setVerifyError(t('transfer.app.errorMemberNotFound'));
+          else if (err.code === 'NETWORK_ERROR') setVerifyError(t('transfer.app.errorNetwork'));
+          else setVerifyError(err.message || t('transfer.app.errorVerifyFailed'));
         } else {
-          setVerifyError('확인에 실패했습니다.');
+          setVerifyError(t('transfer.app.errorVerifyFailed'));
         }
       },
     });
@@ -150,22 +150,22 @@ export default function TransferAppPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title="앱 사용자 송금" onBack={() => navigate('/transfer')} />
+        <TopBar title={t('transfer.app.title')} onBack={() => navigate('/transfer')} />
 
-        <div className={styles.section}>최근 송금한 대상</div>
+        <div className={styles.section}>{t('transfer.app.recentSection')}</div>
 
         {/* 최근 수신자 칩 — 로딩/에러/빈 상태 처리 (#120 패턴) */}
         {recipientsLoading ? (
-          <div className={styles.emptyText}>불러오는 중...</div>
+          <div className={styles.emptyText}>{t('transfer.app.loading')}</div>
         ) : hasRecipientsError ? (
           <div className={styles.emptyText}>
-            최근 송금 기록을 불러오지 못했어요.
+            {t('transfer.app.recentLoadError')}
             <button type="button" className={styles.retryBtn} onClick={() => refetchRecipients()}>
-              다시 시도
+              {t('transfer.app.retry')}
             </button>
           </div>
         ) : recentRecipients.length === 0 ? (
-          <div className={styles.emptyText}>아직 송금 기록이 없습니다.</div>
+          <div className={styles.emptyText}>{t('transfer.app.recentEmpty')}</div>
         ) : (
           <div className={styles.scrollRow}>
             {recentRecipients.map((user) => (
@@ -183,11 +183,11 @@ export default function TransferAppPage() {
         )}
 
         <div className={styles.field}>
-          <label className={styles.label}>받는 사람 이메일</label>
+          <label className={styles.label}>{t('transfer.app.recipientEmailLabel')}</label>
           <div className={styles.inputRow}>
             <input
               type="email"
-              placeholder="이메일 입력 (예: user@example.com)"
+              placeholder={t('transfer.app.recipientEmailPlaceholder')}
               value={recipient}
               onChange={(e) => {
                 setRecipient(e.target.value);
@@ -201,7 +201,7 @@ export default function TransferAppPage() {
               onClick={handleVerify}
               disabled={validateMutation.isPending}
             >
-              {validateMutation.isPending ? '확인 중...' : '확인'}
+              {validateMutation.isPending ? t('transfer.app.verifying') : t('transfer.app.verify')}
             </button>
           </div>
           {verifyError && (
@@ -219,16 +219,16 @@ export default function TransferAppPage() {
             <div className={styles.verifiedInfo}>
               <div className={styles.verifiedName}>
                 {verified.name}
-                <span className={styles.pill}>인증</span>
+                <span className={styles.pill}>{t('transfer.app.verifiedBadge')}</span>
               </div>
-              <div className={styles.verifiedMeta}>최근 송금했던 사용자</div>
+              <div className={styles.verifiedMeta}>{t('transfer.app.verifiedMeta')}</div>
             </div>
           </div>
         )}
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="transfer-currency">
-            보낼 통화
+            {t('transfer.app.currencyLabel')}
           </label>
           <select
             id="transfer-currency"
@@ -237,8 +237,8 @@ export default function TransferAppPage() {
             onChange={(e) => setCurrency(e.target.value)}
             disabled={currenciesLoading || hasCurrenciesError || currencies.length === 0}
           >
-            {currenciesLoading && <option value="">불러오는 중...</option>}
-            {hasCurrenciesError && <option value="">통화 불러오기 실패</option>}
+            {currenciesLoading && <option value="">{t('transfer.app.loading')}</option>}
+            {hasCurrenciesError && <option value="">{t('transfer.app.currencyLoadError')}</option>}
             {!currenciesLoading &&
               !hasCurrenciesError &&
               currencies.map((c) => (
@@ -249,14 +249,14 @@ export default function TransferAppPage() {
           </select>
           {hasCurrenciesError && (
             <button type="button" className={styles.retryBtn} onClick={() => refetchCurrencies()}>
-              다시 시도
+              {t('transfer.app.retry')}
             </button>
           )}
         </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="transfer-amount">
-            보낼 금액
+            {t('transfer.app.amountLabel')}
           </label>
           <input
             id="transfer-amount"
@@ -270,13 +270,13 @@ export default function TransferAppPage() {
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="transfer-memo">
-            메모
+            {t('transfer.app.memoLabel')}
           </label>
           <input
             id="transfer-memo"
             type="text"
             className={styles.input}
-            placeholder="메모 (선택)"
+            placeholder={t('transfer.app.memoPlaceholder')}
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
           />
@@ -285,7 +285,7 @@ export default function TransferAppPage() {
 
       <div className={styles.fixedBtn}>
         <button className={styles.primaryBtn} disabled={!canSubmit} onClick={handleNext}>
-          다음
+          {t('transfer.app.next')}
         </button>
       </div>
     </>

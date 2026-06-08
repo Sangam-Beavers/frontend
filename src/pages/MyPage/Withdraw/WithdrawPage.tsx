@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import Toast, { type ToastVariant } from '@/components/common/Toast';
@@ -11,14 +12,14 @@ import styles from './WithdrawPage.module.css';
 
 type Step = 'reason' | 'info';
 
-/** 탈퇴 사유 옵션 — 카카오페이/Toss 패턴. 마지막 '기타'는 자유 입력. */
-const REASONS = [
-  '서비스를 잘 사용하지 않아요',
-  '다른 송금 서비스를 사용해요',
-  '기능이 부족해요',
-  '오류가 자주 발생해요',
-  '개인정보 보호가 걱정돼요',
-  '기타',
+/** 탈퇴 사유 옵션 키 — 카카오페이/Toss 패턴. 마지막 'etc'은 자유 입력. */
+const REASON_KEYS = [
+  'rarelyUsed',
+  'useOther',
+  'missingFeatures',
+  'frequentErrors',
+  'privacyConcern',
+  'etc',
 ] as const;
 
 /**
@@ -32,21 +33,24 @@ const REASONS = [
  *
  * <p>실패 처리: 500 COMMON5000(IdP 연동 실패, 로컬 무변경) → 재시도 안내 토스트.
  * 401 AUTH4011은 apiClient interceptor가 자동 처리(이미 만료 → /login).
+ *
+ * <p>이슈 #153 — 모든 텍스트 i18n 키화.
  */
 export default function WithdrawPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: profile } = useMyProfile();
   const withdraw = useWithdraw();
 
   const [step, setStep] = useState<Step>('reason');
-  const [reason, setReason] = useState<string | null>(null);
+  const [reasonKey, setReasonKey] = useState<(typeof REASON_KEYS)[number] | null>(null);
   const [reasonEtc, setReasonEtc] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const [toast, setToast] = useState<{ msg: string; variant: ToastVariant } | null>(null);
   const showToast = (msg: string, variant: ToastVariant = 'success') => setToast({ msg, variant });
 
-  const canProceedFromReason = !!reason && (reason !== '기타' || reasonEtc.trim().length > 0);
+  const canProceedFromReason = !!reasonKey && (reasonKey !== 'etc' || reasonEtc.trim().length > 0);
 
   const handleConfirmWithdraw = () => {
     withdraw.mutate(undefined, {
@@ -58,10 +62,10 @@ export default function WithdrawPage() {
         const code = e instanceof ApiException ? e.code : null;
         const msg =
           code === 'COMMON5000'
-            ? '서버에 일시적 문제가 발생했어요. 잠시 후 다시 시도해 주세요.'
+            ? t('withdraw.errorIdpFail')
             : code === 'MEMBER4001'
-              ? '회원 정보를 찾을 수 없어요.'
-              : '탈퇴에 실패했어요. 잠시 후 다시 시도해 주세요.';
+              ? t('withdraw.errorMemberNotFound')
+              : t('withdraw.errorGeneric');
         showToast(msg, 'error');
         setConfirmOpen(false);
       },
@@ -71,40 +75,38 @@ export default function WithdrawPage() {
   return (
     <>
       <TopBar
-        title="회원 탈퇴"
+        title={t('withdraw.title')}
         onBack={() => (step === 'info' ? setStep('reason') : navigate(-1))}
       />
 
       {step === 'reason' && (
         <div className={styles.section}>
-          <h2 className={styles.heading}>탈퇴하시는 이유를 알려주세요</h2>
-          <p className={styles.subheading}>
-            서비스 개선에 큰 도움이 됩니다. 사유는 외부에 공유되지 않아요.
-          </p>
+          <h2 className={styles.heading}>{t('withdraw.step1Heading')}</h2>
+          <p className={styles.subheading}>{t('withdraw.step1Sub')}</p>
 
           <div className={styles.reasonList}>
-            {REASONS.map((r) => (
+            {REASON_KEYS.map((key) => (
               <label
-                key={r}
-                className={`${styles.reasonItem} ${reason === r ? styles.reasonItemSelected : ''}`}
+                key={key}
+                className={`${styles.reasonItem} ${reasonKey === key ? styles.reasonItemSelected : ''}`}
               >
                 <input
                   type="radio"
                   name="withdraw-reason"
-                  value={r}
-                  checked={reason === r}
-                  onChange={() => setReason(r)}
+                  value={key}
+                  checked={reasonKey === key}
+                  onChange={() => setReasonKey(key)}
                   className={styles.reasonRadio}
                 />
-                <span className={styles.reasonLabel}>{r}</span>
+                <span className={styles.reasonLabel}>{t(`withdraw.reasons.${key}`)}</span>
               </label>
             ))}
           </div>
 
-          {reason === '기타' && (
+          {reasonKey === 'etc' && (
             <textarea
               className={styles.etcInput}
-              placeholder="자세한 사유를 알려주세요 (최대 200자)"
+              placeholder={t('withdraw.etcPlaceholder')}
               maxLength={200}
               value={reasonEtc}
               onChange={(e) => setReasonEtc(e.target.value)}
@@ -118,7 +120,7 @@ export default function WithdrawPage() {
               disabled={!canProceedFromReason}
               onClick={() => setStep('info')}
             >
-              다음
+              {t('common.next')}
             </button>
           </div>
         </div>
@@ -127,32 +129,33 @@ export default function WithdrawPage() {
       {step === 'info' && (
         <div className={styles.section}>
           <h2 className={styles.heading}>
-            {profile?.nickname ? `${profile.nickname}님, ` : ''}정말 떠나시겠어요?
+            {profile?.nickname
+              ? t('withdraw.step2HeadingWithName', { nickname: profile.nickname })
+              : t('withdraw.step2Heading')}
           </h2>
-          <p className={styles.subheading}>탈퇴하면 아래 데이터가 모두 사라져요.</p>
+          <p className={styles.subheading}>{t('withdraw.step2Sub')}</p>
 
           <ul className={styles.lossList}>
             <li>
-              <strong>전자지갑 잔액</strong> — 출금 후 탈퇴를 권장합니다
+              <strong>{t('withdraw.lossWalletBalance')}</strong> —{' '}
+              {t('withdraw.lossWalletBalanceDesc')}
             </li>
             <li>
-              <strong>송금·환전·충전 내역</strong> — 복구할 수 없어요
+              <strong>{t('withdraw.lossTransactions')}</strong> —{' '}
+              {t('withdraw.lossTransactionsDesc')}
             </li>
             <li>
-              <strong>커뮤니티 작성글·댓글</strong> — 닉네임이 "탈퇴한 사용자"로 표시돼요
+              <strong>{t('withdraw.lossCommunity')}</strong> — {t('withdraw.lossCommunityDesc')}
             </li>
             <li>
-              <strong>인증 배지</strong> — 재가입 시 신분증 인증을 다시 받아야 해요
+              <strong>{t('withdraw.lossBadge')}</strong> — {t('withdraw.lossBadgeDesc')}
             </li>
             <li>
-              <strong>등록된 계좌·구독·정기 송금</strong> — 모두 해제돼요
+              <strong>{t('withdraw.lossAccounts')}</strong> — {t('withdraw.lossAccountsDesc')}
             </li>
           </ul>
 
-          <div className={styles.warningCard}>
-            동일한 이메일로 30일 내 재가입은 어려울 수 있어요. 정말로 떠나시기 전에 한 번만 더
-            생각해 주세요.
-          </div>
+          <div className={styles.warningCard}>{t('withdraw.warning')}</div>
 
           <div className={styles.fixedBtn}>
             <div className={styles.btnRow}>
@@ -162,7 +165,7 @@ export default function WithdrawPage() {
                 onClick={() => setStep('reason')}
                 disabled={withdraw.isPending}
               >
-                이전
+                {t('common.previous')}
               </button>
               <button
                 type="button"
@@ -170,7 +173,7 @@ export default function WithdrawPage() {
                 onClick={() => setConfirmOpen(true)}
                 disabled={withdraw.isPending}
               >
-                탈퇴할게요
+                {t('withdraw.submit')}
               </button>
             </div>
           </div>
@@ -179,10 +182,10 @@ export default function WithdrawPage() {
 
       {confirmOpen && (
         <ConfirmDialog
-          title="마지막 확인"
-          message="정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다."
-          confirmLabel="탈퇴"
-          cancelLabel="취소"
+          title={t('withdraw.finalConfirmTitle')}
+          message={t('withdraw.finalConfirmMessage')}
+          confirmLabel={t('withdraw.finalConfirmLabel')}
+          cancelLabel={t('common.cancel')}
           danger
           loading={withdraw.isPending}
           onConfirm={handleConfirmWithdraw}
