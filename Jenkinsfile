@@ -64,10 +64,7 @@ pipeline {
       steps {
         container('scanner') {
           withSonarQubeEnv('sonarqube') {
-            sh '''
-              chmod -R 777 source
-              cd source && sonar-scanner
-            '''
+            sh 'cd source && sonar-scanner -Dsonar.working.directory=/tmp/scannerwork'
           }
         }
       }
