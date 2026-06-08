@@ -271,7 +271,7 @@
   "docAnalysis": {
     "title": "AI 문서 분석",
     "uploadTitle": "문서를 업로드하세요",
-    "uploadSub": "근로계약서, 급여명세서, 고용계약서를 AI가 다국어로 분석합니다.",
+    "uploadSub": "근로계약서, 급여명세서를 AI가 다국어로 분석합니다.",
     "selectType": "문서 종류 선택",
     "camera": "카메라 촬영",
     "uploadImage": "이미지 업로드",
