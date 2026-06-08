@@ -115,6 +115,38 @@ export default function TransferAppPage() {
 
   const canSubmit = verified !== null && Number(amount) > 0;
 
+  /**
+   * "다음" 버튼 — TransferConfirm으로 송금 정보를 state로 전달.
+   *
+   * <p>기존 TransferConfirm/Auth가 받던 표시용 필드(currency/amount/recipientName 등)는 그대로 유지하면서
+   * 송금 실행 body 조립에 필요한 신규 옵셔널 필드(transferType/receiverPublicId/amountDecimal/memo)를
+   * 같이 보낸다. 사용자가 정수만 입력했지만 백엔드는 소수 4자리 string이라 amountDecimal로 정규화.
+   * REMITTANCE 흐름(TransferBank)은 신규 필드 없이 기존 흐름대로 동작 — 다음 사이클에 같이 정리.
+   */
+  function handleNext() {
+    if (!verified) return;
+    // 방어적 NaN 가드 — canSubmit이 Number(amount) > 0을 체크하지만,
+    // 비정상 입력(빈 문자열·문자 등)이 들어왔을 때 NaN.toFixed(4) → "NaN"이 백엔드로 가는 것을 막는다.
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) return;
+    const amountDecimal = numericAmount.toFixed(4);
+    navigate('/transfer/confirm', {
+      state: {
+        // 표시용 (기존 컨벤션 유지)
+        recipientName: verified.name,
+        recipientInitial: verified.initial,
+        recipientKind: 'user' as const,
+        currency,
+        amount, // 사용자 입력 그대로 ("10000") — TransferConfirm이 통화 기호 붙여 표시
+        // 송금 실행 body 조립용 (신규 필드)
+        transferType: 'INTERNAL_TRANSFER' as const,
+        receiverPublicId: verified.identifier,
+        amountDecimal,
+        memo: memo.trim() ? memo.trim() : null,
+      },
+    });
+  }
+
   return (
     <>
       <div className={styles.contentExtraPad}>
@@ -252,11 +284,7 @@ export default function TransferAppPage() {
       </div>
 
       <div className={styles.fixedBtn}>
-        <button
-          className={styles.primaryBtn}
-          disabled={!canSubmit}
-          onClick={() => navigate('/transfer/confirm')}
-        >
+        <button className={styles.primaryBtn} disabled={!canSubmit} onClick={handleNext}>
           {t('transfer.app.next')}
         </button>
       </div>
