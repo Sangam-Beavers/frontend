@@ -41,7 +41,7 @@ pipeline {
 
   environment {
     IMAGE       = "harbor.sb.fisa/global_bridge/front-app:${BUILD_NUMBER}"
-    REPO        = "https://github.com/Sangam-Beavers/frontend.git"
+    REPO        = "https://github.com/Sangam-Beavers/frontend"
     BRANCH      = "feature/#162"
     CONFIG_REPO = "github.com/Sangam-Beavers/gb-infra"
     VALUES_PATH = "charts/front-app/values.yaml"
