@@ -229,9 +229,11 @@ export interface SupportedBank {
   bank_code: string;
   /** 은행명 (예: "KB국민은행"). */
   bank_name: string;
+  /** 국가 코드 ISO 3166-1 alpha-2 (예: "KR", "VN", "PH", "US"). 드롭다운 그룹핑에 사용. */
+  country: string;
 }
 
-/** 추가 지원 은행 목록 응답 (GET /accounts/supported-banks) — 이름 가나다순. */
+/** 추가 지원 은행 목록 응답 (GET /accounts/supported-banks) — 국가코드 → 이름순. */
 export interface SupportedBankListResponse {
   banks: SupportedBank[];
 }
@@ -251,17 +253,35 @@ export interface VerifyAccountRequest {
   holder_name: string;
 }
 
-/** 계좌 인증 응답 — register 단계에 그대로 넘길 외부(Mock) 은행 토큰. */
+/**
+ * 1원 소액이체 인증 요청 응답 — 은행이 1원을 입금하고 대기 상태로 전환.
+ * 4자리 코드는 입금 적요에 포함되며 사용자가 직접 확인 후 confirm 단계에 입력한다.
+ */
 export interface VerifyAccountResponse {
-  account_token: string;
+  /** true면 1원이 입금됐고 confirm 대기 중. */
+  pending: boolean;
+  /** ISO 8601 만료 시각. 이 시간 내에 confirm 해야 한다. */
+  expires_at: string;
 }
 
-/** 계좌 등록 최종 완료 요청 body. account_token은 verify 응답값. */
+/** 1원 인증코드 확인 요청 body. */
+export interface ConfirmAccountRequest {
+  bank_code: string;
+  account_number: string;
+  /** 입금 적요에서 확인한 4자리 숫자 코드. */
+  code: string;
+}
+
+/** 1원 인증코드 확인 응답. */
+export interface ConfirmAccountResponse {
+  verified: boolean;
+  confirmed_at: string;
+}
+
+/** 계좌 등록 최종 완료 요청 body. */
 export interface RegisterAccountRequest {
   bank_code: string;
   account_number: string;
-  /** verify 단계에서 발급받은 account_token. */
-  account_token: string;
   holder_name: string;
 }
 
@@ -794,22 +814,31 @@ export const walletApi = {
     }),
 
   /**
-   * 계좌 연결 + 자동이체 인증 요청 (200) — Mock 은행에 인증을 요청하고 account_token을 받는다.
+   * 1원 소액이체 인증 시작 (200) — Mock 은행에 1원 입금을 요청하고 대기 상태를 반환한다.
    *
-   * <p>받은 account_token을 {@link registerAccount}에 그대로 넘겨야 등록이 완료된다.
-   * 인증 실패 ACCOUNT4002(400), 없는 계좌 ACCOUNT4001(404), 횟수초과 ACCOUNT4005(429),
-   * 은행장애 COMMON5031(503) → 모두 ApiException으로 throw.
+   * <p>은행이 계좌로 1원을 입금하며 적요에 4자리 코드가 포함된다. 사용자는 자신의 계좌에서
+   * 코드를 확인 후 {@link confirmAccount}에 입력해야 한다.
+   * 없는 계좌 ACCOUNT4001(404), 횟수초과 ACCOUNT4005(429), 은행장애 COMMON5031(503) → ApiException.
    */
   verifyAccount: (body: VerifyAccountRequest) =>
     apiClient.post<unknown, VerifyAccountResponse>('/accounts/verify', body),
 
   /**
-   * 계좌 등록 최종 완료 (201) — verify에서 받은 account_token으로 계좌를 등록한다.
+   * 1원 인증코드 확인 (200) — 사용자가 입력한 4자리 코드를 Mock 은행에서 검증한다.
+   *
+   * <p>성공 시 서버가 account_token을 Redis에 보관(600s). 이후 registerAccount가 이를 소비한다.
+   * 코드 불일치 ACCOUNT4008(400), 세션 만료/없음 ACCOUNT4009(400) → ApiException.
+   */
+  confirmAccount: (body: ConfirmAccountRequest) =>
+    apiClient.post<unknown, ConfirmAccountResponse>('/accounts/confirm', body),
+
+  /**
+   * 계좌 등록 최종 완료 (201) — confirm 단계에서 서버가 Redis에 저장한 토큰으로 계좌를 등록한다.
    *
    * <p>성공 시 등록된 계좌(AccountResponse, AccountItem과 동일 구조)를 반환.
    * 목록(getMyAccounts)에 즉시 반영하려면 ['wallet','accounts']를 invalidate한다
    * (useRegisterAccount hook의 onSuccess가 처리).
-   * 이미 등록된 계좌 ACCOUNT4004(409), 형식/은행코드 오류 COMMON4001(400) → ApiException.
+   * 세션 없음/만료 ACCOUNT4009(400), 이미 등록 ACCOUNT4004(409), 형식 오류 COMMON4001(400) → ApiException.
    */
   registerAccount: (body: RegisterAccountRequest) =>
     apiClient.post<unknown, AccountItem>('/accounts', body),

@@ -1,12 +1,26 @@
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { ApiException } from '@/api';
 import { useVerifyAccount } from '@/hooks/useVerifyAccount';
+import { useConfirmAccount } from '@/hooks/useConfirmAccount';
 import { useRegisterAccount } from '@/hooks/useRegisterAccount';
 import { accountErrorMessage } from '@/utils/accountErrorMessage';
 import type { AuthStep, AccountRegisterDraft, RegisteredAccountView } from '@/types/charge';
 import styles from './AutoDebitAuthPage.module.css';
+
+/** ISO 8601 문자열로부터 남은 초를 계산. 0 미만이면 0 반환. */
+function secondsLeft(expiresAt: string): number {
+  return Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+}
+
+/** 초를 "MM:SS" 형식으로 변환. */
+function formatCountdown(secs: number): string {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
 
 export default function AutoDebitAuthPage() {
   const { t } = useTranslation();
@@ -15,14 +29,36 @@ export default function AutoDebitAuthPage() {
   const draft = state as AccountRegisterDraft | null;
 
   const verify = useVerifyAccount();
+  const confirm = useConfirmAccount();
   const register = useRegisterAccount();
-  const accountToken = verify.data?.account_token ?? '';
-  const verified = accountToken !== '';
-  // 이미 등록된 계좌(409) — 재시도 대신 계좌 목록으로 유도한다.
+
+  const [otpCode, setOtpCode] = useState('');
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const isPending = verify.isSuccess && !!expiresAt && !confirm.isSuccess;
+  const isConfirmed = confirm.isSuccess;
+
+  // 이미 등록된 계좌(409) — 재시도 대신 계좌 목록으로 유도.
   const alreadyRegistered =
     register.error instanceof ApiException && register.error.code === 'ACCOUNT4004';
 
-  // 계좌 정보 없이 직접 진입(새로고침 등) — 진행 불가, 계좌 추가로 유도.
+  // 만료 카운트다운 타이머
+  useEffect(() => {
+    if (!expiresAt) return;
+
+    setCountdown(secondsLeft(expiresAt));
+    timerRef.current = setInterval(() => {
+      setCountdown(secondsLeft(expiresAt));
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [expiresAt]);
+
+  // 계좌 정보 없이 직접 진입(새로고침 등) — 계좌 추가로 유도.
   if (!draft) {
     return (
       <>
@@ -43,20 +79,36 @@ export default function AutoDebitAuthPage() {
   }
 
   const handleVerify = () => {
-    verify.mutate({
+    verify.mutate(
+      {
+        bank_code: draft.bankCode,
+        account_number: draft.accountNumber,
+        holder_name: draft.holderName,
+      },
+      {
+        onSuccess: (data) => {
+          setExpiresAt(data.expires_at);
+          setOtpCode('');
+        },
+      }
+    );
+  };
+
+  const handleConfirm = () => {
+    if (otpCode.length !== 4) return;
+    confirm.mutate({
       bank_code: draft.bankCode,
       account_number: draft.accountNumber,
-      holder_name: draft.holderName,
+      code: otpCode,
     });
   };
 
   const handleRegister = () => {
-    if (!verified) return;
+    if (!isConfirmed) return;
     register.mutate(
       {
         bank_code: draft.bankCode,
         account_number: draft.accountNumber,
-        account_token: accountToken,
         holder_name: draft.holderName,
       },
       {
@@ -73,10 +125,16 @@ export default function AutoDebitAuthPage() {
   };
 
   const steps: AuthStep[] = [
-    { index: 1, label: t('charge.autoDebit.stepRequest'), done: verified || verify.isPending },
-    { index: 2, label: t('charge.autoDebit.stepConfirm'), done: verified },
-    { index: 3, label: t('charge.autoDebit.stepDone'), done: verified },
+    {
+      index: 1,
+      label: t('charge.autoDebit.stepRequest'),
+      done: isPending || isConfirmed || verify.isPending,
+    },
+    { index: 2, label: t('charge.autoDebit.stepConfirm'), done: isConfirmed },
+    { index: 3, label: t('charge.autoDebit.stepDone'), done: isConfirmed },
   ];
+
+  const activeError = verify.error ?? confirm.error ?? register.error;
 
   return (
     <>
@@ -98,11 +156,62 @@ export default function AutoDebitAuthPage() {
         ))}
       </div>
 
-      {(verify.error || register.error) && (
-        <div className={styles.errorText}>
-          {accountErrorMessage(verify.error || register.error)}
-        </div>
+      {/* 1단계: 1원 입금 요청 */}
+      {!isPending && !isConfirmed && (
+        <button
+          type="button"
+          className={styles.primary}
+          disabled={verify.isPending || verify.isSuccess}
+          onClick={handleVerify}
+        >
+          {verify.isPending ? t('charge.autoDebit.sending') : t('charge.autoDebit.sendVerify')}
+        </button>
       )}
+
+      {/* 2단계: 인증코드 입력 + 확인 */}
+      {isPending && (
+        <>
+          <div className={`${styles.card} ${styles.cardInfo}`}>
+            <div className={styles.cardText}>{t('charge.autoDebit.verificationSent')}</div>
+          </div>
+
+          <div className={styles.otpSection}>
+            <div className={styles.otpLabel}>{t('charge.autoDebit.enterCode')}</div>
+            <div className={styles.otpRow}>
+              <input
+                className={styles.otpInput}
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={4}
+                placeholder={t('charge.autoDebit.codePlaceholder')}
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                autoFocus
+                disabled={confirm.isPending}
+              />
+            </div>
+            {expiresAt && (
+              <div className={`${styles.expiryBadge}${countdown <= 60 ? ` ${styles.urgent}` : ''}`}>
+                {t('charge.autoDebit.codeExpires', { time: formatCountdown(countdown) })}
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className={styles.primary}
+            disabled={otpCode.length !== 4 || confirm.isPending}
+            onClick={handleConfirm}
+          >
+            {confirm.isPending
+              ? t('charge.autoDebit.confirming')
+              : t('charge.autoDebit.confirmCode')}
+          </button>
+        </>
+      )}
+
+      {activeError && <div className={styles.errorText}>{accountErrorMessage(activeError)}</div>}
 
       {alreadyRegistered ? (
         <button
@@ -113,30 +222,16 @@ export default function AutoDebitAuthPage() {
           {t('charge.autoDebit.viewAccounts')}
         </button>
       ) : (
-        <>
-          <button
-            type="button"
-            className={styles.primary}
-            disabled={verify.isPending || verified}
-            onClick={handleVerify}
-          >
-            {verify.isPending
-              ? t('charge.autoDebit.verifying')
-              : verified
-                ? t('charge.autoDebit.verified')
-                : t('charge.autoDebit.requestVerify')}
-          </button>
-          <button
-            type="button"
-            className={styles.ghost}
-            disabled={!verified || register.isPending}
-            onClick={handleRegister}
-          >
-            {register.isPending
-              ? t('charge.autoDebit.registering')
-              : t('charge.autoDebit.completeRegister')}
-          </button>
-        </>
+        <button
+          type="button"
+          className={styles.ghost}
+          disabled={!isConfirmed || register.isPending}
+          onClick={handleRegister}
+        >
+          {register.isPending
+            ? t('charge.autoDebit.registering')
+            : t('charge.autoDebit.completeRegister')}
+        </button>
       )}
     </>
   );

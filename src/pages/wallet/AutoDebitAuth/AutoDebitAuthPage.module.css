@@ -92,3 +92,62 @@
   line-height: 1.5;
   color: #e11d48;
 }
+
+/* 1원 인증코드 입력 영역 */
+.otpSection {
+  margin: 8px 0;
+}
+
+.otpLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.otpRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.otpInput {
+  flex: 1;
+  box-sizing: border-box;
+  height: 48px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  text-align: center;
+  font-family: inherit;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+
+.otpInput:focus {
+  border-color: var(--blue);
+}
+
+.otpInput::placeholder {
+  color: #c5d3e8;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+}
+
+.expiryBadge {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+  margin-top: 6px;
+}
+
+.expiryBadge.urgent {
+  color: #e11d48;
+  font-weight: 700;
+}
