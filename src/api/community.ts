@@ -166,12 +166,19 @@ export interface CommentListResponse {
   total_pages: number;
 }
 
-/** 게시글 작성 요청 body (POST /community/posts). 전부 필수. */
+/** 게시글 작성 요청 body (POST /community/posts). category/title/content 필수. */
 export interface PostCreateRequest {
   /** 카테고리 — 백엔드 enum 대문자 (예: "JOB", "LIFE_INFO"). */
   category: string;
   title: string;
   content: string;
+  /**
+   * 작성 언어 코드(ko/en/vi/fil) — 프론트가 명시 전달한다(api-spec §2).
+   * 미전송 시 백엔드가 ko 기본값. 화이트리스트 외 값은 COMMUNITY4003(400).
+   * 보통 useCreatePost hook가 본문에서 언어를 감지(franc)해 자동 주입하므로 호출 측에서 직접 채울
+   * 필요는 없다 — 앱 UI 언어가 아니라 실제 본문 언어로 저장된다(한국어 앱으로 영어 글 작성 등 대응).
+   */
+  language?: string;
 }
 
 /** 댓글 작성 요청 body (POST /community/posts/{id}/comments). content 필수. 대댓글 미지원. */
