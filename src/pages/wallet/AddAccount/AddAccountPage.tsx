@@ -1,12 +1,35 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { useSupportedBanks } from '@/hooks/useSupportedBanks';
 import { useAccountHolder } from '@/hooks/useAccountHolder';
 import { accountErrorMessage } from '@/utils/accountErrorMessage';
+import type { SupportedBank } from '@/api/wallet';
 import type { AccountRegisterDraft } from '@/types/charge';
 import styles from './AddAccountPage.module.css';
+
+const COUNTRY_LABEL: Record<string, string> = {
+  KR: '🇰🇷 한국',
+  US: '🇺🇸 미국',
+  VN: '🇻🇳 베트남',
+  PH: '🇵🇭 필리핀',
+};
+
+function countryLabel(code: string): string {
+  return COUNTRY_LABEL[code] ?? code;
+}
+
+/** 은행 목록을 국가별로 그룹핑. 백엔드가 country ASC → name ASC 정렬해서 오므로 순서 유지. */
+function groupByCountry(banks: SupportedBank[]): Map<string, SupportedBank[]> {
+  const map = new Map<string, SupportedBank[]>();
+  for (const bank of banks) {
+    const group = map.get(bank.country) ?? [];
+    group.push(bank);
+    map.set(bank.country, group);
+  }
+  return map;
+}
 
 export default function AddAccountPage() {
   const { t } = useTranslation();
@@ -16,10 +39,12 @@ export default function AddAccountPage() {
 
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-  // 기본 선택: 사용자가 고르기 전엔 첫 은행(백엔드가 가나다순 정렬).
+  // 기본 선택: 사용자가 고르기 전엔 첫 은행(백엔드가 country→name 순 정렬).
   const selectedBankCode = bankCode || banks[0]?.bank_code || '';
   // 200 + 빈 배열 — 에러가 아니라 "지원 은행이 아직 없음"(DB 미등록 등) 정상 케이스.
   const banksEmpty = !banksLoading && !banksError && banks.length === 0;
+
+  const bankGroups = useMemo(() => groupByCountry(banks), [banks]);
 
   const holder = useAccountHolder();
   // 조회 응답이 "현재 입력값"과 일치할 때만 확인된 것으로 본다.
@@ -74,10 +99,14 @@ export default function AddAccountPage() {
           {banksLoading && <option value="">{t('charge.addAccount.banksLoading')}</option>}
           {banksError && <option value="">{t('charge.addAccount.banksError')}</option>}
           {banksEmpty && <option value="">{t('charge.addAccount.banksEmpty')}</option>}
-          {banks.map((bank) => (
-            <option key={bank.bank_code} value={bank.bank_code}>
-              {bank.bank_name}
-            </option>
+          {[...bankGroups.entries()].map(([country, groupBanks]) => (
+            <optgroup key={country} label={countryLabel(country)}>
+              {groupBanks.map((bank) => (
+                <option key={bank.bank_code} value={bank.bank_code}>
+                  {bank.bank_name}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </div>

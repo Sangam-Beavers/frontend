@@ -5,15 +5,15 @@ import { walletApi, type RegisterAccountRequest } from '@/api/wallet';
 /**
  * 계좌 등록 최종 완료 hook (api-spec — wallet-service AccountController.registerAccount).
  *
- * <p>verify에서 받은 account_token으로 계좌를 등록한다. 성공 시 등록된 계좌 목록
- * ['wallet','accounts']를 invalidate → 계좌관리·충전·계좌송금 화면이 자동으로 새 계좌를 반영한다.
+ * <p>1원 인증(confirm) 완료 후 서버가 Redis에 보관한 account_token을 서버가 직접 소비해 계좌를 등록한다.
+ * 성공 시 등록된 계좌 목록 ['wallet','accounts']를 invalidate → 계좌관리·충전·계좌송금 화면이 자동으로 새 계좌를 반영한다.
  *
- * <p>이미 등록된 계좌(ACCOUNT4004) 등은 ApiException으로 throw — 호출 측에서 code별 메시지 매핑.
+ * <p>세션 없음/만료(ACCOUNT4009), 이미 등록된 계좌(ACCOUNT4004) 등은 ApiException으로 throw.
  *
  * @example
  *   const register = useRegisterAccount();
  *   register.mutate(
- *     { bank_code, account_number, account_token, holder_name },
+ *     { bank_code, account_number, holder_name },
  *     { onSuccess: (acc) => navigate('/charge/account-registered', { state: acc }) }
  *   );
  */
