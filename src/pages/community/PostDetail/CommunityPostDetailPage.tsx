@@ -15,6 +15,7 @@ import { usePostDetail } from '@/hooks/usePostDetail';
 import { usePostTranslation } from '@/hooks/usePostTranslation';
 import { useToggleLike } from '@/hooks/useToggleLike';
 import { categoryLabel, formatCommunityDate } from '@/utils/communityFeed';
+import { normalizeAppLanguage } from '@/utils/detectLanguage';
 import { communityErrorMessage } from '@/utils/communityErrorMessage';
 import { translationErrorMessage } from '@/utils/translationErrorMessage';
 import styles from './CommunityPostDetailPage.module.css';
@@ -33,7 +34,8 @@ export default function CommunityPostDetailPage() {
   const [translateError, setTranslateError] = useState<string | null>(null);
 
   const { data: post, isLoading, error } = usePostDetail(postId);
-  const targetLanguage = i18n.language;
+  // 번역 대상 언어 — 지역 코드(ko-KR 등)는 백엔드 화이트리스트(ko)와 안 맞아 COMMUNITY4003이 되므로 정규화.
+  const targetLanguage = normalizeAppLanguage(i18n.language);
   const {
     data: translation,
     isFetching: isTranslating,
