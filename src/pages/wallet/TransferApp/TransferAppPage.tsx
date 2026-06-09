@@ -117,10 +117,17 @@ export default function TransferAppPage() {
     setCurrency(user.currency);
   }
 
-  const canSubmit = verified !== null && Number(amount) > 0;
+  const balance = Number(balanceOf(balancesData, currency));
+  const numAmount = Number(amount);
 
-  // 선택 통화가 KRW가 아니고 잔액이 0이면 환전 유도 배너 노출.
-  const needsExchange = currency !== 'KRW' && Number(balanceOf(balancesData, currency)) === 0;
+  // 잔액 0: 금액 입력 전부터 안내
+  const hasNoBalance = currency !== 'KRW' && balance === 0;
+  // 잔액 부족: 금액 입력 후 보유량 초과
+  const isInsufficient = currency !== 'KRW' && numAmount > 0 && balance > 0 && balance < numAmount;
+  const needsExchange = hasNoBalance || isInsufficient;
+
+  // 잔액 부족 시 다음 버튼 비활성 — 서버까지 갔다가 에러 받는 것보다 앞단에서 차단.
+  const canSubmit = verified !== null && numAmount > 0 && !needsExchange;
 
   /**
    * "다음" 버튼 — TransferConfirm으로 송금 정보를 state로 전달.
@@ -265,7 +272,14 @@ export default function TransferAppPage() {
         {needsExchange && (
           <div className={styles.exchangeBanner}>
             <div className={styles.exchangeBannerText}>
-              {t('transfer.app.noBalanceBanner', { currency })}
+              {isInsufficient
+                ? t('transfer.app.insufficientBalanceBanner', {
+                    currency,
+                    needed: (numAmount - balance).toLocaleString(undefined, {
+                      maximumFractionDigits: 4,
+                    }),
+                  })
+                : t('transfer.app.noBalanceBanner', { currency })}
             </div>
             <button
               type="button"

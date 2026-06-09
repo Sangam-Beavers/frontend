@@ -653,7 +653,8 @@
       "errorNetwork": "Network error.",
       "errorVerifyFailed": "Verification failed.",
       "noBalanceBanner": "You have no {{currency}} balance. Exchange first to send.",
-      "goExchange": "Go exchange"
+      "goExchange": "Go exchange",
+      "insufficientBalanceBanner": "Not enough {{currency}}. You need {{needed}} more."
     },
     "bank": {
       "title": "Bank transfer",

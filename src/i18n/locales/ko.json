@@ -653,7 +653,8 @@
       "errorNetwork": "네트워크 오류. 잠시 후 다시 시도해주세요.",
       "errorVerifyFailed": "확인에 실패했습니다.",
       "noBalanceBanner": "보유한 {{currency}}이 없어요. 먼저 환전하고 송금해보세요.",
-      "goExchange": "환전하러 가기"
+      "goExchange": "환전하러 가기",
+      "insufficientBalanceBanner": "{{currency}} 잔액이 부족해요. {{needed}}만큼 더 필요해요."
     },
     "bank": {
       "title": "타행 송금",

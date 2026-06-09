@@ -653,7 +653,8 @@
       "errorNetwork": "Network error.",
       "errorVerifyFailed": "Nabigo ang pagkumpirma.",
       "noBalanceBanner": "Wala kang {{currency}}. Mag-palitan muna bago mag-transfer.",
-      "goExchange": "Palitan ng pera"
+      "goExchange": "Palitan ng pera",
+      "insufficientBalanceBanner": "Kulang ang {{currency}}. Kailangan mo ng {{needed}} pa."
     },
     "bank": {
       "title": "Bank transfer",

@@ -44,7 +44,7 @@ export default function TransferSelectPage() {
 
   return (
     <>
-      <TopBar title={t('transfer.select.title')} />
+      <TopBar title={t('transfer.select.title')} onBack={() => navigate('/')} />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>{t('transfer.select.availableBalance')}</div>

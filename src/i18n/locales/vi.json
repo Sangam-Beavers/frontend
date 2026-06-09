@@ -653,7 +653,8 @@
       "errorNetwork": "Lỗi mạng.",
       "errorVerifyFailed": "Xác nhận thất bại.",
       "noBalanceBanner": "Bạn không có {{currency}}. Hãy đổi tiền trước khi chuyển.",
-      "goExchange": "Đổi tiền"
+      "goExchange": "Đổi tiền",
+      "insufficientBalanceBanner": "Số dư {{currency}} không đủ. Cần thêm {{needed}}."
     },
     "bank": {
       "title": "Chuyển khoản ngân hàng",
