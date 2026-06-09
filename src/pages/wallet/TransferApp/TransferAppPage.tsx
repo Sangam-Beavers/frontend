@@ -6,6 +6,7 @@ import TopBar from '@/components/navigation/TopBar';
 import { useRecentInternalRecipients } from '@/hooks/useRecentInternalRecipients';
 import { useValidateMember } from '@/hooks/useValidateMember';
 import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
+import { useBalances, balanceOf } from '@/hooks/useBalances';
 import styles from './TransferAppPage.module.css';
 
 // 아바타 색상 톤 — mock에서 들고 있던 5색 그대로. 백엔드는 톤을 안 주므로 인덱스로 순환 매핑.
@@ -64,6 +65,9 @@ export default function TransferAppPage() {
     }));
   }, [recipientsData]);
 
+  // 잔액 — 선택 통화의 잔액이 0이면 환전 유도 배너 노출.
+  const { data: balancesData } = useBalances();
+
   const [recipient, setRecipient] = useState('');
   const [verified, setVerified] = useState<RecipientDisplay | null>(null);
   const [verifyError, setVerifyError] = useState<string | null>(null);
@@ -114,6 +118,9 @@ export default function TransferAppPage() {
   }
 
   const canSubmit = verified !== null && Number(amount) > 0;
+
+  // 선택 통화가 KRW가 아니고 잔액이 0이면 환전 유도 배너 노출.
+  const needsExchange = currency !== 'KRW' && Number(balanceOf(balancesData, currency)) === 0;
 
   /**
    * "다음" 버튼 — TransferConfirm으로 송금 정보를 state로 전달.
@@ -253,6 +260,22 @@ export default function TransferAppPage() {
             </button>
           )}
         </div>
+
+        {/* 잔액 부족 → 환전 유도 배너 (#169) */}
+        {needsExchange && (
+          <div className={styles.exchangeBanner}>
+            <div className={styles.exchangeBannerText}>
+              {t('transfer.app.noBalanceBanner', { currency })}
+            </div>
+            <button
+              type="button"
+              className={styles.exchangeBannerBtn}
+              onClick={() => navigate('/exchange/form', { state: { targetCurrency: currency } })}
+            >
+              {t('transfer.app.goExchange')}
+            </button>
+          </div>
+        )}
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="transfer-amount">

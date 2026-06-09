@@ -651,7 +651,9 @@
       "errorInvalidEmail": "이메일 형식을 확인해주세요.",
       "errorMemberNotFound": "해당 이메일의 회원을 찾을 수 없습니다.",
       "errorNetwork": "네트워크 오류. 잠시 후 다시 시도해주세요.",
-      "errorVerifyFailed": "확인에 실패했습니다."
+      "errorVerifyFailed": "확인에 실패했습니다.",
+      "noBalanceBanner": "보유한 {{currency}}이 없어요. 먼저 환전하고 송금해보세요.",
+      "goExchange": "환전하러 가기"
     },
     "bank": {
       "title": "타행 송금",

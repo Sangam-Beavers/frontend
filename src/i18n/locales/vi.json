@@ -651,7 +651,9 @@
       "errorInvalidEmail": "Vui lòng kiểm tra định dạng email.",
       "errorMemberNotFound": "Không tìm thấy thành viên.",
       "errorNetwork": "Lỗi mạng.",
-      "errorVerifyFailed": "Xác nhận thất bại."
+      "errorVerifyFailed": "Xác nhận thất bại.",
+      "noBalanceBanner": "Bạn không có {{currency}}. Hãy đổi tiền trước khi chuyển.",
+      "goExchange": "Đổi tiền"
     },
     "bank": {
       "title": "Chuyển khoản ngân hàng",

@@ -651,7 +651,9 @@
       "errorInvalidEmail": "Please check the email format.",
       "errorMemberNotFound": "No member found with this email.",
       "errorNetwork": "Network error.",
-      "errorVerifyFailed": "Verification failed."
+      "errorVerifyFailed": "Verification failed.",
+      "noBalanceBanner": "You have no {{currency}} balance. Exchange first to send.",
+      "goExchange": "Go exchange"
     },
     "bank": {
       "title": "Bank transfer",

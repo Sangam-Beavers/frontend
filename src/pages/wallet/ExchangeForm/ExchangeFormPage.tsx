@@ -23,7 +23,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException, walletApi, type ExchangeQuoteResponse } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { ROUTES } from '@/constants/routes';
@@ -35,6 +35,8 @@ type Phase = 'INPUT' | 'QUOTING' | 'LOCKED' | 'EXECUTING';
 export default function ExchangeFormPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // TransferAppPage 등에서 { targetCurrency: 'VND' } state로 진입하면 드롭다운 초기값 적용.
+  const { state } = useLocation() as { state?: { targetCurrency?: string } };
   const { data: currenciesData } = useSupportedCurrencies();
   // KRW 제외한 지원 통화만 드롭다운에 노출. 데이터 도착 전엔 빈 배열.
   const foreignList = useMemo(
@@ -42,7 +44,7 @@ export default function ExchangeFormPage() {
     [currenciesData]
   );
 
-  const [toCurrency, setToCurrency] = useState('USD');
+  const [toCurrency, setToCurrency] = useState(state?.targetCurrency ?? 'USD');
   const [amount, setAmount] = useState('');
   const [phase, setPhase] = useState<Phase>('INPUT');
   const [quote, setQuote] = useState<ExchangeQuoteResponse | null>(null);

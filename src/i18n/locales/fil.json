@@ -651,7 +651,9 @@
       "errorInvalidEmail": "Pakisuri ang email.",
       "errorMemberNotFound": "Walang miyembro.",
       "errorNetwork": "Network error.",
-      "errorVerifyFailed": "Nabigo ang pagkumpirma."
+      "errorVerifyFailed": "Nabigo ang pagkumpirma.",
+      "noBalanceBanner": "Wala kang {{currency}}. Mag-palitan muna bago mag-transfer.",
+      "goExchange": "Palitan ng pera"
     },
     "bank": {
       "title": "Bank transfer",
