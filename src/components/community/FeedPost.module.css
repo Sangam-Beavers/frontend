@@ -66,3 +66,12 @@
 .avatarVerified {
   border-color: #22c55e;
 }
+
+/* Phase 2 (FE-5) — CONNECTED 파랑 실선 / TRUSTED 보라 실선. 색 근거: utils/trustGrade.ts 주석 */
+.avatarConnected {
+  border-color: #2563eb;
+}
+
+.avatarTrusted {
+  border-color: #7c3aed;
+}

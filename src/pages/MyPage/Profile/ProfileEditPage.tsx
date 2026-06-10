@@ -8,10 +8,19 @@ import TopBar from '@/components/navigation/TopBar';
 import { SETTING_LANGUAGES } from '@/constants/languages';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useUpdateMyProfile } from '@/hooks/useUpdateMyProfile';
+import type { AvatarTone } from '@/types/community';
 import { trustGradeToTone } from '@/utils/trustGrade';
 import styles from './ProfileEditPage.module.css';
 
 const LANGUAGES = SETTING_LANGUAGES;
+
+/** 신뢰등급 테두리 톤 → CSS 클래스 (FE-5). 톤→색 근거는 utils/trustGrade.ts 주석 참고. */
+const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
+  good: styles.avatarVerified,
+  best: styles.avatarConnected,
+  purple: styles.avatarTrusted,
+  default: styles.avatarNewcomer,
+};
 
 /** 백엔드 BCP 47 코드 → 화면 표시 라벨 매핑. 매핑 못 찾으면 '한국어' fallback. */
 const LANGUAGE_CODE_TO_LABEL: Record<string, string> = {
@@ -58,12 +67,10 @@ export default function ProfileEditPage() {
   // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
   const avatarSeed = profile?.public_id ?? nickname;
 
-  // 신뢰등급 테두리 (이슈 #174) — NEWCOMER 회색 점선 / VERIFIED 초록 실선.
-  // trust_grade 누락(BE #193 배포 전)·미지 값은 trustGradeToTone이 회색('default')으로 폴백.
+  // 신뢰등급 테두리 (이슈 #174 + Phase 2 FE-5) — NEWCOMER 회색 점선 / VERIFIED 초록 /
+  // CONNECTED 파랑 / TRUSTED 보라 실선. 누락·미지 값은 trustGradeToTone이 회색('default')으로 폴백.
   const avatarToneClass =
-    trustGradeToTone(profile?.trust_grade) === 'good'
-      ? styles.avatarVerified
-      : styles.avatarNewcomer;
+    AVATAR_TONE_CLASS[trustGradeToTone(profile?.trust_grade)] ?? styles.avatarNewcomer;
 
   /**
    * 닉네임 사전 중복 확인 (저장과 별개의 API 호출 — race는 저장 시 백엔드가 다시 검증).

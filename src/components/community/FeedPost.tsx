@@ -13,12 +13,15 @@ interface FeedPostProps {
 }
 
 /**
- * 신뢰등급 테두리 톤 → CSS 클래스 (이슈 #175).
- * Phase 1에서 실제 생성되는 톤은 'good'(VERIFIED 초록 실선)·'default'(NEWCOMER·누락 회색 점선) 2개.
+ * 신뢰등급 테두리 톤 → CSS 클래스 (이슈 #175 + Phase 2 FE-5).
+ * 실제 생성되는 톤 4개: 'good'(VERIFIED 초록) · 'best'(CONNECTED 파랑) · 'purple'(TRUSTED 보라)
+ * · 'default'(NEWCOMER·누락 회색 점선). 톤→색 근거는 utils/trustGrade.ts 주석 참고.
  * 매핑에 없는 톤(미사용 레거시 값 포함)은 회색('default')으로 폴백.
  */
 const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
   good: styles.avatarVerified,
+  best: styles.avatarConnected,
+  purple: styles.avatarTrusted,
   default: styles.avatarNewcomer,
 };
 
