@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import CommunityMenu from '@/components/community/CommunityMenu';
 import CommunitySearchBar from '@/components/community/CommunitySearchBar';
@@ -8,10 +9,12 @@ import Pagination from '@/components/community/Pagination';
 import TopBar from '@/components/navigation/TopBar';
 import { usePagedPosts } from '@/hooks/usePagedPosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
+import { ROUTES } from '@/constants/routes';
 import styles from './CommunityPage.module.css';
 
 export default function CommunityPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [showSearch, setShowSearch] = useState(false);
   // 전체 탭 → category 미지정. 페이지·검색 상태는 URL(?page=&keyword=)로 관리(뒤로 가기 복원).
   const { data, isLoading, error, page, goToPage, searchQuery, setSearchQuery, keyword } =
@@ -31,6 +34,17 @@ export default function CommunityPage() {
 
       <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
       {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
+
+      {/* FAQ 빠른 진입 */}
+      <button
+        type="button"
+        className={styles.faqBanner}
+        onClick={() => navigate(ROUTES.COMMUNITY_FAQ)}
+      >
+        <span className={styles.faqIcon}>💬</span>
+        <span className={styles.faqLabel}>자주 묻는 질문 (FAQ)</span>
+        <span className={styles.faqArrow}>›</span>
+      </button>
 
       <div className={styles.section}>{t('community.allPosts')}</div>
 

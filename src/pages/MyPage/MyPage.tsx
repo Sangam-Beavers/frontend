@@ -7,6 +7,8 @@ import { useMyProfile } from '@/hooks/useMyProfile';
 import { useMyVerification } from '@/hooks/useMyVerification';
 import type { AvatarTone } from '@/types/community';
 import { trustGradeToLabelKey, trustGradeToTone } from '@/utils/trustGrade';
+import { isAdminUser } from '@/auth/tokenStore';
+import { ROUTES } from '@/constants/routes';
 import styles from './MyPage.module.css';
 
 /** 신뢰등급 테두리 톤 → CSS 클래스 (FE-5). 톤→색 근거는 utils/trustGrade.ts 주석 참고. */
@@ -52,6 +54,10 @@ export default function MyPage() {
     { label: t('mypage.items.language'), badge: null, path: '/mypage/language' },
     { label: t('mypage.items.withdraw'), badge: null, path: '/mypage/withdraw' },
   ];
+
+  const isAdmin = isAdminUser();
+
+  const ADMIN_ITEMS = [{ label: '앱 관리', path: ROUTES.ADMIN_APP }];
 
   const nickname = profile?.nickname ?? '';
   // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
@@ -119,6 +125,21 @@ export default function MyPage() {
             {t('mypage.profileEdit')}
           </button>
         </div>
+
+        {/* 관리자 전용 섹션 — 최상단 배치. JWT groups: ["admin"] 인 경우에만 표시 */}
+        {isAdmin && (
+          <>
+            <div className={styles.section}>앱 관리</div>
+            <div className={styles.list}>
+              {ADMIN_ITEMS.map((item) => (
+                <div key={item.path} className={styles.item} onClick={() => navigate(item.path)}>
+                  <div className={styles.itemTitle}>{item.label}</div>
+                  <span className={styles.arrow}>›</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         <div className={styles.section}>{t('mypage.sectionActivity')}</div>
 

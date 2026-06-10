@@ -44,3 +44,17 @@ export function clearLocalTokens(): void {
   sessionStorage.removeItem(ACCESS);
   sessionStorage.removeItem(ID);
 }
+
+// JWT groups 클레임으로 관리자 여부를 판별한다.
+// Authentik에서 admin 그룹 멤버는 access_token의 groups claim에 "admin"이 포함된다.
+// 토큰이 없거나 파싱에 실패하면 false를 반환(fail-closed).
+export function isAdminUser(): boolean {
+  const token = getAccessToken();
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return Array.isArray(payload.groups) && payload.groups.includes('admin');
+  } catch {
+    return false;
+  }
+}

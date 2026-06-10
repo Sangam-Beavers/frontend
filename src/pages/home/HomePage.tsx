@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import { ROUTES } from '@/constants/routes';
+import { isAdminUser } from '@/auth/tokenStore';
 import { balanceOf, useBalances } from '@/hooks/useBalances';
 import { useExchangeRatesWidget } from '@/hooks/useExchangeRatesWidget';
+import { useSetting } from '@/hooks/useServiceSettings';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useWalletMe } from '@/hooks/useWalletMe';
 import { HOME_ALL_CURRENCIES_MOCK, HOME_NOTIFICATIONS_MOCK } from '@/mocks/homeMock';
@@ -58,6 +60,7 @@ function loadCurrencies(): CurrencyOption[] {
 export default function HomePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const isAdmin = isAdminUser();
   const [currencies, setCurrencies] = useState<CurrencyOption[]>(loadCurrencies);
   const { data: balances, isLoading: balancesLoading, error: balancesError } = useBalances();
   // 이슈 #108 — 신분증 미인증 사용자는 전자지갑 카드 자체를 잠그고 인증 안내로 교체한다.
@@ -65,9 +68,14 @@ export default function HomePage() {
   const isVerified = profile?.is_verified ?? false;
   // "지금 나의 원화" 카드용 — 보유 통화 전체의 KRW 환산 합계.
   const { data: walletMe, isLoading: walletMeLoading, error: walletMeError } = useWalletMe();
+  // 서비스 설정 — 환율 갱신 주기 (분 단위, 0이면 자동 갱신 없음)
+  const rateRefreshMin = Number(useSetting('EXCHANGE_RATE_REFRESH_MIN', '0'));
+  const rateRefreshMs = rateRefreshMin > 0 ? rateRefreshMin * 60_000 : 0;
   // 실시간 환율 (KRW 기준 "1 외화→KRW") — 홈 카드용. KRW 제외 전체 통화.
-  const { data: ratesData, isLoading: ratesLoading } = useExchangeRatesWidget();
-
+  const { data: ratesData, isLoading: ratesLoading } = useExchangeRatesWidget(
+    undefined,
+    rateRefreshMs
+  );
   useEffect(() => {
     setCurrencies(loadCurrencies());
   }, []);
@@ -99,6 +107,9 @@ export default function HomePage() {
           </button>
         </div>
       </header>
+
+      {/* 관리자 배너 — isAdmin일 때만 표시 */}
+      {isAdmin && <div className={styles.adminBanner}>⚙️ Administration</div>}
 
       {isVerified ? (
         <div className={styles.wallet}>
@@ -231,6 +242,16 @@ export default function HomePage() {
 
       <div className={styles.section}>{t('home.alerts')}</div>
       <div className={styles.scrollRow}>
+        {/* 공지사항 카드 — 목록 페이지로 이동 */}
+        <div
+          className={`${styles.card} ${styles.notifCard}`}
+          onClick={() => navigate(ROUTES.NOTICES)}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className={styles.cardTitle}>공지사항</div>
+          <div className={styles.cardText}>새로운 공지사항을 확인하세요</div>
+        </div>
+        {/* 기존 mock 알림 카드 */}
         {NOTIFICATIONS.map((notif) => {
           // 알림 mock의 title/description은 한국어 — i18n 키로 매핑(이슈 #153).
           // 매핑 없으면 mock 원본을 fallback으로 표시.

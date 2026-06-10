@@ -1,0 +1,79 @@
+.wrap { padding: 0 16px 80px; }
+.topBar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 14px; }
+.title { font-weight: 900; font-size: 20px; color: var(--blue); }
+.iconBtn { width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 14px; background: #fff; color: #334155; font-weight: 800; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 40px 0; }
+.list { display: flex; flex-direction: column; gap: 10px; }
+
+/* 설정 카드 */
+.card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  background: #fff;
+}
+.cardInactive { opacity: .55; }
+.cardLabel { font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+.cardDesc { font-size: 12px; color: #94a3b8; margin-bottom: 14px; line-height: 1.5; }
+.rawValue { font-family: monospace; font-size: 13px; color: #475569; }
+
+/* 토글 스위치 */
+.toggleRow { display: flex; align-items: center; gap: 12px; }
+.toggleState { font-size: 14px; font-weight: 700; color: #475569; min-width: 36px; }
+.toggle {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  transition: background .2s;
+  padding: 0;
+}
+.toggleOn { background: var(--blue); }
+.toggleOff { background: #cbd5e1; }
+.toggle:disabled { opacity: .6; cursor: not-allowed; }
+.toggleThumb {
+  position: absolute;
+  top: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left .2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+.toggleOn .toggleThumb { left: 27px; }
+.toggleOff .toggleThumb { left: 3px; }
+
+/* 숫자 스테퍼 */
+.numberRow { display: flex; align-items: center; gap: 8px; }
+.stepBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+  font-size: 20px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stepBtn:disabled { opacity: .4; cursor: not-allowed; }
+.stepBtn:hover:not(:disabled) { background: #e2e8f0; }
+.numberInput {
+  width: 100px;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  background: #fff;
+}
+.unit { font-size: 13px; color: #94a3b8; font-weight: 600; flex-shrink: 0; }
