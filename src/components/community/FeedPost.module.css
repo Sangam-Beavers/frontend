@@ -56,3 +56,13 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* 신뢰등급 테두리 (이슈 #175) — NEWCOMER·등급 누락 회색 점선 / VERIFIED 초록 실선 */
+.avatarNewcomer {
+  border-color: #94a3b8;
+  border-style: dashed;
+}
+
+.avatarVerified {
+  border-color: #22c55e;
+}

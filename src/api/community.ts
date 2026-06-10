@@ -49,6 +49,12 @@ export interface PostSummaryItem {
   author_nickname: string;
   /** 작성자 프로필 사진 URL. 미설정 시 null — 프론트는 기본 아바타로 대체. */
   author_profile_image_url: string | null;
+  /**
+   * 작성자 신뢰등급. 값: 'NEWCOMER' | 'VERIFIED' (Phase 1) — 아바타 테두리 톤 매핑(이슈 #175).
+   * 수동 추가 — BE #194 배포 전 응답엔 없어 optional(누락 시 프론트는 회색 폴백).
+   * TODO: BE #194 배포 후 openapi 재생성 필요.
+   */
+  author_trust_grade?: string;
   like_count: number;
   comment_count: number;
   /** 작성 시각 (ISO 8601 UTC Z). */

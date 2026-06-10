@@ -1,5 +1,6 @@
 import type { PostSummaryItem } from '@/api/community';
 import type { FeedPostItem } from '@/types/community';
+import { trustGradeToTone } from '@/utils/trustGrade';
 
 /** 백엔드 카테고리(대문자) → 화면 표시 라벨. */
 const CATEGORY_LABEL: Record<string, string> = {
@@ -56,6 +57,9 @@ export function toFeedPostItem(item: PostSummaryItem): FeedPostItem {
     // (닉네임을 바꿔도 그림 유지 + 같은 사용자는 어디서든 같은 그림). 빈 값이면 닉네임/글 id로 폴백.
     avatarSeed: item.author_public_id || item.author_nickname || item.public_id,
     avatarImageUrl: item.author_profile_image_url ?? null,
+    // 작성자 신뢰등급 → 테두리 톤(이슈 #175). 랜덤/시드 배색이 아니라 등급이 SSOT.
+    // BE #194 배포 전엔 author_trust_grade가 없어 회색('default') 폴백.
+    avatarTone: trustGradeToTone(item.author_trust_grade),
     language: item.language,
   };
 }
