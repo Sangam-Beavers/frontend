@@ -66,7 +66,40 @@
   "trust": {
     "grade": {
       "newcomer": "Newcomer Beaver",
-      "verified": "Verified Beaver"
+      "verified": "Verified Beaver",
+      "connected": "Connected Beaver",
+      "trusted": "Trusted Beaver"
+    },
+    "sheet": {
+      "open": "Open trust level guide",
+      "aria": "Trust level guide",
+      "title": "My Trust Level",
+      "close": "Close",
+      "loading": "Loading…",
+      "loadError": "Couldn't load your milestones. Please try again in a moment.",
+      "retry": "Try again",
+      "achieved": "Achieved",
+      "achievedAt": "Achieved on {{date}}",
+      "allDone": "You've achieved every milestone!",
+      "milestones": {
+        "ID_VERIFIED": {
+          "name": "ID verification",
+          "next": "Verify your ID to earn the green border"
+        },
+        "BANK_ACCOUNT_CONNECTED": {
+          "name": "Bank account connection",
+          "next": "Connect a bank account to earn the blue border"
+        },
+        "FIRST_TRANSACTION_COMPLETED": {
+          "name": "First transaction",
+          "next": "Complete your first transaction to earn the purple border"
+        }
+      },
+      "cta": {
+        "ID_VERIFIED": "Go verify my ID",
+        "BANK_ACCOUNT_CONNECTED": "Go connect an account",
+        "FIRST_TRANSACTION_COMPLETED": "Go top up my wallet"
+      }
     }
   },
   "mypage": {

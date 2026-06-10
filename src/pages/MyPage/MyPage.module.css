@@ -82,8 +82,35 @@
   border-color: #22c55e;
 }
 
-/* 아바타 옆 등급명 라벨 (예: 새싹 비버 / 인증 비버) */
+/* Phase 2 (FE-5) — CONNECTED 파랑 실선 / TRUSTED 보라 실선. 색 근거: utils/trustGrade.ts 주석 */
+.avatarConnected {
+  border-color: #2563eb;
+}
+
+.avatarTrusted {
+  border-color: #7c3aed;
+}
+
+/* 아바타 탭 영역 (FE-4) — 버튼 리셋. 탭하면 등급 바텀시트가 열린다. */
+.avatarBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
+/* 아바타 옆 등급명 라벨 (예: 새싹 비버 / 인증 비버). FE-4부터 탭 가능(버튼) — 등급 바텀시트 오픈. */
 .trustLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 800;
   color: var(--muted);

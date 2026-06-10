@@ -66,7 +66,40 @@
   "trust": {
     "grade": {
       "newcomer": "Newcomer Beaver",
-      "verified": "Verified Beaver"
+      "verified": "Verified Beaver",
+      "connected": "Connected Beaver",
+      "trusted": "Trusted Beaver"
+    },
+    "sheet": {
+      "open": "Buksan ang gabay sa trust level",
+      "aria": "Gabay sa trust level",
+      "title": "Aking Trust Level",
+      "close": "Isara",
+      "loading": "Naglo-load…",
+      "loadError": "Hindi na-load ang mga milestone. Pakisubukang muli mamaya.",
+      "retry": "Subukang muli",
+      "achieved": "Nakamit na",
+      "achievedAt": "Nakamit noong {{date}}",
+      "allDone": "Nakamit mo na ang lahat ng milestone!",
+      "milestones": {
+        "ID_VERIFIED": {
+          "name": "Pag-verify ng ID",
+          "next": "I-verify ang iyong ID para makuha ang berdeng border"
+        },
+        "BANK_ACCOUNT_CONNECTED": {
+          "name": "Pagkonekta ng bank account",
+          "next": "Ikonekta ang iyong bank account para makuha ang asul na border"
+        },
+        "FIRST_TRANSACTION_COMPLETED": {
+          "name": "Unang transaksyon",
+          "next": "Kumpletuhin ang unang transaksyon para makuha ang lilang border"
+        }
+      },
+      "cta": {
+        "ID_VERIFIED": "I-verify ang aking ID",
+        "BANK_ACCOUNT_CONNECTED": "Ikonekta ang account",
+        "FIRST_TRANSACTION_COMPLETED": "Mag-top up ng wallet"
+      }
     }
   },
   "mypage": {
