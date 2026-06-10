@@ -142,6 +142,34 @@ export interface LanguageResponse {
   language: string;
 }
 
+// ---------- 신뢰등급 마일스톤 (Phase 2 — FE-4 / 백엔드 BE-6) ----------
+
+/**
+ * 마일스톤 종류. 백엔드 카탈로그 SSOT — Phase 2는 3종 (기획서 §3-1 Lv2~4 순차 체인).
+ *
+ * TODO: BE-6 (GET /members/me/trust-milestones) 배포 후 openapi 재생성 필요
+ *   (@/types/api/member에 자동 생성 타입이 생기면 본 수동 타입과 대조).
+ */
+export type TrustMilestoneType =
+  | 'ID_VERIFIED'
+  | 'BANK_ACCOUNT_CONNECTED'
+  | 'FIRST_TRANSACTION_COMPLETED';
+
+/** 마일스톤 1건 — 미달성 항목도 카탈로그에 포함된다(프론트가 "다음 단계"를 그리기 위함). */
+export interface TrustMilestone {
+  milestone_type: TrustMilestoneType;
+  achieved: boolean;
+  /** 달성 시각(ISO 8601 UTC Z). 미달성이거나 달성 시각을 모를 때 null. */
+  achieved_at: string | null;
+}
+
+/** GET /api/v1/members/me/trust-milestones 응답 data. */
+export interface TrustMilestonesResponse {
+  /** 현재 신뢰등급 ('NEWCOMER' | 'VERIFIED' | 'CONNECTED' | 'TRUSTED'). 미지 값 대비 string. */
+  trust_grade: string;
+  milestones: TrustMilestone[];
+}
+
 // ---------- API 함수 ----------
 
 export const memberApi = {
@@ -231,6 +259,18 @@ export const memberApi = {
    * 사용자에게 다시 시도 안내. 인증 누락 401 AUTH4011 / 회원 없음 404 MEMBER4001.
    */
   withdraw: () => apiClient.delete<unknown, void>('/members/me'),
+
+  /**
+   * 내 신뢰등급 마일스톤 현황 조회 (Phase 2 — FE-4 등급 바텀시트 전용).
+   *
+   * <p>현재 등급 + 전체 마일스톤 카탈로그(미달성 포함)를 반환한다. 백엔드 BE-6 배포 전엔
+   * 404/네트워크 에러가 나며, 호출 측(바텀시트)은 재시도 안내로 폴백한다(Phase 1 테두리 표시는 무영향).
+   * 에러: 401 AUTH4011 / 404 MEMBER4001 → ApiException.
+   *
+   * <p>TODO: BE-6 배포 후 openapi 재생성 필요 (응답 형태 변경 시 본 수동 타입 갱신).
+   */
+  getTrustMilestones: () =>
+    apiClient.get<unknown, TrustMilestonesResponse>('/members/me/trust-milestones'),
 
   // TODO: 다음 사이클 — 프로필 수정(PATCH /members/me) 등
 };

@@ -66,7 +66,40 @@
   "trust": {
     "grade": {
       "newcomer": "Newcomer Beaver",
-      "verified": "Verified Beaver"
+      "verified": "Verified Beaver",
+      "connected": "Connected Beaver",
+      "trusted": "Trusted Beaver"
+    },
+    "sheet": {
+      "open": "Mở hướng dẫn cấp độ tin cậy",
+      "aria": "Hướng dẫn cấp độ tin cậy",
+      "title": "Cấp độ tin cậy của tôi",
+      "close": "Đóng",
+      "loading": "Đang tải…",
+      "loadError": "Không tải được danh sách cột mốc. Vui lòng thử lại sau.",
+      "retry": "Thử lại",
+      "achieved": "Đã đạt",
+      "achievedAt": "Đạt ngày {{date}}",
+      "allDone": "Bạn đã đạt tất cả các cột mốc!",
+      "milestones": {
+        "ID_VERIFIED": {
+          "name": "Xác minh giấy tờ tùy thân",
+          "next": "Xác minh giấy tờ để nhận viền xanh lá"
+        },
+        "BANK_ACCOUNT_CONNECTED": {
+          "name": "Liên kết tài khoản ngân hàng",
+          "next": "Liên kết tài khoản để nhận viền xanh dương"
+        },
+        "FIRST_TRANSACTION_COMPLETED": {
+          "name": "Giao dịch đầu tiên",
+          "next": "Hoàn thành giao dịch đầu tiên để nhận viền tím"
+        }
+      },
+      "cta": {
+        "ID_VERIFIED": "Đi xác minh giấy tờ",
+        "BANK_ACCOUNT_CONNECTED": "Đi liên kết tài khoản",
+        "FIRST_TRANSACTION_COMPLETED": "Đi nạp tiền"
+      }
     }
   },
   "mypage": {

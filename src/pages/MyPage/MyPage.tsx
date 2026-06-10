@@ -1,10 +1,21 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Identicon from '@/components/common/Identicon';
+import TrustGradeSheet from '@/components/mypage/TrustGradeSheet';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useMyVerification } from '@/hooks/useMyVerification';
-import { trustGradeToTone } from '@/utils/trustGrade';
+import type { AvatarTone } from '@/types/community';
+import { trustGradeToLabelKey, trustGradeToTone } from '@/utils/trustGrade';
 import styles from './MyPage.module.css';
+
+/** 신뢰등급 테두리 톤 → CSS 클래스 (FE-5). 톤→색 근거는 utils/trustGrade.ts 주석 참고. */
+const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
+  good: styles.avatarVerified,
+  best: styles.avatarConnected,
+  purple: styles.avatarTrusted,
+  default: styles.avatarNewcomer,
+};
 
 export default function MyPage() {
   const navigate = useNavigate();
@@ -16,6 +27,9 @@ export default function MyPage() {
   // 이력 없는 신규 회원은 null이라 자연스럽게 미표시. status === 'APPROVED'일 때만 인증 완료.
   const { data: verification } = useMyVerification();
   const isVerified = verification?.status === 'APPROVED';
+
+  // 등급 바텀시트 (FE-4) — 아바타/등급라벨 탭으로 오픈. 닫혀 있으면 마일스톤 API 미호출.
+  const [isTrustSheetOpen, setTrustSheetOpen] = useState(false);
 
   // 라벨이 언어 변경마다 재계산되도록 컴포넌트 안에서 구성한다.
   const MY_ACTIVITY = [
@@ -43,12 +57,11 @@ export default function MyPage() {
   // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
   const avatarSeed = profile?.public_id ?? nickname;
 
-  // 신뢰등급 테두리 (이슈 #174) — NEWCOMER 회색 점선 / VERIFIED 초록 실선.
-  // trust_grade 누락(BE #193 배포 전)·미지 값은 trustGradeToTone이 회색('default')으로 폴백.
+  // 신뢰등급 테두리 (이슈 #174 + Phase 2 FE-5) — NEWCOMER 회색 점선 / VERIFIED 초록 /
+  // CONNECTED 파랑 / TRUSTED 보라 실선. 누락·미지 값은 trustGradeToTone이 회색('default')으로 폴백.
   const trustTone = trustGradeToTone(profile?.trust_grade);
-  const avatarToneClass = trustTone === 'good' ? styles.avatarVerified : styles.avatarNewcomer;
-  const trustGradeLabel =
-    trustTone === 'good' ? t('trust.grade.verified') : t('trust.grade.newcomer');
+  const avatarToneClass = AVATAR_TONE_CLASS[trustTone] ?? styles.avatarNewcomer;
+  const trustGradeLabel = t(trustGradeToLabelKey(profile?.trust_grade));
 
   return (
     <>
@@ -65,13 +78,21 @@ export default function MyPage() {
         {/* Profile card */}
         <div className={styles.card}>
           <div className={styles.profileRow}>
-            <div className={`${styles.avatar} ${avatarToneClass}`}>
-              {profile?.profile_image_url ? (
-                <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
-              ) : (
-                <Identicon seed={avatarSeed} />
-              )}
-            </div>
+            {/* 아바타 탭 → 등급 바텀시트 (FE-4, 기획서 §4-2) */}
+            <button
+              type="button"
+              className={styles.avatarBtn}
+              onClick={() => setTrustSheetOpen(true)}
+              aria-label={t('trust.sheet.open')}
+            >
+              <div className={`${styles.avatar} ${avatarToneClass}`}>
+                {profile?.profile_image_url ? (
+                  <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
+                ) : (
+                  <Identicon seed={avatarSeed} />
+                )}
+              </div>
+            </button>
             <div className={styles.profileInfo}>
               <div className={styles.profileName}>
                 {isLoading ? t('mypage.loading') : nickname}
@@ -79,7 +100,15 @@ export default function MyPage() {
                   <span className={styles.verifiedPill}>{t('mypage.verifiedBadge')}</span>
                 )}
               </div>
-              {profile && <div className={styles.trustLabel}>{trustGradeLabel}</div>}
+              {profile && (
+                <button
+                  type="button"
+                  className={styles.trustLabel}
+                  onClick={() => setTrustSheetOpen(true)}
+                >
+                  {trustGradeLabel} ›
+                </button>
+              )}
             </div>
           </div>
           <button
@@ -117,6 +146,13 @@ export default function MyPage() {
           ))}
         </div>
       </div>
+
+      {/* 등급 바텀시트 (FE-4) — MobileScreen 안 절대 위치. 닫혀 있으면 null 렌더 + API 미호출. */}
+      <TrustGradeSheet
+        isOpen={isTrustSheetOpen}
+        onClose={() => setTrustSheetOpen(false)}
+        fallbackGrade={profile?.trust_grade}
+      />
     </>
   );
 }
