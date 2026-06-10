@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Identicon from '@/components/common/Identicon';
 import { useCommentTranslation } from '@/hooks/useCommentTranslation';
 import { formatCommunityDate } from '@/utils/communityFeed';
 import { translationErrorMessage } from '@/utils/translationErrorMessage';
@@ -33,6 +34,7 @@ export interface CommentProps {
   classNames: {
     root: string;
     avatar: string;
+    avatarImg: string;
     body: string;
     name: string;
     verifiedPill: string;
@@ -53,7 +55,6 @@ export default function Comment({
 }: CommentProps) {
   const { t, i18n } = useTranslation();
   const [showTranslated, setShowTranslated] = useState<boolean>(false);
-  const [translateError, setTranslateError] = useState<string | null>(null);
 
   const targetLanguage = i18n.language;
   const {
@@ -62,29 +63,36 @@ export default function Comment({
     error,
   } = useCommentTranslation(postId, comment.public_id, targetLanguage, showTranslated);
 
-  // 에러 발생 시 번역 상태를 원문으로 되돌리고 사용자에게 메시지 노출.
-  // 같은 effect에서 setShowTranslated(false)를 호출해도 useQuery의 enabled가 false가 되며
-  // error 객체는 그대로 남아 재시도 시 재호출됨.
-  useEffect(() => {
-    if (error) {
-      setTranslateError(translationErrorMessage(error, t));
-      setShowTranslated(false);
-    } else {
-      setTranslateError(null);
-    }
-  }, [error, t]);
+  // 번역 호출 에러 메시지는 렌더 중 파생한다 — effect 안 setState(연쇄 렌더) 대신.
+  // 재요청 중(isFetching)엔 직전 에러를 숨겨 깜빡임을 막는다.
+  const translateError = error && !isFetching ? translationErrorMessage(error, t) : null;
+
+  // 새 에러가 발생하면 번역 토글을 꺼 둔다(다음 클릭이 재시도가 되도록).
+  // effect가 아니라 "렌더 중 상태 조정"(React 권장 패턴): 직전과 다른 에러일 때만 1회 반영.
+  const [seenError, setSeenError] = useState<unknown>(null);
+  if (error !== seenError) {
+    setSeenError(error);
+    if (error) setShowTranslated(false);
+  }
 
   const displayContent =
     showTranslated && translation ? translation.translated_content : comment.content;
 
   const handleToggle = () => {
-    setTranslateError(null);
     setShowTranslated((prev) => !prev);
   };
 
   return (
     <div className={classNames.root}>
-      <div className={classNames.avatar}>{comment.author_nickname.charAt(0) || '?'}</div>
+      <div className={classNames.avatar}>
+        {comment.author_profile_image_url ? (
+          <img src={comment.author_profile_image_url} alt="" className={classNames.avatarImg} />
+        ) : (
+          <Identicon
+            seed={comment.author_public_id || comment.author_nickname || comment.public_id}
+          />
+        )}
+      </div>
       <div className={classNames.body}>
         <div className={classNames.name}>
           {comment.author_nickname}

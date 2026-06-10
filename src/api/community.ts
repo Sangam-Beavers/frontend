@@ -44,7 +44,11 @@ export interface PostSummaryItem {
    * `i18n.language`와 같으면 버튼 숨김. 백엔드 #161 머지 전 응답엔 없을 수 있어 optional.
    */
   language?: string;
+  /** 작성자 식별자(UUID). 기본 아바타(identicon) 시드 — 마이페이지와 동일 시드라 같은 사용자는 같은 그림. */
+  author_public_id: string;
   author_nickname: string;
+  /** 작성자 프로필 사진 URL. 미설정 시 null — 프론트는 기본 아바타로 대체. */
+  author_profile_image_url: string | null;
   like_count: number;
   comment_count: number;
   /** 작성 시각 (ISO 8601 UTC Z). */
@@ -81,7 +85,11 @@ export interface PostDetailResponse {
   title: string;
   /** 본문 전체. */
   content: string;
+  /** 작성자 식별자(UUID). 기본 아바타(identicon) 시드 — 마이페이지와 동일 시드라 같은 사용자는 같은 그림. */
+  author_public_id: string;
   author_nickname: string;
+  /** 작성자 프로필 사진 URL. 미설정 시 null — 프론트는 기본 아바타로 대체. */
+  author_profile_image_url: string | null;
   /** 작성자 인증 배지 여부. */
   author_is_verified: boolean;
   /** 요청자가 작성자인지 — 수정·삭제 노출 판단. 비로그인/타인은 false. */
@@ -145,7 +153,11 @@ export interface CommentItem {
   /** 대댓글이면 부모 댓글 id, 최상위면 null. */
   parent_comment_public_id: string | null;
   content: string;
+  /** 작성자 식별자(UUID). 기본 아바타(identicon) 시드 — 마이페이지와 동일 시드라 같은 사용자는 같은 그림. */
+  author_public_id: string;
   author_nickname: string;
+  /** 작성자 프로필 사진 URL. 미설정 시 null — 프론트는 기본 아바타로 대체. */
+  author_profile_image_url: string | null;
   author_is_verified: boolean;
   /** 요청자가 작성자인지 — 댓글 삭제 노출 판단. 비로그인/타인은 false. */
   is_author: boolean;

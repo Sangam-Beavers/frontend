@@ -1,5 +1,5 @@
 import type { PostSummaryItem } from '@/api/community';
-import type { AvatarTone, FeedPostItem } from '@/types/community';
+import type { FeedPostItem } from '@/types/community';
 
 /** 백엔드 카테고리(대문자) → 화면 표시 라벨. */
 const CATEGORY_LABEL: Record<string, string> = {
@@ -41,18 +41,6 @@ export function formatRelativeTime(iso: string): string {
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
 }
 
-const TONES: AvatarTone[] = ['best', 'good', 'mid', 'warn', 'bad', 'purple'];
-
-/**
- * 아바타 톤 — API 응답엔 톤이 없어 닉네임 기반으로 결정적으로 파생(표시용 색 다양화).
- * 같은 작성자는 항상 같은 톤이 된다.
- */
-function toneFor(seed: string): AvatarTone {
-  let sum = 0;
-  for (const ch of seed) sum += ch.charCodeAt(0);
-  return TONES[sum % TONES.length];
-}
-
 /**
  * API 게시글 요약(PostSummaryItem) → FeedPost 표시용 항목(FeedPostItem) 매핑.
  * 커뮤니티 목록 화면들이 공용으로 사용한다.
@@ -64,8 +52,10 @@ export function toFeedPostItem(item: PostSummaryItem): FeedPostItem {
     title: item.title,
     body: item.content_preview,
     meta: `${item.author_nickname} · ${label} · 댓글 ${item.comment_count} · 좋아요 ${item.like_count}`,
-    avatarInitial: item.author_nickname.charAt(0) || '?',
-    avatarTone: toneFor(item.author_nickname || item.public_id),
+    // 같은 작성자 → 항상 같은 identicon. 마이페이지와 동일하게 작성자 public_id를 시드로 쓴다
+    // (닉네임을 바꿔도 그림 유지 + 같은 사용자는 어디서든 같은 그림). 빈 값이면 닉네임/글 id로 폴백.
+    avatarSeed: item.author_public_id || item.author_nickname || item.public_id,
+    avatarImageUrl: item.author_profile_image_url ?? null,
     language: item.language,
   };
 }

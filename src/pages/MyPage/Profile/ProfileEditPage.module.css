@@ -21,6 +21,13 @@
   font-weight: 900;
   font-size: 28px;
   color: var(--ink);
+  overflow: hidden;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .secondaryBtn {

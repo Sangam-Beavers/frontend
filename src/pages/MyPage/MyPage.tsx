@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Identicon from '@/components/common/Identicon';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useMyVerification } from '@/hooks/useMyVerification';
 import styles from './MyPage.module.css';
@@ -38,7 +39,8 @@ export default function MyPage() {
   ];
 
   const nickname = profile?.nickname ?? '';
-  const initial = nickname.charAt(0).toUpperCase() || '?';
+  // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
+  const avatarSeed = profile?.public_id ?? nickname;
 
   return (
     <>
@@ -55,7 +57,13 @@ export default function MyPage() {
         {/* Profile card */}
         <div className={styles.card}>
           <div className={styles.profileRow}>
-            <div className={styles.avatar}>{initial}</div>
+            <div className={styles.avatar}>
+              {profile?.profile_image_url ? (
+                <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
+              ) : (
+                <Identicon seed={avatarSeed} />
+              )}
+            </div>
             <div className={styles.profileInfo}>
               <div className={styles.profileName}>
                 {isLoading ? t('mypage.loading') : nickname}
