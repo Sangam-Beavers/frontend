@@ -63,6 +63,12 @@
       "KRW": "Korean Won"
     }
   },
+  "trust": {
+    "grade": {
+      "newcomer": "Newcomer Beaver",
+      "verified": "Verified Beaver"
+    }
+  },
   "mypage": {
     "title": "My Page",
     "verifiedBadge": "Verified",
@@ -186,13 +192,6 @@
         "title": "Open board",
         "sub": "Talk freely"
       }
-    },
-    "temp": {
-      "caution": "Caution",
-      "belowAverage": "Below average",
-      "average": "Average",
-      "good": "Good",
-      "veryGood": "Very good"
     },
     "writePage": {
       "title": "Write a post",

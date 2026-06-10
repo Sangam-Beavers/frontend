@@ -63,6 +63,12 @@
       "KRW": "한국 원"
     }
   },
+  "trust": {
+    "grade": {
+      "newcomer": "새싹 비버",
+      "verified": "인증 비버"
+    }
+  },
   "mypage": {
     "title": "마이페이지",
     "verifiedBadge": "인증",
@@ -186,13 +192,6 @@
         "title": "자유게시판",
         "sub": "자유 대화"
       }
-    },
-    "temp": {
-      "caution": "주의",
-      "belowAverage": "보통 이하",
-      "average": "보통",
-      "good": "좋음",
-      "veryGood": "매우 좋음"
     },
     "writePage": {
       "title": "글쓰기",

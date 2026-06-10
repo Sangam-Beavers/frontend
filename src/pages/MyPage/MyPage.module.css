@@ -72,6 +72,23 @@
   object-fit: cover;
 }
 
+/* 신뢰등급 테두리 (이슈 #174) — NEWCOMER 회색 점선(프로필 미완성 시그널) / VERIFIED 초록 실선 */
+.avatarNewcomer {
+  border-color: #94a3b8;
+  border-style: dashed;
+}
+
+.avatarVerified {
+  border-color: #22c55e;
+}
+
+/* 아바타 옆 등급명 라벨 (예: 새싹 비버 / 인증 비버) */
+.trustLabel {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
 .profileInfo {
   flex: 1;
 }

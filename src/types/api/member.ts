@@ -93,7 +93,7 @@ export interface paths {
     };
     /**
      * 내 프로필 조회
-     * @description 마이페이지 내 프로필을 조회한다. is_verified/temperature_grade/profile_image_url은 각각 인증·커뮤니티·이미지 도메인 소관이라 현재 기본값으로 내려간다.
+     * @description 마이페이지 내 프로필을 조회한다. is_verified/trust_grade/profile_image_url은 각각 인증·커뮤니티·이미지 도메인 소관이라 현재 기본값으로 내려간다. (trust_grade는 수동 수정 — BE #193 배포 후 openapi 재생성 필요)
      */
     get: operations['getMyProfile'];
     put?: never;
@@ -315,8 +315,11 @@ export interface components {
       bio?: string;
       /** @description 신분증 인증 배지 여부. (현재 기본 false — 인증 도메인 구현 시 실제 값) */
       isVerified?: boolean;
-      /** @description 커뮤니티 매너온도 등급(RED/YELLOW/GREEN/PURPLE/BLUE). (현재 기본값 — 커뮤니티 도메인 구현 시 실제 값) */
-      temperatureGrade?: string;
+      /**
+       * @description 마일스톤 기반 신뢰등급. 값: 'NEWCOMER' | 'VERIFIED' (Phase 1).
+       * 레거시 생활온도(temperatureGrade) 폐기 — 수동 수정. TODO: BE #193 배포 후 openapi 재생성 필요.
+       */
+      trustGrade?: string;
       /** @description 프로필 사진 URL. 미설정 시 null */
       profileImageUrl?: string;
       /**

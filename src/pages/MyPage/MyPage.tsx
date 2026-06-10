@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Identicon from '@/components/common/Identicon';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useMyVerification } from '@/hooks/useMyVerification';
+import { trustGradeToTone } from '@/utils/trustGrade';
 import styles from './MyPage.module.css';
 
 export default function MyPage() {
@@ -42,6 +43,13 @@ export default function MyPage() {
   // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
   const avatarSeed = profile?.public_id ?? nickname;
 
+  // 신뢰등급 테두리 (이슈 #174) — NEWCOMER 회색 점선 / VERIFIED 초록 실선.
+  // trust_grade 누락(BE #193 배포 전)·미지 값은 trustGradeToTone이 회색('default')으로 폴백.
+  const trustTone = trustGradeToTone(profile?.trust_grade);
+  const avatarToneClass = trustTone === 'good' ? styles.avatarVerified : styles.avatarNewcomer;
+  const trustGradeLabel =
+    trustTone === 'good' ? t('trust.grade.verified') : t('trust.grade.newcomer');
+
   return (
     <>
       <div className={styles.noTopPad}>
@@ -57,7 +65,7 @@ export default function MyPage() {
         {/* Profile card */}
         <div className={styles.card}>
           <div className={styles.profileRow}>
-            <div className={styles.avatar}>
+            <div className={`${styles.avatar} ${avatarToneClass}`}>
               {profile?.profile_image_url ? (
                 <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
               ) : (
@@ -71,6 +79,7 @@ export default function MyPage() {
                   <span className={styles.verifiedPill}>{t('mypage.verifiedBadge')}</span>
                 )}
               </div>
+              {profile && <div className={styles.trustLabel}>{trustGradeLabel}</div>}
             </div>
           </div>
           <button

@@ -10,19 +10,6 @@ import { usePagedPosts } from '@/hooks/usePagedPosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityResidencePage.module.css';
 
-interface TemperatureChip {
-  labelKey: string;
-  toneClass: string;
-}
-
-const TEMPERATURES: TemperatureChip[] = [
-  { labelKey: 'community.temp.caution', toneClass: styles.tempRed },
-  { labelKey: 'community.temp.belowAverage', toneClass: styles.tempYellow },
-  { labelKey: 'community.temp.average', toneClass: styles.tempGreen },
-  { labelKey: 'community.temp.good', toneClass: styles.tempPurple },
-  { labelKey: 'community.temp.veryGood', toneClass: styles.tempBlue },
-];
-
 export default function CommunityResidencePage() {
   const { t } = useTranslation();
   const [showSearch, setShowSearch] = useState(false);
@@ -43,14 +30,6 @@ export default function CommunityResidencePage() {
       <div className={styles.banner}>
         <b>{t('community.boards.residence.title')}</b>
         <span>{t('community.boards.residence.sub')}</span>
-      </div>
-
-      <div className={styles.tempStrip}>
-        {TEMPERATURES.map((chip) => (
-          <span key={chip.labelKey} className={`${styles.temp} ${chip.toneClass}`}>
-            {t(chip.labelKey)}
-          </span>
-        ))}
       </div>
 
       {isLoading ? (

@@ -8,6 +8,7 @@ import TopBar from '@/components/navigation/TopBar';
 import { SETTING_LANGUAGES } from '@/constants/languages';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useUpdateMyProfile } from '@/hooks/useUpdateMyProfile';
+import { trustGradeToTone } from '@/utils/trustGrade';
 import styles from './ProfileEditPage.module.css';
 
 const LANGUAGES = SETTING_LANGUAGES;
@@ -56,6 +57,13 @@ export default function ProfileEditPage() {
 
   // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
   const avatarSeed = profile?.public_id ?? nickname;
+
+  // 신뢰등급 테두리 (이슈 #174) — NEWCOMER 회색 점선 / VERIFIED 초록 실선.
+  // trust_grade 누락(BE #193 배포 전)·미지 값은 trustGradeToTone이 회색('default')으로 폴백.
+  const avatarToneClass =
+    trustGradeToTone(profile?.trust_grade) === 'good'
+      ? styles.avatarVerified
+      : styles.avatarNewcomer;
 
   /**
    * 닉네임 사전 중복 확인 (저장과 별개의 API 호출 — race는 저장 시 백엔드가 다시 검증).
@@ -118,7 +126,7 @@ export default function ProfileEditPage() {
 
         {/* Avatar */}
         <div className={styles.avatarWrap}>
-          <div className={styles.avatar}>
+          <div className={`${styles.avatar} ${avatarToneClass}`}>
             {profile?.profile_image_url ? (
               <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
             ) : (
