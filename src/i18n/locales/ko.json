@@ -187,13 +187,6 @@
         "sub": "자유 대화"
       }
     },
-    "temp": {
-      "caution": "주의",
-      "belowAverage": "보통 이하",
-      "average": "보통",
-      "good": "좋음",
-      "veryGood": "매우 좋음"
-    },
     "writePage": {
       "title": "글쓰기",
       "editTitle": "글 수정",

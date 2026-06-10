@@ -187,13 +187,6 @@
         "sub": "Trò chuyện tự do"
       }
     },
-    "temp": {
-      "caution": "Cẩn thận",
-      "belowAverage": "Dưới trung bình",
-      "average": "Trung bình",
-      "good": "Tốt",
-      "veryGood": "Rất tốt"
-    },
     "writePage": {
       "title": "Viết bài",
       "editTitle": "Chỉnh sửa bài",

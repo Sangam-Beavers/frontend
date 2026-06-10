@@ -187,13 +187,6 @@
         "sub": "Talk freely"
       }
     },
-    "temp": {
-      "caution": "Caution",
-      "belowAverage": "Below average",
-      "average": "Average",
-      "good": "Good",
-      "veryGood": "Very good"
-    },
     "writePage": {
       "title": "Write a post",
       "editTitle": "Edit post",

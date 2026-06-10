@@ -187,13 +187,6 @@
         "sub": "Mag-usap nang malaya"
       }
     },
-    "temp": {
-      "caution": "Pag-iingat",
-      "belowAverage": "Mababa sa karaniwan",
-      "average": "Karaniwan",
-      "good": "Maganda",
-      "veryGood": "Napakaganda"
-    },
     "writePage": {
       "title": "Sumulat ng post",
       "editTitle": "I-edit ang post",
