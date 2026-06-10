@@ -63,6 +63,12 @@
       "KRW": "한국 원"
     }
   },
+  "trust": {
+    "grade": {
+      "newcomer": "새싹 비버",
+      "verified": "인증 비버"
+    }
+  },
   "mypage": {
     "title": "마이페이지",
     "verifiedBadge": "인증",

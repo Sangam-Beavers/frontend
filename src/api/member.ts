@@ -109,8 +109,12 @@ export interface ProfileResponse {
   bio: string | null;
   /** 신분증 인증 배지 여부. user_verifications APPROVED 시 true. */
   is_verified: boolean;
-  /** 매너온도 등급 RED/YELLOW/GREEN/PURPLE/BLUE. 현재 "GREEN" 고정(커뮤니티 도메인 미구현). */
-  temperature_grade: string;
+  /**
+   * 마일스톤 기반 신뢰등급. 값: 'NEWCOMER' | 'VERIFIED' (Phase 1).
+   * 레거시 생활온도(temperature_grade) 폐기 — BE #193 배포 전 응답엔 없을 수 있어 optional.
+   * TODO: BE #193 배포 후 openapi 재생성 필요 (@/types/api/member의 trustGrade도 함께).
+   */
+  trust_grade?: string;
   /** 프로필 사진 URL. 이미지 도메인 미구현으로 현재 항상 null. */
   profile_image_url: string | null;
   /** 가입 일시 (ISO 8601 UTC Z). */

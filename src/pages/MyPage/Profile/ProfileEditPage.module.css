@@ -30,6 +30,16 @@
   object-fit: cover;
 }
 
+/* 신뢰등급 테두리 (이슈 #174) — NEWCOMER 회색 점선(프로필 미완성 시그널) / VERIFIED 초록 실선 */
+.avatarNewcomer {
+  border-color: #94a3b8;
+  border-style: dashed;
+}
+
+.avatarVerified {
+  border-color: #22c55e;
+}
+
 .secondaryBtn {
   width: 100%;
   border-radius: 15px;
