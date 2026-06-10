@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { startLogout } from '@/auth/logout';
+import Identicon from '@/components/common/Identicon';
 import { LANGUAGE_CODE_TO_LABEL } from '@/constants/languages';
 import { ROUTES } from '@/constants/routes';
 import { useMyProfile } from '@/hooks/useMyProfile';
@@ -94,7 +95,8 @@ export default function AllMenuPage() {
   // 헤더 프로필 — 실제 로그인 사용자(GET /members/me). 마이페이지와 동일 소스.
   const { data: profile, isLoading } = useMyProfile();
   const nickname = profile?.nickname ?? '';
-  const avatarInitial = nickname.charAt(0).toUpperCase() || '?';
+  // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
+  const avatarSeed = profile?.public_id ?? nickname;
   const languageLabel = profile?.language
     ? (LANGUAGE_CODE_TO_LABEL[profile.language] ?? profile.language)
     : '';
@@ -117,7 +119,13 @@ export default function AllMenuPage() {
             onClick={() => navigate('/mypage')}
             style={{ cursor: 'pointer' }}
           >
-            <div className={styles.avatar}>{avatarInitial}</div>
+            <div className={styles.avatar}>
+              {profile?.profile_image_url ? (
+                <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
+              ) : (
+                <Identicon seed={avatarSeed} />
+              )}
+            </div>
             <div>
               <div className={styles.username}>
                 {isLoading ? t('common.loading') : nickname || t('common.user')}

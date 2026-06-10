@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import { memberApi } from '@/api/member';
+import Identicon from '@/components/common/Identicon';
 import TopBar from '@/components/navigation/TopBar';
 import { SETTING_LANGUAGES } from '@/constants/languages';
 import { useMyProfile } from '@/hooks/useMyProfile';
@@ -53,7 +54,8 @@ export default function ProfileEditPage() {
     initializedRef.current = true;
   }, [profile]);
 
-  const avatarInitial = nickname.charAt(0).toUpperCase() || '?';
+  // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
+  const avatarSeed = profile?.public_id ?? nickname;
 
   /**
    * 닉네임 사전 중복 확인 (저장과 별개의 API 호출 — race는 저장 시 백엔드가 다시 검증).
@@ -116,7 +118,13 @@ export default function ProfileEditPage() {
 
         {/* Avatar */}
         <div className={styles.avatarWrap}>
-          <div className={styles.avatar}>{avatarInitial}</div>
+          <div className={styles.avatar}>
+            {profile?.profile_image_url ? (
+              <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
+            ) : (
+              <Identicon seed={avatarSeed} />
+            )}
+          </div>
         </div>
         <button type="button" className={styles.secondaryBtn} disabled>
           {t('mypage2.profile.changePhoto')}

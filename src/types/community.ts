@@ -7,8 +7,10 @@ export interface FeedPostItem {
   title: string;
   meta: string;
   body: string;
-  avatarInitial: string;
-  avatarTone: AvatarTone;
+  /** 작성자별 고정 아바타 시드(닉네임). 사진 미설정 시 identicon 생성에 사용. */
+  avatarSeed: string;
+  /** 작성자 프로필 사진 URL. 있으면 사진, 없으면(null) identicon. */
+  avatarImageUrl: string | null;
   /**
    * 작성 언어 코드. 카드별 "Translate" 버튼이 `i18n.language`와 비교해 같으면 숨긴다.
    * 백엔드가 응답에 안 채워주면 undefined — 그땐 가드 못해 버튼 항상 노출(안전 fallback).

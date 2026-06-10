@@ -1,25 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Identicon from '@/components/common/Identicon';
 import TranslateButton from '@/components/community/TranslateButton';
 import { buildCommunityPostPath } from '@/constants/routes';
 import { usePostTranslation } from '@/hooks/usePostTranslation';
-import type { AvatarTone, FeedPostItem } from '@/types/community';
+import type { FeedPostItem } from '@/types/community';
 import styles from './FeedPost.module.css';
 
 interface FeedPostProps {
   post: FeedPostItem;
 }
-
-const AVATAR_CLASS: Record<AvatarTone, string> = {
-  best: styles.avatarBest,
-  good: styles.avatarGood,
-  mid: styles.avatarMid,
-  warn: styles.avatarWarn,
-  bad: styles.avatarBad,
-  purple: styles.avatarPurple,
-  default: '',
-};
 
 /**
  * 커뮤니티 목록 카드 + 카드별 번역 토글 (이슈 #160 후속).
@@ -43,7 +34,6 @@ export default function FeedPost({ post }: FeedPostProps) {
     showTranslated
   );
 
-  const avatarClass = `${styles.avatar} ${AVATAR_CLASS[post.avatarTone]}`.trim();
   const isShowingTranslation = showTranslated && Boolean(translation);
   const titleText = isShowingTranslation ? translation!.translated_title : post.title;
   const bodyText = isShowingTranslation ? translation!.translated_content : post.body;
@@ -59,7 +49,13 @@ export default function FeedPost({ post }: FeedPostProps) {
       style={{ cursor: 'pointer' }}
     >
       <div className={styles.head}>
-        <div className={avatarClass}>{post.avatarInitial}</div>
+        <div className={styles.avatar}>
+          {post.avatarImageUrl ? (
+            <img src={post.avatarImageUrl} alt="" className={styles.avatarImg} />
+          ) : (
+            <Identicon seed={post.avatarSeed} />
+          )}
+        </div>
         <div>
           <b>{titleText}</b>
           <p>{post.meta}</p>

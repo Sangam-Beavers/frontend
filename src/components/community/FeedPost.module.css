@@ -48,29 +48,11 @@
   background: #eef6ff;
   font-weight: 900;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
-.avatarBest {
-  border-color: #2563eb;
-}
-
-.avatarGood {
-  border-color: #7c3aed;
-}
-
-.avatarMid {
-  border-color: #22c55e;
-}
-
-.avatarWarn {
-  border-color: #f59e0b;
-}
-
-.avatarBad {
-  border-color: #ef4444;
-}
-
-.avatarPurple {
-  border-color: #7c3aed;
-  background: #f4efff;
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
