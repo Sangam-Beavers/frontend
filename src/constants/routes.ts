@@ -65,7 +65,7 @@ export const ROUTES = {
   TRANSFER_BANK: '/transfer/bank',
   TRANSFER_CONFIRM: '/transfer/confirm',
   TRANSFER_AUTH: '/transfer/auth',
-  TRANSFER_PIN_SETUP: '/transfer/pin-setup', // 송금 PIN 최초 등록 (PIN은 새 설계라 와이어프레임에 없음)
+  TRANSFER_PIN_SETUP: '/transfer/pin-setup',
   TRANSFER_COMPLETE: '/transfer/complete',
   TRANSFER_RECEIPT: '/transfer/receipt/:transferPublicId',
 
@@ -75,6 +75,20 @@ export const ROUTES = {
   DOC_ANALYSIS_LOADING: '/doc-analysis/loading',
   DOC_ANALYSIS_RESULT: '/doc-analysis/result',
   DOC_ANALYSIS_PAYMENT: '/doc-analysis/payment',
+
+  // ===== Admin: 앱 관리 (admin 그룹 전용) =====
+  ADMIN_APP: '/admin/app',
+  ADMIN_NOTICES: '/admin/app/notices',
+  ADMIN_FAQS: '/admin/app/faqs',
+  ADMIN_FEE_POLICIES: '/admin/app/fee-policies',
+  ADMIN_SERVICE_SETTINGS: '/admin/app/settings',
+  ADMIN_MEMBERS: '/admin/app/members',
+  ADMIN_MEMBER_DETAIL: '/admin/app/members/:userId',
+
+  // ===== App: 공지사항 / FAQ (공개) =====
+  NOTICES: '/notices',
+  NOTICE_DETAIL: '/notices/:noticeId',
+  COMMUNITY_FAQ: '/community/faq',
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
@@ -84,8 +98,13 @@ export const buildCommunityPostPath = (postId: string): string => `/community/po
 export const buildCommunityPostEditPath = (postId: string): string =>
   `/community/posts/${postId}/edit`;
 
+export const buildRecurringHistoryPath = (transferPublicId: string): string =>
+  `/recurring/${transferPublicId}/history`;
+
 export const buildTransferReceiptPath = (transferPublicId: string): string =>
   `/transfer/receipt/${transferPublicId}`;
 
-export const buildRecurringHistoryPath = (transferPublicId: string): string =>
-  `/recurring/${transferPublicId}/history`;
+export const buildAdminMemberDetailPath = (userId: string): string =>
+  `/admin/app/members/${userId}`;
+
+export const buildNoticeDetailPath = (noticeId: string): string => `/notices/${noticeId}`;

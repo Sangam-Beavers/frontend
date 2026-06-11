@@ -1,0 +1,24 @@
+.wrap { padding: 0 16px 80px; }
+.topBar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 10px; }
+.backBtn { width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 14px; background: #fff; color: #334155; font-weight: 800; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.title { font-weight: 900; font-size: 20px; color: var(--blue); }
+
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 6px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex-shrink: 0; padding: 6px 14px; border: 1px solid var(--line); border-radius: 20px; background: #fff; font-size: 13px; font-weight: 500; color: #64748b; cursor: pointer; white-space: nowrap; }
+.tabActive { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 700; }
+
+.list { display: flex; flex-direction: column; gap: 0; }
+.item { border-bottom: 1px solid var(--line); }
+.item:first-child { border-top: 1px solid var(--line); }
+
+.question { width: 100%; display: flex; align-items: flex-start; gap: 10px; padding: 16px 0; background: none; border: none; text-align: left; cursor: pointer; }
+.qMark { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.qText { flex: 1; font-size: 14px; font-weight: 600; color: #1e293b; line-height: 1.5; }
+.chevron { flex-shrink: 0; font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+.answer { display: flex; align-items: flex-start; gap: 10px; padding: 0 0 16px; }
+.aMark { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: #f1f5f9; color: #475569; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.aText { flex: 1; font-size: 14px; color: #475569; line-height: 1.6; white-space: pre-wrap; }
+
+.empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 60px 0; }

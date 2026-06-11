@@ -10,6 +10,8 @@ const BACKEND = {
   COMMUNITY: 'http://localhost:8082',
   DOCUMENT: 'http://localhost:8083',
   WALLET: 'http://localhost:8084',
+  ADMIN: 'http://localhost:8085',
+  APP_ADMIN: 'http://localhost:8086',
 } as const;
 
 // https://vite.dev/config/
@@ -41,6 +43,11 @@ export default defineConfig({
       '/api/v1/accounts': { target: BACKEND.WALLET, changeOrigin: true },
       // community-service (8082)
       '/api/v1/community': { target: BACKEND.COMMUNITY, changeOrigin: true },
+      // app-admin-service (8086) — /admin/app 가 /admin 보다 먼저 와야 올바르게 매칭됨
+      '/api/v1/admin/app': { target: BACKEND.APP_ADMIN, changeOrigin: true },
+      '/api/v1/app': { target: BACKEND.APP_ADMIN, changeOrigin: true },
+      // admin-service (8085)
+      '/api/v1/admin': { target: BACKEND.ADMIN, changeOrigin: true },
       // document-service (8083)
       '/api/v1/documents': { target: BACKEND.DOCUMENT, changeOrigin: true },
     },

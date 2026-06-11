@@ -1,0 +1,11 @@
+.wrap { padding: 0 16px 80px; }
+.topBar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 14px; }
+.backBtn { width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 14px; background: #fff; color: #334155; font-weight: 800; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.title { font-weight: 900; font-size: 20px; color: var(--blue); }
+.article { padding-top: 8px; }
+.pinBadge { display: inline-block; font-size: 11px; font-weight: 700; color: var(--blue); background: #eff6ff; border-radius: 20px; padding: 2px 10px; margin-bottom: 10px; }
+.articleTitle { font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 8px; line-height: 1.4; }
+.meta { font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
+.divider { border: none; border-top: 1px solid var(--line); margin-bottom: 20px; }
+.body { font-size: 14px; color: #334155; line-height: 1.7; white-space: pre-wrap; }
+.empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 60px 0; }

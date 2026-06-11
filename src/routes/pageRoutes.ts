@@ -56,6 +56,16 @@ import ExchangeRateFullPage from '@/pages/wallet/ExchangeRateFull/ExchangeRateFu
 import TransferConfirmPage from '@/pages/wallet/TransferConfirm/TransferConfirmPage';
 import TransferPinSetupPage from '@/pages/wallet/TransferPinSetup/TransferPinSetupPage';
 import TransferSelectPage from '@/pages/wallet/TransferSelect/TransferSelectPage';
+import AdminAppPage from '@/pages/admin/AppManage/AdminAppPage';
+import AdminNoticesPage from '@/pages/admin/Notices/AdminNoticesPage';
+import AdminFaqsPage from '@/pages/admin/Faqs/AdminFaqsPage';
+import AdminFeePoliciesPage from '@/pages/admin/FeePolicies/AdminFeePoliciesPage';
+import AdminServiceSettingsPage from '@/pages/admin/ServiceSettings/AdminServiceSettingsPage';
+import AdminMembersPage from '@/pages/admin/Members/AdminMembersPage';
+import AdminMemberDetailPage from '@/pages/admin/Members/AdminMemberDetailPage';
+import NoticesPage from '@/pages/notices/NoticesPage';
+import NoticeDetailPage from '@/pages/notices/NoticeDetailPage';
+import CommunityFaqPage from '@/pages/community/Faq/CommunityFaqPage';
 
 export interface PageRoute {
   path: string;
@@ -154,3 +164,21 @@ export const nonFinancialServiceRoutes: PageRoute[] = [
  * 두 배열을 합친 형태이며, 호환을 위해 잠시 유지한다(외부 참조 없으면 제거 가능).
  */
 export const serviceRoutes: PageRoute[] = [...financialServiceRoutes, ...nonFinancialServiceRoutes];
+
+// ─── 공개 콘텐츠 라우트 (인증 불필요) ───────────────────────────────────────────
+export const publicContentRoutes: PageRoute[] = [
+  { path: ROUTES.NOTICES, Component: NoticesPage },
+  { path: ROUTES.NOTICE_DETAIL, Component: NoticeDetailPage },
+  { path: ROUTES.COMMUNITY_FAQ, Component: CommunityFaqPage },
+];
+
+// ─── Admin routes (admin 그룹 전용, AdminRoute 가드 적용) ─────────────────────
+export const adminRoutes: PageRoute[] = [
+  { path: ROUTES.ADMIN_APP, Component: AdminAppPage },
+  { path: ROUTES.ADMIN_NOTICES, Component: AdminNoticesPage },
+  { path: ROUTES.ADMIN_FAQS, Component: AdminFaqsPage },
+  { path: ROUTES.ADMIN_FEE_POLICIES, Component: AdminFeePoliciesPage },
+  { path: ROUTES.ADMIN_SERVICE_SETTINGS, Component: AdminServiceSettingsPage },
+  { path: ROUTES.ADMIN_MEMBERS, Component: AdminMembersPage },
+  { path: ROUTES.ADMIN_MEMBER_DETAIL, Component: AdminMemberDetailPage },
+];

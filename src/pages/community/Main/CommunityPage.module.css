@@ -10,3 +10,21 @@
   font-weight: 900;
   margin: 18px 0 10px;
 }
+
+.faqBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  margin: 8px 0;
+  background: #f0f7ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.faqIcon { font-size: 18px; }
+.faqLabel { flex: 1; font-size: 14px; font-weight: 600; color: var(--blue); }
+.faqArrow { font-size: 18px; color: var(--blue); font-weight: 700; }

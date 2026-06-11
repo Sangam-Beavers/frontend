@@ -6,6 +6,7 @@ import TopBar from '@/components/navigation/TopBar';
 import { useRecentInternalRecipients } from '@/hooks/useRecentInternalRecipients';
 import { useValidateMember } from '@/hooks/useValidateMember';
 import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
+import { useSetting } from '@/hooks/useServiceSettings';
 import styles from './TransferAppPage.module.css';
 
 // 아바타 색상 톤 — mock에서 들고 있던 5색 그대로. 백엔드는 톤을 안 주므로 인덱스로 순환 매핑.
@@ -73,6 +74,30 @@ export default function TransferAppPage() {
   const [amount, setAmount] = useState('');
   const [memo, setMemo] = useState('');
 
+  // 서비스 설정 — 송금 한도
+  const maxAmountSetting = useSetting('MAX_TRANSFER_AMOUNT', '0');
+  const minAmountSetting = useSetting('MIN_TRANSFER_AMOUNT', '0');
+  const dailyMaxSetting = useSetting('MAX_DAILY_TRANSFER', '0');
+  const maxAmount = Number(maxAmountSetting);
+  const minAmount = Number(minAmountSetting);
+  const dailyMax = Number(dailyMaxSetting);
+
+  function getAmountError(): string | null {
+    const num = Number(amount);
+    if (!amount || !Number.isFinite(num) || num <= 0) return null;
+    if (minAmount > 0 && num < minAmount) {
+      return `최소 송금 금액은 ₩${minAmount.toLocaleString()}입니다.`;
+    }
+    if (maxAmount > 0 && num > maxAmount) {
+      return `1회 최대 송금 금액은 ₩${maxAmount.toLocaleString()}입니다.`;
+    }
+    if (dailyMax > 0 && num > dailyMax) {
+      return `일일 한도 ₩${dailyMax.toLocaleString()}을 초과합니다.`;
+    }
+    return null;
+  }
+  const amountError = getAmountError();
+
   function handleVerify() {
     setVerifyError(null);
     const trimmed = recipient.trim();
@@ -113,7 +138,7 @@ export default function TransferAppPage() {
     setCurrency(user.currency);
   }
 
-  const canSubmit = verified !== null && Number(amount) > 0;
+  const canSubmit = verified !== null && Number(amount) > 0 && amountError === null;
 
   /**
    * "다음" 버튼 — TransferConfirm으로 송금 정보를 state로 전달.
@@ -261,11 +286,20 @@ export default function TransferAppPage() {
           <input
             id="transfer-amount"
             type="number"
-            className={styles.input}
+            className={`${styles.input} ${amountError ? styles.inputError : ''}`}
             placeholder="0"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
+          {amountError && <p className={styles.errorText}>{amountError}</p>}
+          {!amountError && (minAmount > 0 || maxAmount > 0 || dailyMax > 0) && (
+            <p className={styles.hintText}>
+              {minAmount > 0 && `최소 ₩${minAmount.toLocaleString()}`}
+              {minAmount > 0 && maxAmount > 0 && ' · '}
+              {maxAmount > 0 && `최대 ₩${maxAmount.toLocaleString()}`}
+              {dailyMax > 0 && ` · 일 한도 ₩${dailyMax.toLocaleString()}`}
+            </p>
+          )}
         </div>
 
         <div className={styles.field}>
