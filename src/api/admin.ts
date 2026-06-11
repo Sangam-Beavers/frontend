@@ -170,6 +170,28 @@ export const serviceSettingApi = {
   ) => apiClient.patch<unknown, ServiceSettingResponse>(`/admin/app/settings/${publicId}`, data),
 };
 
+// ─────── 환율 정책 ────────────────────────────────────────────────────────────
+
+export interface ExchangeRatePolicyResponse {
+  publicId: string;
+  currencyCode: string;
+  spread: string;
+  active: boolean;
+  updatedAt: string;
+}
+
+export const exchangeRatePolicyApi = {
+  listAll: () =>
+    apiClient.get<unknown, ExchangeRatePolicyResponse[]>('/admin/app/exchange-rate-policies'),
+  create: (data: { currencyCode: string; spread: string; active: boolean }) =>
+    apiClient.post<unknown, ExchangeRatePolicyResponse>('/admin/app/exchange-rate-policies', data),
+  update: (publicId: string, data: Partial<{ spread: string; active: boolean }>) =>
+    apiClient.patch<unknown, ExchangeRatePolicyResponse>(
+      `/admin/app/exchange-rate-policies/${publicId}`,
+      data
+    ),
+};
+
 // ─────── 회원 관리 ────────────────────────────────────────────────────────────
 
 export const adminMemberApi = {
