@@ -91,6 +91,13 @@
   border-color: #7c3aed;
 }
 
+/* Phase 3 — GOLD 금색 실선 + glow */
+.avatarGold {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25), 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+/* 아바타 탭 영역 (FE-4) — 버튼 리셋. 탭하면 등급 바텀시트가 열린다. */
 .avatarBtn {
   background: none;
   border: none;

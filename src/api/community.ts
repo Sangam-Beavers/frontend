@@ -98,6 +98,8 @@ export interface PostDetailResponse {
   author_profile_image_url: string | null;
   /** 작성자 인증 배지 여부. */
   author_is_verified: boolean;
+  /** 작성자 신뢰등급(NEWCOMER/VERIFIED/CONNECTED/TRUSTED/GOLD). 누락 시 NEWCOMER 폴백. */
+  author_trust_grade?: string;
   /** 요청자가 작성자인지 — 수정·삭제 노출 판단. 비로그인/타인은 false. */
   is_author: boolean;
   like_count: number;

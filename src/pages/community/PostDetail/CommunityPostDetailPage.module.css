@@ -33,6 +33,29 @@
   object-fit: cover;
 }
 
+/* 신뢰등급 테두리 — FeedPost/MyPage와 동일 팔레트(utils/trustGrade.ts 주석). */
+.avatarNewcomer {
+  border-color: #94a3b8;
+  border-style: dashed;
+}
+
+.avatarVerified {
+  border-color: #22c55e;
+}
+
+.avatarConnected {
+  border-color: #2563eb;
+}
+
+.avatarTrusted {
+  border-color: #7c3aed;
+}
+
+.avatarGold {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25), 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
 .authorMain {
   min-width: 0;
   flex: 1;

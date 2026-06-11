@@ -72,7 +72,12 @@
       "newcomer": "Newcomer Beaver",
       "verified": "Verified Beaver",
       "connected": "Connected Beaver",
-      "trusted": "Trusted Beaver"
+      "trusted": "Trusted Beaver",
+      "gold": "Gold Beaver"
+    },
+    "celebrate": {
+      "title": "Level Up!",
+      "message": "Congrats on reaching {{grade}} 🎉"
     },
     "sheet": {
       "open": "Open trust level guide",
@@ -97,12 +102,36 @@
         "FIRST_TRANSACTION_COMPLETED": {
           "name": "First transaction",
           "next": "Complete your first transaction to earn the purple border"
+        },
+        "DOCUMENT_ANALYZED": {
+          "name": "Document Expert",
+          "next": "Use AI document analysis at least once"
+        },
+        "COMMUNITY_ACTIVE": {
+          "name": "Community Debut",
+          "next": "Write a post or comment in the community"
+        },
+        "TRANSACTION_FIVE_COMPLETED": {
+          "name": "Regular Trader",
+          "next": "Complete 5 transactions in total to unlock"
+        },
+        "ACCOUNT_NINETY_DAYS": {
+          "name": "Together for 90 Days",
+          "next": "Automatically achieved 90 days after joining"
         }
+      },
+      "goldSection": {
+        "title": "Gold Beaver Requirements",
+        "subtitle": "Achieve 2 or more of the 4 items below to reach GOLD!"
       },
       "cta": {
         "ID_VERIFIED": "Go verify my ID",
         "BANK_ACCOUNT_CONNECTED": "Go connect an account",
-        "FIRST_TRANSACTION_COMPLETED": "Go top up my wallet"
+        "FIRST_TRANSACTION_COMPLETED": "Go top up my wallet",
+        "DOCUMENT_ANALYZED": "Try document analysis",
+        "COMMUNITY_ACTIVE": "Write a community post",
+        "TRANSACTION_FIVE_COMPLETED": "Go top up my wallet",
+        "ACCOUNT_NINETY_DAYS": "Just a little longer!"
       }
     }
   },

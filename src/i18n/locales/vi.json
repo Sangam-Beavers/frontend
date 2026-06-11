@@ -72,7 +72,12 @@
       "newcomer": "Newcomer Beaver",
       "verified": "Verified Beaver",
       "connected": "Connected Beaver",
-      "trusted": "Trusted Beaver"
+      "trusted": "Trusted Beaver",
+      "gold": "Gold Beaver"
+    },
+    "celebrate": {
+      "title": "Lên cấp!",
+      "message": "Chúc mừng bạn đạt {{grade}} 🎉"
     },
     "sheet": {
       "open": "Mở hướng dẫn cấp độ tin cậy",
@@ -97,12 +102,36 @@
         "FIRST_TRANSACTION_COMPLETED": {
           "name": "Giao dịch đầu tiên",
           "next": "Hoàn thành giao dịch đầu tiên để nhận viền tím"
+        },
+        "DOCUMENT_ANALYZED": {
+          "name": "Chuyên gia giấy tờ",
+          "next": "Sử dụng phân tích giấy tờ AI ít nhất 1 lần"
+        },
+        "COMMUNITY_ACTIVE": {
+          "name": "Ra mắt cộng đồng",
+          "next": "Viết bài hoặc bình luận trong cộng đồng"
+        },
+        "TRANSACTION_FIVE_COMPLETED": {
+          "name": "Giao dịch đều đặn",
+          "next": "Hoàn thành tổng cộng 5 giao dịch"
+        },
+        "ACCOUNT_NINETY_DAYS": {
+          "name": "90 ngày cùng nhau",
+          "next": "Tự động đạt được sau 90 ngày kể từ khi tham gia"
         }
+      },
+      "goldSection": {
+        "title": "Yêu cầu Hải ly Vàng",
+        "subtitle": "Đạt 2 trong 4 mục dưới đây để lên hạng GOLD!"
       },
       "cta": {
         "ID_VERIFIED": "Đi xác minh giấy tờ",
         "BANK_ACCOUNT_CONNECTED": "Đi liên kết tài khoản",
-        "FIRST_TRANSACTION_COMPLETED": "Đi nạp tiền"
+        "FIRST_TRANSACTION_COMPLETED": "Đi nạp tiền",
+        "DOCUMENT_ANALYZED": "Thử phân tích giấy tờ",
+        "COMMUNITY_ACTIVE": "Viết bài cộng đồng",
+        "TRANSACTION_FIVE_COMPLETED": "Đi nạp tiền",
+        "ACCOUNT_NINETY_DAYS": "Chờ thêm một chút nữa thôi!"
       }
     }
   },

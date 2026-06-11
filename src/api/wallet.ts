@@ -383,6 +383,8 @@ export interface RecentRecipientItem {
   last_currency_code: string;
   /** 가장 최근 송금 시각 (ISO 8601 UTC Z). */
   last_transferred_at: string;
+  /** 마일스톤 기반 신뢰등급 (Phase 3 — NEWCOMER/VERIFIED/CONNECTED/TRUSTED/GOLD). */
+  trust_grade?: string;
 }
 
 /** 최근 송금 수신자 목록 응답 (GET /transfers/recent-recipients/members). */
@@ -396,6 +398,8 @@ export interface ValidateMemberResponse {
   receiver_public_id: string;
   nickname: string;
   is_verified: boolean;
+  /** 마일스톤 기반 신뢰등급 (Phase 3 — NEWCOMER/VERIFIED/CONNECTED/TRUSTED/GOLD). */
+  trust_grade?: string;
 }
 
 /** 송금 방식 (백엔드 TransferType enum). 정기송금에도 동일 enum 사용. */
