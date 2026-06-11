@@ -15,11 +15,22 @@ import { useDeletePost } from '@/hooks/useDeletePost';
 import { usePostDetail } from '@/hooks/usePostDetail';
 import { usePostTranslation } from '@/hooks/usePostTranslation';
 import { useToggleLike } from '@/hooks/useToggleLike';
+import { trustGradeToTone } from '@/utils/trustGrade';
+import type { AvatarTone } from '@/types/community';
 import { categoryLabel, formatCommunityDate } from '@/utils/communityFeed';
 import { normalizeAppLanguage } from '@/utils/detectLanguage';
 import { communityErrorMessage } from '@/utils/communityErrorMessage';
 import { translationErrorMessage } from '@/utils/translationErrorMessage';
 import styles from './CommunityPostDetailPage.module.css';
+
+/** 신뢰등급 테두리 톤 → CSS 클래스 (FeedPost/MyPage와 동일 팔레트). */
+const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
+  good: styles.avatarVerified,
+  best: styles.avatarConnected,
+  purple: styles.avatarTrusted,
+  gold: styles.avatarGold,
+  default: styles.avatarNewcomer,
+};
 
 export default function CommunityPostDetailPage() {
   const navigate = useNavigate();
@@ -152,7 +163,9 @@ export default function CommunityPostDetailPage() {
 
       <div className={styles.authorCard}>
         <div className={styles.authorRow}>
-          <div className={styles.avatar}>
+          <div
+            className={`${styles.avatar} ${AVATAR_TONE_CLASS[trustGradeToTone(post.author_trust_grade)] ?? styles.avatarNewcomer}`}
+          >
             {post.author_profile_image_url ? (
               <img src={post.author_profile_image_url} alt="" className={styles.avatarImg} />
             ) : (
