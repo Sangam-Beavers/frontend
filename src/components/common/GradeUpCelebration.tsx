@@ -1,79 +1,87 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './GradeUpCelebration.module.css';
 
 interface GradeUpCelebrationProps {
-  /** 달성한 등급명(이미 i18n 변환된 라벨). 축하 메시지 본문에 들어간다. */
+  /** 달성한 등급명 (이미 번역된 문자열, 예: "인증 비버"). */
   gradeName: string;
-  /** 자동/수동 dismiss 시 호출 — 부모가 표시 상태를 내린다. */
+  /** 축하 애니메이션 종료 후 호출 (부모가 상태를 false로 바꿔야 재표시 가능). */
   onDismiss: () => void;
-  /** 자동 dismiss까지의 ms (기본 2800). 0 이하면 자동 닫기 비활성(탭으로만 닫힘). */
-  duration?: number;
 }
 
-const CONFETTI_COUNT = 28;
-const CONFETTI_COLORS = ['#16a34a', '#0b66ff', '#7c3aed', '#f59e0b', '#ec4899'];
+const PARTICLE_COLORS = [
+  '#f59e0b',
+  '#22c55e',
+  '#2563eb',
+  '#7c3aed',
+  '#ec4899',
+  '#f97316',
+  '#06b6d4',
+  '#eab308',
+];
+
+/** 컨페티 파티클 수 */
+const PARTICLE_COUNT = 28;
 
 /**
- * 등급 상승 축하 모먼트 (Phase 3) — 컨페티 + 중앙 카드를 1회 띄우고 자동으로 사라진다.
+ * 등급 상승 축하 모먼트 — 컨페티 + 토스트 (비버 캐릭터 없음).
  *
- * <p>MyPage 진입 시 lastSeen 등급과 현재 등급을 비교해 상승했을 때만 마운트된다(표시 판정은 부모 책임).
- * 외부 컨페티 라이브러리 없이 CSS 애니메이션만 사용한다(의존성 추가 회피, CLAUDE.md).
- * 모션 민감 사용자는 {@code prefers-reduced-motion}으로 컨페티가 꺼지고 카드만 정적으로 보인다.
- *
- * @example
- *   {celebrating && (
- *     <GradeUpCelebration gradeName={trustGradeLabel} onDismiss={() => setCelebrating(false)} />
- *   )}
+ * 마운트 시 바로 애니메이션 시작, 약 3초 뒤 onDismiss 호출.
+ * 부모는 `celebrating && <GradeUpCelebration ... />` 패턴으로 조건 렌더한다.
  */
-export default function GradeUpCelebration({
-  gradeName,
-  onDismiss,
-  duration = 2800,
-}: GradeUpCelebrationProps) {
+export default function GradeUpCelebration({ gradeName, onDismiss }: GradeUpCelebrationProps) {
   const { t } = useTranslation();
+  const dismissedRef = useRef(false);
 
-  // 컨페티 조각은 마운트 시 1회만 생성 — 리렌더마다 위치가 튀지 않도록 고정한다.
-  const pieces = useMemo(
-    () =>
-      Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        delayMs: Math.random() * 400,
-        durationMs: 2200 + Math.random() * 1200,
-        color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-      })),
-    []
-  );
-
-  // duration 뒤 자동 dismiss. duration이 바뀌면 타이머 재설정.
   useEffect(() => {
-    if (duration <= 0) return;
-    const id = window.setTimeout(onDismiss, duration);
+    dismissedRef.current = false;
+    const id = window.setTimeout(() => {
+      if (!dismissedRef.current) {
+        dismissedRef.current = true;
+        onDismiss();
+      }
+    }, 3000);
     return () => window.clearTimeout(id);
-  }, [duration, onDismiss]);
+  }, [onDismiss]);
+
+  // 파티클 배열 — 랜덤 위치·색·딜레이 (SSR 없는 CSR 앱이라 Math.random 안전)
+  const particles = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+    key: i,
+    color: PARTICLE_COLORS[i % PARTICLE_COLORS.length],
+    left: `${5 + ((i * 3.3) % 90)}%`,
+    delay: `${(i * 55) % 800}ms`,
+    size: `${6 + (i % 4) * 2}px`,
+    rotate: `${(i * 37) % 360}deg`,
+  }));
 
   return (
-    <div className={styles.overlay} role="status" aria-live="polite" onClick={onDismiss}>
-      <div className={styles.confettiLayer} aria-hidden="true">
-        {pieces.map((p) => (
+    <>
+      {/* 컨페티 오버레이 */}
+      <div className={styles.overlay} aria-hidden="true">
+        {particles.map((p) => (
           <span
-            key={p.id}
-            className={styles.confetti}
+            key={p.key}
+            className={styles.particle}
             style={{
-              left: `${p.left}%`,
+              left: p.left,
+              top: '-10px',
+              width: p.size,
+              height: p.size,
               background: p.color,
-              animationDelay: `${p.delayMs}ms`,
-              animationDuration: `${p.durationMs}ms`,
+              animationDelay: p.delay,
+              transform: `rotate(${p.rotate})`,
             }}
           />
         ))}
       </div>
-      <div className={styles.card}>
-        <div className={styles.emoji}>🎉</div>
-        <div className={styles.title}>{t('trust.celebrate.title')}</div>
-        <div className={styles.message}>{t('trust.celebrate.message', { grade: gradeName })}</div>
+
+      {/* 등급 상승 토스트 */}
+      <div className={styles.toast} role="status" aria-live="polite">
+        <div className={styles.toastTitle}>{t('trust.celebrate.title')}</div>
+        <div className={styles.toastMessage}>
+          {t('trust.celebrate.message', { grade: gradeName })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

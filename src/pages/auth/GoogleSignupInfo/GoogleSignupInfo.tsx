@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 
+import { ROUTES } from '@/constants/routes';
 import { NATIONALITIES } from '@/constants/nationalities';
 import { SIGNUP_LANGUAGES as LANGUAGES } from '@/constants/languages';
+import { GENDERS, AGE_RANGES } from '@/constants/demographics';
 
 function GoogleSignupInfo() {
   const { t } = useTranslation();
@@ -14,6 +16,8 @@ function GoogleSignupInfo() {
     nickname: '',
     nationality: '',
     language: '',
+    gender: '',
+    ageRange: '',
     agreeAll: false,
   });
   const [nicknameStatus, setNicknameStatus] = useState<null | 'ok' | 'fail'>(null);
@@ -42,7 +46,7 @@ function GoogleSignupInfo() {
             <button
               type="button"
               className="auth-icon"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(ROUTES.LOGIN)}
               aria-label={t('auth.googleSignup.backButton')}
             >
               ‹
@@ -120,6 +124,40 @@ function GoogleSignupInfo() {
                 {LANGUAGES.map((l) => (
                   <option key={l} value={l}>
                     {l}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="gs-gender">{t('auth.googleSignup.genderLabel')}</label>
+              <select
+                id="gs-gender"
+                className="auth-select"
+                value={form.gender}
+                onChange={set('gender')}
+              >
+                <option value="">{t('auth.googleSignup.genderPlaceholder')}</option>
+                {GENDERS.map((g) => (
+                  <option key={g.value} value={g.value}>
+                    {g.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="gs-age-range">{t('auth.googleSignup.ageRangeLabel')}</label>
+              <select
+                id="gs-age-range"
+                className="auth-select"
+                value={form.ageRange}
+                onChange={set('ageRange')}
+              >
+                <option value="">{t('auth.googleSignup.ageRangePlaceholder')}</option>
+                {AGE_RANGES.map((a) => (
+                  <option key={a.value} value={a.value}>
+                    {a.label}
                   </option>
                 ))}
               </select>

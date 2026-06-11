@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import type { ScheduledTransferItem } from '@/api/wallet';
 import TopBar from '@/components/navigation/TopBar';
-import { buildRecurringHistoryPath } from '@/constants/routes';
+import { buildRecurringHistoryPath, ROUTES } from '@/constants/routes';
 import { useScheduledTransfers } from '@/hooks/useScheduledTransfers';
 import styles from './RecurringTransferListPage.module.css';
 
@@ -32,6 +32,7 @@ function formatDate(isoDate: string): string {
 export default function RecurringTransferListPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { data, isLoading, error, refetch } = useScheduledTransfers();
 
   const WEEKDAY_LABEL = [
@@ -79,7 +80,10 @@ export default function RecurringTransferListPage() {
 
   return (
     <>
-      <TopBar title={t('recurring.list.title')} />
+      <TopBar
+        title={t('recurring.list.title')}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.HOME))}
+      />
 
       <div className={styles.list}>
         {isLoading ? (

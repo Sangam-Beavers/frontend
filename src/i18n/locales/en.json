@@ -34,7 +34,7 @@
     "import": "Top up",
     "send": "Send",
     "exchange": "Exchange",
-    "myKrwTitle": "My KRW value",
+    "myKrwTitle": "💰 My KRW value",
     "myKrwSub": "Converted from all currencies at current rates",
     "ratesTitle": "Live exchange rates",
     "ratesViewAll": "View all",
@@ -47,13 +47,13 @@
     "unverifiedHint": "Shown after verification",
     "ratesLoading": "Loading…",
     "notices": {
-      "title": "Notices",
+      "title": "📢 Notices",
       "desc": "Check the latest announcements"
     },
     "notifications": {
-      "fraudTitle": "Fraud detection",
+      "fraudTitle": "🛡️ Fraud detection",
       "fraudDesc": "Your wallet is currently safe.",
-      "legalTitle": "Lawyer consultation",
+      "legalTitle": "⚖️ Lawyer consultation",
       "legalDesc": "Get a consultation to review your employment contract."
     },
     "currencies": {
@@ -193,7 +193,7 @@
       "chargeWithdraw": "Top up / Withdraw",
       "exchange": "Exchange / Re-exchange",
       "exchangeHistory": "Exchange history",
-      "walletHistory": "Transfer history",
+      "walletHistory": "Transaction history",
       "docAnalysis": "AI document analysis",
       "docHistory": "Document analysis history",
       "communityHome": "Community home",
@@ -332,6 +332,21 @@
       "emptyPage": "No liked posts on this page.",
       "backToFirst": "Back to First",
       "empty": "No liked posts yet. Tap ♥ on posts you like."
+    },
+    "faq": {
+      "title": "FAQ",
+      "loading": "Loading...",
+      "empty": "No FAQs available.",
+      "categories": {
+        "all": "All",
+        "GENERAL": "General",
+        "TRANSFER": "Transfer",
+        "EXCHANGE": "Exchange",
+        "DOCUMENT": "Document Analysis",
+        "ACCOUNT": "Account"
+      },
+      "loadError": "Failed to load FAQs.",
+      "bannerSub": "Find answers by category"
     }
   },
   "docAnalysis": {
@@ -401,7 +416,7 @@
     "step2HeadingWithName": "{{nickname}}, are you sure?",
     "step2Sub": "All of the data below will be erased.",
     "lossWalletBalance": "Wallet balance",
-    "lossWalletBalanceDesc": "We recommend withdrawing first.",
+    "lossWalletBalanceDesc": "Any remaining balance is lost when you leave. Please withdraw first.",
     "lossTransactions": "Transaction history",
     "lossTransactionsDesc": "Cannot be recovered.",
     "lossCommunity": "Community posts and comments",
@@ -452,6 +467,8 @@
       "nicknameLabel": "Nickname",
       "nationalityLabel": "Nationality",
       "languageLabel": "Primary language",
+      "genderLabel": "Gender",
+      "ageRangeLabel": "Age group",
       "selectOption": "Select ▾",
       "checkDuplicate": "Check",
       "checking": "Checking...",
@@ -492,6 +509,10 @@
       "nationalityPlaceholder": "Korea / USA / Vietnam / Philippines ▾",
       "languageLabel": "Primary language",
       "languagePlaceholder": "Select language ▾",
+      "genderLabel": "Gender",
+      "genderPlaceholder": "Select gender ▾",
+      "ageRangeLabel": "Age group",
+      "ageRangePlaceholder": "Select age group ▾",
       "agreeAll": "I agree to the Terms of Service and Privacy Policy",
       "submitButton": "Complete sign-up"
     },
@@ -1112,6 +1133,24 @@
       "errValidateFmt": "Validation failed.",
       "noticeTextNew": "The next run date is calculated automatically. A reminder is sent before each transfer; insufficient balance may cause failure."
     },
+    "history": {
+      "title": "Recurring Transfer History",
+      "loading": "Loading...",
+      "notFound": "Recurring transfer history not found.",
+      "loadError": "Failed to load history.",
+      "empty": "No executions yet.",
+      "fee": "Fee",
+      "prev": "Previous",
+      "next": "Next",
+      "pageInfo": "{{current}} / {{total}} ({{count}} total)",
+      "status": {
+        "COMPLETED": "Completed",
+        "PENDING": "Pending",
+        "PROCESSING": "Processing",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      }
+    },
     "complete": {
       "title": "Recurring set",
       "cardTitle": "Recurring transfer set",
@@ -1157,7 +1196,11 @@
       "backToStart": "Back to Start",
       "analyzingTitle": "Analyzing",
       "estimatedMinutes": "About {{minutes}} min — please wait.",
-      "pleaseWait": "Please wait."
+      "pleaseWait": "Please wait.",
+      "cancelTitle": "Analysis in Progress",
+      "cancelMessage": "Leaving now will take you out of this screen. You can check the result later in 'Document Analysis History'.",
+      "cancelConfirm": "Leave",
+      "cancelDismiss": "Keep Waiting"
     },
     "result": {
       "title": "Analysis Result",
@@ -1245,5 +1288,17 @@
     "askMoreAria": "Ask AI more about {{title}}",
     "typingAria": "Generating response",
     "fabLabel": "Have a question? Just ask"
+  },
+  "maintenance": {
+    "title": "Service Maintenance",
+    "body": "We are currently performing maintenance to improve our service.",
+    "retry": "Please try again later."
+  },
+  "notices": {
+    "title": "Notices",
+    "loading": "Loading...",
+    "loadError": "Failed to load notices.",
+    "empty": "No notices available.",
+    "pinned": "📌 Notice"
   }
 }

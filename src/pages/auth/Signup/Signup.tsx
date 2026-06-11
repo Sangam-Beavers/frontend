@@ -1,18 +1,5 @@
-// ─────────────────────────────────────────────────────────────
-// pages/auth/Signup/Signup.tsx — 회원가입 화면 (프론트 #82)
-//
-// 흐름:
-//   1) 이메일/닉네임 중복확인(선택) → GET /members/check-email · /check-nickname → available 안내
-//   2) 제출 → POST /api/v1/auth/register (snake_case body)
-//      성공(201) → 완료 카드 + "로그인하러 가기"
-//      MEMBER4002(이메일 중복) / MEMBER4003(닉네임 중복) / COMMON4001(형식) → 에러 표시
-//
-// 비밀번호는 우리 DB에 저장되지 않는다 — 백엔드가 IdP(Authentik)에 사용자 생성+비번 설정(방식 B).
-// 가입 직후 로그인은 Authentik 로그인 페이지에서 진행(자동 로그인 아님).
-// ─────────────────────────────────────────────────────────────
-
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 
@@ -20,6 +7,7 @@ import { ApiException, memberApi } from '@/api';
 import { ROUTES } from '@/constants/routes';
 import { NATIONALITIES } from '@/constants/nationalities';
 import { SIGNUP_LANGUAGES as LANGUAGES } from '@/constants/languages';
+import { GENDERS, AGE_RANGES } from '@/constants/demographics';
 
 interface CheckboxRowProps {
   label: string;
@@ -36,12 +24,12 @@ function CheckboxRow({ label, checked, onChange }: CheckboxRowProps) {
   );
 }
 
-// 중복확인 상태(이메일·닉네임 공용): 안 함 / 확인 중 / 사용 가능 / 이미 사용 중
 type DupCheck = 'idle' | 'checking' | 'available' | 'taken';
 
 function Signup() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -50,13 +38,15 @@ function Signup() {
     nickname: '',
     nationality: '',
     language: '',
+    gender: '',
+    ageRange: '',
     agreeTerms: false,
     agreePrivacy: false,
   });
   const [emailCheck, setEmailCheck] = useState<DupCheck>('idle');
   const [nicknameCheck, setNicknameCheck] = useState<DupCheck>('idle');
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false); // 가입 완료
+  const [done, setDone] = useState((location.state as { done?: boolean } | null)?.done ?? false);
   const [error, setError] = useState<string | null>(null);
 
   const set =
@@ -70,7 +60,6 @@ function Signup() {
   const toggle = (key: 'agreeTerms' | 'agreePrivacy') =>
     setForm((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  // 이메일 중복확인 버튼
   const handleCheckEmail = async () => {
     const email = form.email.trim();
     if (!email) {
@@ -93,7 +82,6 @@ function Signup() {
     }
   };
 
-  // 닉네임 중복확인 버튼
   const handleCheckNickname = async () => {
     const nickname = form.nickname.trim();
     if (!nickname) {
@@ -124,7 +112,16 @@ function Signup() {
     const name = form.name.trim();
     const nickname = form.nickname.trim();
 
-    if (!email || !form.password || !name || !nickname || !form.nationality || !form.language) {
+    if (
+      !email ||
+      !form.password ||
+      !name ||
+      !nickname ||
+      !form.nationality ||
+      !form.language ||
+      !form.gender ||
+      !form.ageRange
+    ) {
       setError(t('auth.signup.errorAllFieldsRequired'));
       return;
     }
@@ -146,8 +143,11 @@ function Signup() {
         nickname,
         nationality: form.nationality,
         language: form.language,
+        gender: form.gender,
+        age_range: form.ageRange,
       });
-      setDone(true); // 201 — 가입 완료 (자동 로그인 아님 → 로그인 화면으로 안내)
+      setDone(true);
+      navigate(location.pathname, { replace: true, state: { done: true } });
     } catch (err) {
       if (err instanceof ApiException) {
         if (err.code === 'MEMBER4002') {
@@ -170,7 +170,6 @@ function Signup() {
     }
   };
 
-  // 가입 완료 화면
   if (done) {
     return (
       <div className="auth-page">
@@ -204,7 +203,7 @@ function Signup() {
             <button
               type="button"
               className="auth-icon"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(ROUTES.LOGIN)}
               aria-label={t('auth.signup.backButton')}
             >
               ‹
@@ -342,6 +341,42 @@ function Signup() {
                   {LANGUAGES.map((l) => (
                     <option key={l} value={l}>
                       {l}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="auth-grid2">
+              <div className="auth-field">
+                <label htmlFor="signup-gender">{t('auth.signup.genderLabel')}</label>
+                <select
+                  id="signup-gender"
+                  className="auth-select"
+                  value={form.gender}
+                  onChange={set('gender')}
+                >
+                  <option value="">{t('auth.signup.selectOption')}</option>
+                  {GENDERS.map((g) => (
+                    <option key={g.value} value={g.value}>
+                      {g.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="auth-field">
+                <label htmlFor="signup-age-range">{t('auth.signup.ageRangeLabel')}</label>
+                <select
+                  id="signup-age-range"
+                  className="auth-select"
+                  value={form.ageRange}
+                  onChange={set('ageRange')}
+                >
+                  <option value="">{t('auth.signup.selectOption')}</option>
+                  {AGE_RANGES.map((a) => (
+                    <option key={a.value} value={a.value}>
+                      {a.label}
                     </option>
                   ))}
                 </select>

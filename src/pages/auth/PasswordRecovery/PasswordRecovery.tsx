@@ -60,7 +60,7 @@ function PasswordRecovery() {
             <button
               type="button"
               className="auth-icon"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(ROUTES.LOGIN)}
               aria-label={t('auth.passwordRecovery.backButton')}
             >
               ‹

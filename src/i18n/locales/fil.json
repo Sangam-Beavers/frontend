@@ -34,7 +34,7 @@
     "import": "Mag-top up",
     "send": "Magpadala",
     "exchange": "Magpalit ng pera",
-    "myKrwTitle": "Aking KRW value",
+    "myKrwTitle": "💰 Aking KRW value",
     "myKrwSub": "Na-convert mula sa lahat ng currencies sa kasalukuyang halaga",
     "ratesTitle": "Live exchange rates",
     "ratesViewAll": "Tingnan lahat",
@@ -47,13 +47,13 @@
     "unverifiedHint": "Ipinapakita pagkatapos ng verification",
     "ratesLoading": "Naglo-load…",
     "notices": {
-      "title": "Mga Abiso",
+      "title": "📢 Mga Abiso",
       "desc": "Tingnan ang mga pinakabagong abiso"
     },
     "notifications": {
-      "fraudTitle": "Pagtuklas ng manloloko",
+      "fraudTitle": "🛡️ Pagtuklas ng manloloko",
       "fraudDesc": "Ligtas ang iyong wallet sa kasalukuyan.",
-      "legalTitle": "Konsultasyon sa abogado",
+      "legalTitle": "⚖️ Konsultasyon sa abogado",
       "legalDesc": "Kumuha ng konsultasyon para sa employment contract."
     },
     "currencies": {
@@ -193,7 +193,7 @@
       "chargeWithdraw": "Top up / Withdraw",
       "exchange": "Palit / Palit muli",
       "exchangeHistory": "Kasaysayan ng palitan",
-      "walletHistory": "Kasaysayan ng padala",
+      "walletHistory": "Kasaysayan ng transaksyon",
       "docAnalysis": "AI document analysis",
       "docHistory": "Kasaysayan ng pagsusuri",
       "communityHome": "Community home",
@@ -332,6 +332,21 @@
       "emptyPage": "Walang gusto sa pahinang ito.",
       "backToFirst": "Sa Una",
       "empty": "Wala pang gusto. Pindutin ang ♥."
+    },
+    "faq": {
+      "title": "Mga Madalas na Tanong",
+      "loading": "Naglo-load...",
+      "empty": "Walang mga FAQ.",
+      "categories": {
+        "all": "Lahat",
+        "GENERAL": "Pangkalahatan",
+        "TRANSFER": "Paglipat",
+        "EXCHANGE": "Palitan",
+        "DOCUMENT": "Pagsusuri ng Dokumento",
+        "ACCOUNT": "Account"
+      },
+      "loadError": "Hindi ma-load ang mga FAQ.",
+      "bannerSub": "Hanapin ang mga sagot ayon sa kategorya"
     }
   },
   "docAnalysis": {
@@ -401,7 +416,7 @@
     "step2HeadingWithName": "{{nickname}}, sigurado ka ba?",
     "step2Sub": "Mawawala ang lahat ng datos sa ibaba.",
     "lossWalletBalance": "Wallet balance",
-    "lossWalletBalanceDesc": "Inirerekomenda i-withdraw muna.",
+    "lossWalletBalanceDesc": "Mawawala ang natitirang balanse kapag umalis ka. Mag-withdraw muna.",
     "lossTransactions": "Transaction history",
     "lossTransactionsDesc": "Hindi na maibabalik.",
     "lossCommunity": "Posts at komento sa komunidad",
@@ -452,6 +467,8 @@
       "nicknameLabel": "Palayaw",
       "nationalityLabel": "Nasyonalidad",
       "languageLabel": "Pangunahing wika",
+      "genderLabel": "Kasarian",
+      "ageRangeLabel": "Pangkat ng edad",
       "selectOption": "Pumili ▾",
       "checkDuplicate": "Suriin",
       "checking": "Sinusuri...",
@@ -492,6 +509,10 @@
       "nationalityPlaceholder": "Korea / USA / Vietnam / Pilipinas ▾",
       "languageLabel": "Pangunahing wika",
       "languagePlaceholder": "Pumili ng wika ▾",
+      "genderLabel": "Kasarian",
+      "genderPlaceholder": "Pumili ng kasarian ▾",
+      "ageRangeLabel": "Pangkat ng edad",
+      "ageRangePlaceholder": "Pumili ng pangkat ng edad ▾",
       "agreeAll": "Sumasang-ayon sa Mga Tuntunin at Patakaran sa Privacy",
       "submitButton": "Tapusin ang pag-sign up"
     },
@@ -1112,6 +1133,24 @@
       "errValidateFmt": "Nabigo ang validation.",
       "noticeTextNew": "Ang susunod na petsa ay awtomatikong kinakalkula. May abiso bago ang transfer; kulang na balanse ay maaaring magdulot ng failure."
     },
+    "history": {
+      "title": "Kasaysayan ng Paulit-ulit na Paglipat",
+      "loading": "Naglo-load...",
+      "notFound": "Hindi nahanap ang kasaysayan ng paulit-ulit na paglipat.",
+      "loadError": "Hindi ma-load ang kasaysayan.",
+      "empty": "Wala pang mga pagpapatupad.",
+      "fee": "Bayad",
+      "prev": "Nakaraan",
+      "next": "Susunod",
+      "pageInfo": "{{current}} / {{total}} (kabuuan {{count}})",
+      "status": {
+        "COMPLETED": "Nakumpleto",
+        "PENDING": "Nakabinbin",
+        "PROCESSING": "Pinoproseso",
+        "FAILED": "Nabigo",
+        "CANCELLED": "Nakansela"
+      }
+    },
     "complete": {
       "title": "Nakatakda",
       "cardTitle": "Nakatakda na",
@@ -1157,7 +1196,11 @@
       "backToStart": "Bumalik",
       "analyzingTitle": "Nag-a-analyze",
       "estimatedMinutes": "{{minutes}} min — pakihintay.",
-      "pleaseWait": "Pakihintay."
+      "pleaseWait": "Pakihintay.",
+      "cancelTitle": "Nag-a-analyze",
+      "cancelMessage": "Kung aalis na ngayon, mawawala ang screen na ito. Makikita mo ang resulta mamaya sa 'Kasaysayan ng Pagsusuri ng Dokumento'.",
+      "cancelConfirm": "Umalis",
+      "cancelDismiss": "Magpatuloy na Maghintay"
     },
     "result": {
       "title": "Resulta",
@@ -1245,5 +1288,17 @@
     "askMoreAria": "Tanungin ang AI pa tungkol sa {{title}}",
     "typingAria": "Bumubuo ng tugon",
     "fabLabel": "May tanong? Itanong lang"
+  },
+  "maintenance": {
+    "title": "Pagpapanatili ng Serbisyo",
+    "body": "Kasalukuyan kaming nag-aayos ng aming serbisyo.",
+    "retry": "Pakisubukang muli mamaya."
+  },
+  "notices": {
+    "title": "Mga Abiso",
+    "loading": "Naglo-load...",
+    "loadError": "Hindi ma-load ang mga abiso.",
+    "empty": "Walang mga abiso.",
+    "pinned": "📌 Abiso"
   }
 }

@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { startLogout } from '@/auth/logout';
 import Identicon from '@/components/common/Identicon';
@@ -10,6 +10,9 @@ import styles from './AllMenuPage.module.css';
 
 const NAV_KEYS = ['all', 'finance', 'documents', 'community', 'mypage', 'support'] as const;
 type NavKey = (typeof NAV_KEYS)[number];
+
+const TAB_KEY = 'allMenu_activeNav';
+const SCROLL_KEY = 'allMenu_scroll';
 
 interface MenuItem {
   labelKey: string;
@@ -31,7 +34,6 @@ const docItems: MenuItem[] = [
   { labelKey: 'allmenu.items.docHistory', path: '/mypage/doc-analysis-history' },
 ];
 
-// 커뮤니티 카테고리는 community.categories.* 키 재사용 (COMMUNITY_TABS과 의미 동일)
 const communityItems: MenuItem[] = [
   { labelKey: 'allmenu.items.communityHome', path: ROUTES.COMMUNITY },
   { labelKey: 'community.categories.residence', path: ROUTES.COMMUNITY_RESIDENCE },
@@ -54,9 +56,9 @@ const mypageItems: MenuItem[] = [
 ];
 
 const supportItems: MenuItem[] = [
-  { labelKey: 'allmenu.items.notices', path: '/community' },
-  { labelKey: 'allmenu.items.faq', path: '/community' },
-  { labelKey: 'allmenu.items.contact', path: '/community/write' },
+  { labelKey: 'allmenu.items.notices', path: ROUTES.NOTICES },
+  { labelKey: 'allmenu.items.faq', path: ROUTES.COMMUNITY_FAQ },
+  { labelKey: 'allmenu.items.contact', path: ROUTES.COMMUNITY_WRITE },
 ];
 
 const ALL_ITEMS: MenuItem[] = [
@@ -84,23 +86,61 @@ const TAGS: MenuItem[] = [
 ];
 
 const QUICK_LINKS: MenuItem[] = [
-  { labelKey: 'allmenu.quickLinks.finance', path: '/charge' },
-  { labelKey: 'allmenu.quickLinks.languageTranslate', path: '/mypage/language' },
-  { labelKey: 'allmenu.quickLinks.language', path: '/mypage/language' },
+  { labelKey: 'allmenu.quickLinks.finance', path: ROUTES.CHARGE },
+  { labelKey: 'allmenu.quickLinks.languageTranslate', path: ROUTES.MYPAGE_LANGUAGE },
+  { labelKey: 'allmenu.quickLinks.language', path: ROUTES.MYPAGE_LANGUAGE },
 ];
 
 export default function AllMenuPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const navType = useNavigationType();
   const { t } = useTranslation();
-  // 헤더 프로필 — 실제 로그인 사용자(GET /members/me). 마이페이지와 동일 소스.
   const { data: profile, isLoading } = useMyProfile();
   const nickname = profile?.nickname ?? '';
-  // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
   const avatarSeed = profile?.public_id ?? nickname;
   const languageLabel = profile?.language
     ? (LANGUAGE_CODE_TO_LABEL[profile.language] ?? profile.language)
     : '';
-  const [activeNav, setActiveNav] = useState<NavKey>('all');
+
+  // useSearchParams 대신 sessionStorage: setSearchParams가 location.key를 바꿔
+  // useScrollRestoration이 스크롤을 0으로 리셋하는 부작용을 방지.
+  // POP(뒤로가기)이면 이전 탭 복원, 새 진입이면 '전체' 탭으로 초기화.
+  const [activeNav, setActiveNav] = useState<NavKey>(() => {
+    if (navType === 'POP') {
+      const saved = sessionStorage.getItem(TAB_KEY) as NavKey;
+      return NAV_KEYS.includes(saved) ? saved : 'all';
+    }
+    return 'all';
+  });
+
+  const handleSetActiveNav = (key: NavKey) => {
+    setActiveNav(key);
+    sessionStorage.setItem(TAB_KEY, key);
+  };
+
+  // rightContent는 data-scroll-root가 아닌 자체 overflow-y: auto 컨테이너이므로
+  // 전역 useScrollRestoration 대신 여기서 직접 저장·복원한다.
+  const rightRef = useRef<HTMLDivElement>(null);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    if (navType !== 'POP') return;
+    const saved = sessionStorage.getItem(`${SCROLL_KEY}_${location.key}`);
+    if (saved !== null && rightRef.current) rightRef.current.scrollTop = Number(saved);
+  }, []);
+
+  useEffect(() => {
+    const key = location.key;
+    return () => {
+      if (rightRef.current) {
+        try {
+          sessionStorage.setItem(`${SCROLL_KEY}_${key}`, String(rightRef.current.scrollTop));
+        } catch {}
+      }
+    };
+  }, [location.key]);
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const searchResults = useMemo(() => {
@@ -116,7 +156,7 @@ export default function AllMenuPage() {
         <div className={styles.head}>
           <div
             className={styles.profileRow}
-            onClick={() => navigate('/mypage')}
+            onClick={() => navigate(ROUTES.MYPAGE)}
             style={{ cursor: 'pointer' }}
           >
             <div className={styles.avatar}>
@@ -137,7 +177,7 @@ export default function AllMenuPage() {
             </div>
           </div>
           <div className={styles.headIcons}>
-            <span onClick={() => navigate('/mypage')} style={{ cursor: 'pointer' }}>
+            <span onClick={() => navigate(ROUTES.MYPAGE)} style={{ cursor: 'pointer' }}>
               ⚙️
             </span>
           </div>
@@ -146,7 +186,12 @@ export default function AllMenuPage() {
         {/* Quick access */}
         <div className={styles.quickGrid}>
           {QUICK_LINKS.map((q) => (
-            <span key={q.labelKey} onClick={() => navigate(q.path)}>
+            <span
+              key={q.labelKey}
+              onClick={() => {
+                navigate(q.path, { state: { from: ROUTES.ALL_MENU } });
+              }}
+            >
               {t(q.labelKey)}
             </span>
           ))}
@@ -166,7 +211,13 @@ export default function AllMenuPage() {
         {/* Tags */}
         <div className={styles.tagRow}>
           {TAGS.map((tag) => (
-            <span key={tag.labelKey} className={styles.tag} onClick={() => navigate(tag.path)}>
+            <span
+              key={tag.labelKey}
+              className={styles.tag}
+              onClick={() => {
+                navigate(tag.path, { state: { from: ROUTES.ALL_MENU } });
+              }}
+            >
               {t(tag.labelKey)}
             </span>
           ))}
@@ -182,7 +233,9 @@ export default function AllMenuPage() {
                 <div
                   key={item.labelKey + item.path}
                   className={styles.menuItem}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => {
+                    navigate(item.path, { state: { from: ROUTES.ALL_MENU } });
+                  }}
                 >
                   <span>{t(item.labelKey)}</span>
                   <span className={styles.arrow}>›</span>
@@ -198,7 +251,7 @@ export default function AllMenuPage() {
                 <div
                   key={key}
                   className={`${styles.leftItem} ${activeNav === key ? styles.leftItemActive : ''}`}
-                  onClick={() => setActiveNav(key)}
+                  onClick={() => handleSetActiveNav(key)}
                 >
                   {t(`allmenu.nav.${key}`)}
                 </div>
@@ -206,7 +259,7 @@ export default function AllMenuPage() {
             </div>
 
             {/* Right content */}
-            <div className={styles.rightContent}>
+            <div ref={rightRef} className={styles.rightContent}>
               {MENU[activeNav].map((block) => (
                 <div key={block.titleKey} className={styles.menuBlock}>
                   <b className={styles.blockTitle}>{t(block.titleKey)}</b>
@@ -214,7 +267,9 @@ export default function AllMenuPage() {
                     <div
                       key={item.labelKey + item.path}
                       className={styles.menuItem}
-                      onClick={() => navigate(item.path)}
+                      onClick={() => {
+                        navigate(item.path, { state: { from: ROUTES.ALL_MENU } });
+                      }}
                     >
                       <span>{t(item.labelKey)}</span>
                       <span className={styles.arrow}>›</span>
@@ -228,8 +283,8 @@ export default function AllMenuPage() {
 
         {/* Footer links */}
         <div className={styles.footer}>
-          <span onClick={() => navigate('/mypage')}>{t('allmenu.footer.privacy')}</span>
-          <span onClick={() => navigate('/mypage')}>{t('allmenu.footer.terms')}</span>
+          <span onClick={() => navigate(ROUTES.MYPAGE)}>{t('allmenu.footer.privacy')}</span>
+          <span onClick={() => navigate(ROUTES.MYPAGE)}>{t('allmenu.footer.terms')}</span>
           <span onClick={() => startLogout()}>{t('allmenu.footer.logout')}</span>
         </div>
       </div>

@@ -1,10 +1,7 @@
-// pages/wallet/RecurringSetup/RecurringTransferSetupPage.tsx
-// 정기 송금 설정 (INTERNAL_TRANSFER 한정 — 앱 사용자 간)
-// develop의 API 연동 + i18n 키화 통합
-
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/constants/routes';
 import { ApiException } from '@/api';
 import type { CreateScheduledTransferRequest, ScheduledTransferFrequency } from '@/api/wallet';
 import TopBar from '@/components/navigation/TopBar';
@@ -197,7 +194,7 @@ export default function RecurringTransferSetupPage() {
 
   return (
     <div className={styles.contentPad}>
-      <TopBar title={t('recurring.setup.title')} />
+      <TopBar title={t('recurring.setup.title')} onBack={() => navigate(ROUTES.RECURRING)} />
 
       <div className={styles.section}>{t('recurring.setup.recentSection')}</div>
       {recipientsLoading ? (

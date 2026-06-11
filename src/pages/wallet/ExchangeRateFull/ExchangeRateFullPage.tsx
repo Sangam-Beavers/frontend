@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { useExchangeRatesWidget } from '@/hooks/useExchangeRatesWidget';
+import { ROUTES } from '@/constants/routes';
 import styles from './ExchangeRateFullPage.module.css';
 
 type Region = '아시아' | '미주';
@@ -22,6 +23,7 @@ type Tab = (typeof TABS)[number];
 export default function ExchangeRateFullPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<Tab>('전체');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const { data, isLoading, isFetching, error, refetch } = useExchangeRatesWidget();
@@ -51,7 +53,6 @@ export default function ExchangeRateFullPage() {
     });
   };
 
-  // 백엔드 응답 + 지역/단위 메타를 합쳐 화면용 항목으로.
   const items = useMemo(() => {
     const rates = data?.rates ?? [];
     return rates.map((r) => {
@@ -67,7 +68,6 @@ export default function ExchangeRateFullPage() {
       const localizedUnit = unitLabels[r.currency_code] ?? meta.unit;
       return {
         code: r.currency_code,
-        // 통화명은 i18n 매핑(이슈 #153) — 사전에 없는 코드는 백엔드 응답 그대로.
         country: t(`home.currencies.${r.currency_code}`, { defaultValue: r.currency_name }),
         unit: localizedUnit,
         rate: rateLabel,
@@ -100,7 +100,7 @@ export default function ExchangeRateFullPage() {
     <>
       <TopBar
         title={t('exchange.rateFull.title')}
-        onBack={() => navigate('/')}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.HOME))}
         rightAction={
           <button
             className={styles.iconBtn}

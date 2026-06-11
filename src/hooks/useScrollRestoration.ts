@@ -1,21 +1,9 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
-/**
- * 스크롤 위치 복원 — 영속 스크롤 컨테이너(`.content[data-scroll-root]`)용.
- *
- * <p>MainLayout처럼 라우트가 바뀌어도 살아있는 레이아웃에서 한 번 호출한다. 컨테이너가 라우트
- * 간 공유되므로 React Router 기본 동작으로는 위치가 복원되지 않는다 — 특히 목록→상세→뒤로 시,
- * 짧은 상세 화면이 컨테이너 scrollTop을 잘라 목록으로 돌아오면 맨 위로 보이는 문제가 있다.
- *
- * <p>history 엔트리(location.key)별 scrollTop을 저장해 두고:
- * - 뒤로/앞으로(POP) → 저장된 위치로 복원
- * - 새 이동(PUSH/REPLACE) → 맨 위 (새 카테고리·상세 진입 등은 top이 자연스럽다)
- *
- * <p>저장은 **사용자가 직접 스크롤(wheel·touch·pointer·key)할 때만** 한다. 복원용 프로그램적
- * 스크롤은 저장에서 제외 — 안 그러면 복원이 늦게 잡힌 높이로 잘린 값을 도로 저장해, 왕복할수록
- * 위치가 조금씩 위로 줄어든다. 또 복원은 목표 높이가 늦게 잡혀도 맞도록 몇 프레임 재시도한다.
- */
+// sessionStorage를 Map과 병용하는 이유: scroll passive 이벤트 처리 전에 navigate가 실행되면
+// Map에 마지막 scrollTop이 빠지는 타이밍 이슈가 있다. navigate 직전에 saveScroll로 강제
+// 저장해두면 POP 복원 시 sessionStorage 값을 우선 사용한다.
 export function useScrollRestoration() {
   const location = useLocation();
   const navType = useNavigationType();
@@ -28,12 +16,15 @@ export function useScrollRestoration() {
     if (!el) return;
     const key = location.key;
 
-    // 사용자가 실제로 스크롤한 위치만 저장(프로그램적 복원 스크롤은 restoring 가드로 제외).
     const onScroll = () => {
       if (restoring.current) return;
-      positions.current.set(key, el.scrollTop);
+      const top = el.scrollTop;
+      positions.current.set(key, top);
+      // sessionStorage에도 백업 — navigate 타이밍 이슈 및 재마운트 후 복원용
+      try {
+        sessionStorage.setItem(`_srp_${key}`, String(top));
+      } catch {}
     };
-    // 사용자 입력이 시작되면 이후 스크롤은 '사용자 것' — 저장 재개.
     const endRestoring = () => {
       restoring.current = false;
     };
@@ -57,18 +48,24 @@ export function useScrollRestoration() {
     const el = document.querySelector<HTMLElement>('[data-scroll-root]');
     if (!el) return;
 
-    const target = navType === 'POP' ? (positions.current.get(location.key) ?? 0) : 0;
-    // 사용자가 입력하기 전까지 저장 차단(프로그램 스크롤이 저장값을 오염시키지 않게).
+    let target = 0;
+    if (navType === 'POP') {
+      // sessionStorage 우선 — navigate 직전에 saveScroll로 강제 저장한 값이 더 정확하다.
+      // 메모리 Map은 scroll 이벤트 타이밍에 따라 마지막 위치가 빠질 수 있어 fallback으로만 사용.
+      const ss = sessionStorage.getItem(`_srp_${location.key}`);
+      const mem = positions.current.get(location.key);
+      target = ss !== null ? Number(ss) : (mem ?? 0);
+    }
+
     restoring.current = true;
 
     let raf = 0;
     let tries = 0;
     const apply = () => {
-      // 사용자가 스크롤로 끼어들면(restoring 해제) 복원 중단 — 사용자의 스크롤을 가로채지 않는다.
       if (!restoring.current) return;
       el.scrollTop = target;
       tries += 1;
-      // 콘텐츠 높이가 늦게 잡혀 목표에 못 미치면(clamp) 다음 프레임 재시도 — 목표 도달/한계 시 멈춘다.
+      // 콘텐츠 높이가 늦게 잡혀 목표에 못 미치면(clamp) 다음 프레임 재시도.
       if (target > 0 && el.scrollTop < target - 1 && tries < 30) {
         raf = requestAnimationFrame(apply);
       }

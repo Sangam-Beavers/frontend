@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import { ChatbotEntryButton, ChatbotSheet } from '@/components/chat';
 import { ApiException, documentApi } from '@/api';
 import type { RiskLevelCode } from '@/api/document';
@@ -53,9 +54,9 @@ export default function DocAnalysisResultPage() {
   // ② 결과 미생성(422): 아직 분석 중 — 로딩(폴링) 화면으로 돌려보내 완료 시 다시 넘어오게 한다.
   useEffect(() => {
     if (!documentPublicId) {
-      navigate('/doc-analysis', { replace: true });
+      navigate(ROUTES.DOC_ANALYSIS, { replace: true });
     } else if (notReady) {
-      navigate('/doc-analysis/loading', {
+      navigate(ROUTES.DOC_ANALYSIS_LOADING, {
         replace: true,
         state: { publicId: documentPublicId },
       });
@@ -73,7 +74,7 @@ export default function DocAnalysisResultPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <TopBar title={t('doc.result.title')} onBack={() => navigate(-1)} />
+      <TopBar title={t('doc.result.title')} onBack={() => navigate(ROUTES.DOC_ANALYSIS)} />
 
       {/* ① 결론 — 메인 결과 강조 */}
       {isPending && (
@@ -170,14 +171,14 @@ export default function DocAnalysisResultPage() {
         <button
           type="button"
           className={styles.secondaryBtn}
-          onClick={() => navigate('/mypage/doc-analysis-history')}
+          onClick={() => navigate(ROUTES.MYPAGE_DOC_ANALYSIS_HISTORY)}
         >
           {t('doc.result.saveExport')}
         </button>
         <button
           type="button"
           className={styles.primaryBtn}
-          onClick={() => navigate('/community/write')}
+          onClick={() => navigate(ROUTES.COMMUNITY_WRITE)}
         >
           {t('doc.result.shareCommunity')}
         </button>
@@ -199,8 +200,6 @@ export default function DocAnalysisResultPage() {
         </button>
       </div>
 
-      {/* 바텀시트 — 진입 버튼이 누르면 store.isOpen=true → 슬라이드 업.
-          시트 초기 화면에 도구 4종 안내 + 분석 결과 기반 추천 질문 노출. */}
       <ChatbotSheet suggestedTopics={suggestedTopics} />
     </div>
   );

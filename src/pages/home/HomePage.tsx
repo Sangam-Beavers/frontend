@@ -2,15 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
+import type { ExchangeRateItem } from '@/api/wallet';
 import { ROUTES } from '@/constants/routes';
+import { SUPPORTED_CURRENCIES, CURRENCY_SYMBOL, isSupportedCurrency } from '@/constants/currencies';
 import { isAdminUser } from '@/auth/tokenStore';
 import { balanceOf, useBalances } from '@/hooks/useBalances';
 import { useExchangeRatesWidget } from '@/hooks/useExchangeRatesWidget';
 import { useSetting } from '@/hooks/useServiceSettings';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useWalletMe } from '@/hooks/useWalletMe';
-import { HOME_ALL_CURRENCIES_MOCK, HOME_NOTIFICATIONS_MOCK } from '@/mocks/homeMock';
-import type { CurrencyOption } from '@/types/home';
+import { HOME_NOTIFICATIONS_MOCK } from '@/mocks/homeMock';
 import styles from './HomePage.module.css';
 
 // 알림 카드는 mock 데이터지만 표시 라벨은 i18n 키로 매핑한다(이슈 #153).
@@ -20,20 +21,7 @@ const NOTIFICATION_KEYS: Record<string, { titleKey: string; descKey: string }> =
 };
 const NOTIFICATIONS = HOME_NOTIFICATIONS_MOCK.result;
 const STORAGE_KEY = 'homeCurrencies';
-
-// 통화 기호 매핑 — 백엔드 응답에는 잔액만 있고 기호는 없어서 클라이언트에서 보강.
-// 백엔드 지원 통화(KRW/USD/PHP/VND)만 실제 잔액이 들어오고, 나머지(THB/CNY/JPY/EUR)는
-// 사용자가 홈 설정에 골라도 항상 0으로 표시된다(잔액 자체가 없음).
-const CURRENCY_SYMBOL: Record<string, string> = {
-  KRW: '₩',
-  USD: '$',
-  PHP: '₱',
-  VND: '₫',
-  THB: '฿',
-  CNY: '¥',
-  JPY: '¥',
-  EUR: '€',
-};
+const MAIN_CURRENCY_KEY = 'homeMainCurrency'; // 메인 통화(이슈 #194) — 기본 KRW
 
 function formatBalance(code: string, balance: string): string {
   const symbol = CURRENCY_SYMBOL[code] ?? '';
@@ -45,24 +33,61 @@ function formatBalance(code: string, balance: string): string {
   })}`;
 }
 
-function loadCurrencies(): CurrencyOption[] {
+/** 표시 통화(홈 칩) 코드 목록 — localStorage에서 읽어 지원 통화로 정제. */
+function loadDisplayCurrencies(): string[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const codes: string[] = raw ? JSON.parse(raw) : ['USD', 'VND'];
-    return codes
-      .map((code) => HOME_ALL_CURRENCIES_MOCK.find((c) => c.code === code))
-      .filter((c): c is CurrencyOption => c !== undefined);
+    return codes.filter(isSupportedCurrency);
   } catch {
-    return HOME_ALL_CURRENCIES_MOCK.slice(0, 2);
+    return ['USD', 'VND'];
   }
+}
+
+/** 메인 통화 코드 — localStorage에서 읽어 지원 통화면 사용, 아니면 KRW. */
+function loadMainCurrency(): string {
+  try {
+    const raw = localStorage.getItem(MAIN_CURRENCY_KEY);
+    return raw && isSupportedCurrency(raw) ? raw : 'KRW';
+  } catch {
+    return 'KRW';
+  }
+}
+
+/** 통화별 표시 포맷(KRW는 정수, 외화는 소수 2자리). */
+function formatAmountByCurrency(code: string, value: number): string {
+  const symbol = CURRENCY_SYMBOL[code] ?? '';
+  if (code === 'KRW') return `${symbol}${Math.round(value).toLocaleString()}`;
+  return `${symbol}${value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+/**
+ * 총 원화환산액(total_balance_in_krw)을 메인 통화로 환산해 문자열로 반환한다(이슈 #194).
+ * KRW면 그대로, 외화면 ÷(1 외화→KRW 환율). 환율을 모르면 null(호출 측이 '—' 처리).
+ */
+function formatMainAmount(
+  currency: string,
+  totalKrw: number,
+  rates?: ExchangeRateItem[]
+): string | null {
+  if (currency === 'KRW') return formatAmountByCurrency('KRW', totalKrw);
+  const rate = rates?.find((r) => r.currency_code === currency)?.exchange_rate;
+  const rateNum = Number(rate);
+  if (!rate || !rateNum) return null;
+  return formatAmountByCurrency(currency, totalKrw / rateNum);
 }
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isAdmin = isAdminUser();
-  const [currencies, setCurrencies] = useState<CurrencyOption[]>(loadCurrencies);
-  const { data: balances, isLoading: balancesLoading, error: balancesError } = useBalances();
+  const [currencies, setCurrencies] = useState<string[]>(loadDisplayCurrencies);
+  const [mainCurrency, setMainCurrency] = useState<string>(loadMainCurrency);
+  const [mainCurrencyOpen, setMainCurrencyOpen] = useState(false);
+  const { data: balances, isLoading: balancesLoading } = useBalances();
   // 이슈 #108 — 신분증 미인증 사용자는 전자지갑 카드 자체를 잠그고 인증 안내로 교체한다.
   const { data: profile } = useMyProfile();
   const isVerified = profile?.is_verified ?? false;
@@ -77,16 +102,33 @@ export default function HomePage() {
     rateRefreshMs
   );
   useEffect(() => {
-    setCurrencies(loadCurrencies());
+    setCurrencies(loadDisplayCurrencies());
   }, []);
 
-  // 메인 KRW 잔액 표시. 지갑 없음(WALLET4001)이면 ₩0으로 fallback (가입 직후 등 일시 상태).
-  // 그 외 에러는 로딩 중 표시와 동일하게 "—"로 두어 가짜 값 노출을 피함.
-  const krwBalance =
-    balancesError instanceof ApiException && balancesError.code === 'WALLET4001'
-      ? '0.0000'
-      : balanceOf(balances, 'KRW');
-  const mainAmount = balancesLoading ? '—' : formatBalance('KRW', krwBalance);
+  // 메인 통화 변경(이슈 #194) — 선택값을 localStorage에 저장하고 드롭다운을 닫는다.
+  const selectMainCurrency = (code: string) => {
+    setMainCurrency(code);
+    try {
+      localStorage.setItem(MAIN_CURRENCY_KEY, code);
+    } catch {
+      /* 저장 실패는 무시(이번 세션에만 반영) */
+    }
+    setMainCurrencyOpen(false);
+  };
+
+  // 표시 통화 칩 = 저장된 표시 통화 중 메인 통화를 제외한 것(메인은 큰 금액으로 이미 표기).
+  const displayCurrencies = currencies.filter((code) => code !== mainCurrency);
+
+  // 카드 큰 금액 = 총 원화환산액(/wallets/me)을 메인 통화로 환산(이슈 #194).
+  // 지갑 없음(WALLET4001)이면 0, 로딩/환율 미준비면 '—'.
+  const totalKrw =
+    walletMeError instanceof ApiException && walletMeError.code === 'WALLET4001'
+      ? 0
+      : Number(walletMe?.total_balance_in_krw ?? 0);
+  const mainAmountReady = !walletMeLoading && (mainCurrency === 'KRW' || !ratesLoading);
+  const mainAmount = mainAmountReady
+    ? (formatMainAmount(mainCurrency, totalKrw, ratesData?.rates) ?? '—')
+    : '—';
 
   // 현재 언어 코드 (i18n 기준). 헤더의 언어 셀렉터에 표시.
   const currentLangCode = (i18n.language || 'ko').toUpperCase().slice(0, 2);
@@ -115,26 +157,67 @@ export default function HomePage() {
         <div className={styles.wallet}>
           <div className={styles.walletRow}>
             <span>{t('home.wallet')}</span>
-            <span>
-              {t('home.mainCurrency')} KRW · {t('home.change')}
+            {/* 메인 통화 변경(이슈 #194) — 클릭 시 지원 4통화 드롭다운. 선택 시 큰 금액이 해당 통화로 환산됨. */}
+            <span style={{ position: 'relative' }}>
+              <span style={{ cursor: 'pointer' }} onClick={() => setMainCurrencyOpen((o) => !o)}>
+                {t('home.mainCurrency')} {mainCurrency} · {t('home.change')} ▾
+              </span>
+              {mainCurrencyOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: '100%',
+                    marginTop: 4,
+                    background: '#fff',
+                    color: '#111',
+                    borderRadius: 8,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    zIndex: 10,
+                    overflow: 'hidden',
+                    minWidth: 132,
+                  }}
+                >
+                  {SUPPORTED_CURRENCIES.map((code) => (
+                    <div
+                      key={code}
+                      onClick={() => selectMainCurrency(code)}
+                      style={{
+                        padding: '8px 12px',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        fontWeight: code === mainCurrency ? 700 : 400,
+                      }}
+                    >
+                      {code} · {t(`home.currencies.${code}`)}
+                    </div>
+                  ))}
+                </div>
+              )}
             </span>
           </div>
-          <div className={styles.amount}>{mainAmount}</div>
+          {/* 총 금액 클릭 → 거래 내역(이슈 #194). */}
+          <div
+            className={styles.amount}
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigate(ROUTES.MYPAGE_WALLET_HISTORY)}
+          >
+            {mainAmount}
+          </div>
           <div
             className={styles.walletRowClickable}
             onClick={() => navigate('/home/currency-settings')}
           >
-            <span>{t('home.showingNCurrencies', { count: currencies.length })}</span>
+            <span>{t('home.showingNCurrencies', { count: displayCurrencies.length })}</span>
             <span>{t('home.settings')} ›</span>
           </div>
           <div className={styles.currencyGrid}>
-            {currencies.map((currency) => {
-              // 사용자가 고른 통화의 실제 잔액. 백엔드 미지원 통화(THB/CNY/JPY/EUR)는 0으로 표시됨.
+            {displayCurrencies.map((code) => {
               const display = balancesLoading
-                ? `${currency.code} —`
-                : `${currency.code} ${formatBalance(currency.code, balanceOf(balances, currency.code))}`;
+                ? `${code} —`
+                : `${code} ${formatBalance(code, balanceOf(balances, code))}`;
               return (
-                <div key={currency.code} className={styles.currencyChip}>
+                <div key={code} className={styles.currencyChip}>
                   {display}
                 </div>
               );
@@ -151,7 +234,6 @@ export default function HomePage() {
               {t('home.exchange')}
             </button>
           </div>
-          <p className={styles.walletFooter}>{t('home.walletSubtitle')}</p>
         </div>
       ) : (
         // 이슈 #108 — 신분증 미인증 사용자: 전자지갑 카드를 인증 안내로 교체.

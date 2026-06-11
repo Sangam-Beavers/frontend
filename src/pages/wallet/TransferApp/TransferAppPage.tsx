@@ -1,24 +1,24 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import { useRecentInternalRecipients } from '@/hooks/useRecentInternalRecipients';
 import { useValidateMember } from '@/hooks/useValidateMember';
 import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
 import { useSetting } from '@/hooks/useServiceSettings';
+import type { AvatarTone } from '@/types/community';
+import { trustGradeToTone } from '@/utils/trustGrade';
 import styles from './TransferAppPage.module.css';
 
-// 아바타 색상 톤 — mock에서 들고 있던 5색 그대로. 백엔드는 톤을 안 주므로 인덱스로 순환 매핑.
-type AvatarTone = 'best' | 'good' | 'mid' | 'warn' | 'bad';
-const TONES: AvatarTone[] = ['best', 'good', 'mid', 'warn', 'bad'];
-
-const AVATAR_CLASS: Record<AvatarTone, string> = {
-  best: styles.avatarBest,
+// 신뢰등급 톤 → CSS 클래스 (Phase 3 실데이터 연결 — mock 순환 배색 제거)
+const AVATAR_CLASS: Partial<Record<AvatarTone, string>> = {
+  default: styles.avatarDefault,
   good: styles.avatarGood,
-  mid: styles.avatarMid,
-  warn: styles.avatarWarn,
-  bad: styles.avatarBad,
+  best: styles.avatarBest,
+  purple: styles.avatarPurple,
+  gold: styles.avatarGold,
 };
 
 /** 화면에서 다루는 수신자 표시 모델 — API 응답에서 파생. */
@@ -32,6 +32,7 @@ interface RecipientDisplay {
 
 export default function TransferAppPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
 
   // 통화 드롭다운 (#120 패턴)
@@ -53,15 +54,15 @@ export default function TransferAppPage() {
   } = useRecentInternalRecipients();
   const hasRecipientsError = recipientsError != null;
 
-  // API 응답 → 화면용 모델 변환. tone은 인덱스 순환.
+  // API 응답 → 화면용 모델 변환. tone은 trust_grade에서 매핑 (Phase 3 실데이터 연결).
   const recentRecipients: RecipientDisplay[] = useMemo(() => {
     const list = recipientsData?.receivers ?? [];
-    return list.map((r, idx) => ({
+    return list.map((r) => ({
       identifier: r.nickname,
       name: r.nickname,
       initial: r.nickname.charAt(0).toUpperCase() || '?',
       currency: r.last_currency_code,
-      tone: TONES[idx % TONES.length],
+      tone: trustGradeToTone(r.trust_grade),
     }));
   }, [recipientsData]);
 
@@ -115,7 +116,7 @@ export default function TransferAppPage() {
           initial: res.nickname.charAt(0).toUpperCase() || '?',
           // 통화는 백엔드 응답에 없음 → 현재 selectedCurrency 유지 (사용자가 따로 선택).
           currency,
-          tone: 'good',
+          tone: trustGradeToTone(res.trust_grade),
         });
       },
       onError: (err) => {
@@ -175,7 +176,10 @@ export default function TransferAppPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title={t('transfer.app.title')} onBack={() => navigate('/transfer')} />
+        <TopBar
+          title={t('transfer.app.title')}
+          onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.TRANSFER))}
+        />
 
         <div className={styles.section}>{t('transfer.app.recentSection')}</div>
 
@@ -199,7 +203,11 @@ export default function TransferAppPage() {
                 className={styles.recentCard}
                 onClick={() => handleRecentSelect(user)}
               >
-                <div className={`${styles.avatar} ${AVATAR_CLASS[user.tone]}`}>{user.initial}</div>
+                <div
+                  className={`${styles.avatar} ${AVATAR_CLASS[user.tone] ?? styles.avatarDefault}`}
+                >
+                  {user.initial}
+                </div>
                 <div className={styles.recentName}>{user.name}</div>
                 <div className={styles.recentCurrency}>{user.currency}</div>
               </div>
@@ -238,7 +246,9 @@ export default function TransferAppPage() {
 
         {verified && (
           <div className={styles.verifiedCard}>
-            <div className={`${styles.avatar} ${AVATAR_CLASS[verified.tone]}`}>
+            <div
+              className={`${styles.avatar} ${AVATAR_CLASS[verified.tone] ?? styles.avatarDefault}`}
+            >
               {verified.initial}
             </div>
             <div className={styles.verifiedInfo}>

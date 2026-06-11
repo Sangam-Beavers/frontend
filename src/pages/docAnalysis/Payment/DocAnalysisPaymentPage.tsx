@@ -49,7 +49,7 @@ export default function DocAnalysisPaymentPage() {
         type="button"
         className={styles.primaryBtn}
         disabled={!agreed}
-        onClick={() => navigate('/doc-analysis/loading')}
+        onClick={() => navigate('/doc-analysis')}
       >
         {t('doc.payment.payButton')}
       </button>
