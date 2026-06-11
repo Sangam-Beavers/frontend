@@ -387,7 +387,7 @@
     "step2HeadingWithName": "{{nickname}}님, 정말 떠나시겠어요?",
     "step2Sub": "탈퇴하면 아래 데이터가 모두 사라져요.",
     "lossWalletBalance": "전자지갑 잔액",
-    "lossWalletBalanceDesc": "출금 후 탈퇴를 권장합니다",
+    "lossWalletBalanceDesc": "남은 금액은 탈퇴 시 사라져요. 출금 후 탈퇴해주세요",
     "lossTransactions": "송금·환전·충전 내역",
     "lossTransactionsDesc": "복구할 수 없어요",
     "lossCommunity": "커뮤니티 작성글·댓글",

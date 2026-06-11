@@ -387,7 +387,7 @@
     "step2HeadingWithName": "{{nickname}}, bạn có chắc không?",
     "step2Sub": "Tất cả dữ liệu dưới đây sẽ bị xóa.",
     "lossWalletBalance": "Số dư ví",
-    "lossWalletBalanceDesc": "Khuyên rút số dư trước.",
+    "lossWalletBalanceDesc": "Số dư còn lại sẽ mất khi rời đi. Vui lòng rút tiền trước.",
     "lossTransactions": "Lịch sử giao dịch",
     "lossTransactionsDesc": "Không thể khôi phục.",
     "lossCommunity": "Bài viết và bình luận cộng đồng",

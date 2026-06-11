@@ -387,7 +387,7 @@
     "step2HeadingWithName": "{{nickname}}, sigurado ka ba?",
     "step2Sub": "Mawawala ang lahat ng datos sa ibaba.",
     "lossWalletBalance": "Wallet balance",
-    "lossWalletBalanceDesc": "Inirerekomenda i-withdraw muna.",
+    "lossWalletBalanceDesc": "Mawawala ang natitirang balanse kapag umalis ka. Mag-withdraw muna.",
     "lossTransactions": "Transaction history",
     "lossTransactionsDesc": "Hindi na maibabalik.",
     "lossCommunity": "Posts at komento sa komunidad",
