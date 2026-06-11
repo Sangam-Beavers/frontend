@@ -7,6 +7,8 @@
   padding: 32px 24px;
   background: #f8faff;
   text-align: center;
+  max-width: 430px;
+  margin: 0 auto;
 }
 
 .icon {

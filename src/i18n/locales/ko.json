@@ -46,6 +46,10 @@
     "lockedCta": "신분증 인증하기",
     "unverifiedHint": "인증 후 표시됩니다",
     "ratesLoading": "불러오는 중...",
+    "notices": {
+      "title": "공지사항",
+      "desc": "새로운 공지사항을 확인하세요"
+    },
     "notifications": {
       "fraudTitle": "이상거래 탐지",
       "fraudDesc": "현재 전자지갑은 안전합니다.",
@@ -118,7 +122,8 @@
       "subscription": "구독 관리",
       "additionalCert": "추가 인증",
       "language": "언어 설정",
-      "withdraw": "회원 탈퇴"
+      "withdraw": "회원 탈퇴",
+      "appManage": "앱 관리"
     },
     "verified": "완료"
   },

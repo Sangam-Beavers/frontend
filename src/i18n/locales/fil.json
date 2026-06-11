@@ -46,6 +46,10 @@
     "lockedCta": "I-verify ang ID",
     "unverifiedHint": "Ipinapakita pagkatapos ng verification",
     "ratesLoading": "Naglo-load…",
+    "notices": {
+      "title": "Mga Abiso",
+      "desc": "Tingnan ang mga pinakabagong abiso"
+    },
     "notifications": {
       "fraudTitle": "Pagtuklas ng manloloko",
       "fraudDesc": "Ligtas ang iyong wallet sa kasalukuyan.",
@@ -118,7 +122,8 @@
       "subscription": "Subscription",
       "additionalCert": "ID Verification",
       "language": "Wika",
-      "withdraw": "Tanggalin ang Account"
+      "withdraw": "Tanggalin ang Account",
+      "appManage": "Pamamahala ng App"
     },
     "verified": "Tapos na"
   },

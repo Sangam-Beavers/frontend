@@ -46,6 +46,10 @@
     "lockedCta": "Xác minh ID",
     "unverifiedHint": "Hiển thị sau khi xác minh",
     "ratesLoading": "Đang tải…",
+    "notices": {
+      "title": "Thông báo",
+      "desc": "Kiểm tra thông báo mới nhất"
+    },
     "notifications": {
       "fraudTitle": "Phát hiện giao dịch bất thường",
       "fraudDesc": "Ví điện tử của bạn hiện đang an toàn.",
@@ -118,7 +122,8 @@
       "subscription": "Đăng ký",
       "additionalCert": "Xác minh ID",
       "language": "Ngôn ngữ",
-      "withdraw": "Xóa tài khoản"
+      "withdraw": "Xóa tài khoản",
+      "appManage": "Quản lý ứng dụng"
     },
     "verified": "Hoàn tất"
   },

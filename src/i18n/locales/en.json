@@ -46,6 +46,10 @@
     "lockedCta": "Verify ID",
     "unverifiedHint": "Shown after verification",
     "ratesLoading": "Loading…",
+    "notices": {
+      "title": "Notices",
+      "desc": "Check the latest announcements"
+    },
     "notifications": {
       "fraudTitle": "Fraud detection",
       "fraudDesc": "Your wallet is currently safe.",
@@ -118,7 +122,8 @@
       "subscription": "Subscription",
       "additionalCert": "ID Verification",
       "language": "Language",
-      "withdraw": "Delete Account"
+      "withdraw": "Delete Account",
+      "appManage": "App Management"
     },
     "verified": "Done"
   },

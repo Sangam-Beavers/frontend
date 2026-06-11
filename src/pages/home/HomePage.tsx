@@ -248,8 +248,8 @@ export default function HomePage() {
           onClick={() => navigate(ROUTES.NOTICES)}
           style={{ cursor: 'pointer' }}
         >
-          <div className={styles.cardTitle}>공지사항</div>
-          <div className={styles.cardText}>새로운 공지사항을 확인하세요</div>
+          <div className={styles.cardTitle}>{t('home.notices.title')}</div>
+          <div className={styles.cardText}>{t('home.notices.desc')}</div>
         </div>
         {/* 기존 mock 알림 카드 */}
         {NOTIFICATIONS.map((notif) => {

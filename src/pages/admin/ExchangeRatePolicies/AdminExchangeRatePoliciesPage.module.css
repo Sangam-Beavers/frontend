@@ -24,3 +24,4 @@
 .empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 40px 0; }
 .addBtn { width: 40px; height: 40px; border: none; border-radius: 14px; background: var(--blue); color: #fff; font-weight: 800; font-size: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
 .createBox { border: 1px solid var(--blue); border-radius: 14px; padding: 14px; background: #f0f7ff; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.fieldError { font-size: 11px; color: #ef4444; margin: -4px 0 0 0; font-weight: 600; }

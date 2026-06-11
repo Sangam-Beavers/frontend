@@ -24,10 +24,15 @@ export default function AdminAppPage() {
       <div className={styles.section}>관리 메뉴</div>
       <div className={styles.list}>
         {MENU.map((item) => (
-          <div key={item.path} className={styles.item} onClick={() => navigate(item.path)}>
+          <button
+            key={item.path}
+            type="button"
+            className={styles.item}
+            onClick={() => navigate(item.path)}
+          >
             <span>{item.label}</span>
             <span className={styles.arrow}>›</span>
-          </div>
+          </button>
         ))}
       </div>
     </div>

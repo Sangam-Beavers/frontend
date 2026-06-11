@@ -57,7 +57,7 @@ export default function MyPage() {
 
   const isAdmin = isAdminUser();
 
-  const ADMIN_ITEMS = [{ label: '앱 관리', path: ROUTES.ADMIN_APP }];
+  const ADMIN_ITEMS = [{ label: t('mypage.items.appManage'), path: ROUTES.ADMIN_APP }];
 
   const nickname = profile?.nickname ?? '';
   // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.

@@ -5,14 +5,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import styles from './AdminExchangeRatePoliciesPage.module.css';
 
 const EMPTY_CREATE = { currencyCode: '', spread: '', active: true };
+const CURRENCY_CODE_RE = /^[A-Z]{3}$/;
+
+function isValidSpread(v: string): boolean {
+  const n = parseFloat(v);
+  return v !== '' && Number.isFinite(n) && n >= 0;
+}
 
 export default function AdminExchangeRatePoliciesPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [editTarget, setEditTarget] = useState<ExchangeRatePolicyResponse | null>(null);
   const [editForm, setEditForm] = useState({ spread: '', active: true });
+  const [editSpreadError, setEditSpreadError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState(EMPTY_CREATE);
+  const [createCodeError, setCreateCodeError] = useState<string | null>(null);
+  const [createSpreadError, setCreateSpreadError] = useState<string | null>(null);
 
   const { data: policies = [], isLoading } = useQuery({
     queryKey: ['admin', 'exchange-rate-policies'],
@@ -20,11 +29,17 @@ export default function AdminExchangeRatePoliciesPage() {
   });
 
   const createMut = useMutation({
-    mutationFn: () => exchangeRatePolicyApi.create(createForm),
+    mutationFn: () =>
+      exchangeRatePolicyApi.create({
+        ...createForm,
+        currencyCode: createForm.currencyCode.trim().toUpperCase(),
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'exchange-rate-policies'] });
       setShowCreate(false);
       setCreateForm(EMPTY_CREATE);
+      setCreateCodeError(null);
+      setCreateSpreadError(null);
     },
   });
 
@@ -43,7 +58,36 @@ export default function AdminExchangeRatePoliciesPage() {
   const startEdit = (p: ExchangeRatePolicyResponse) => {
     setEditTarget(p);
     setEditForm({ spread: p.spread, active: p.active });
+    setEditSpreadError(null);
   };
+
+  function handleCreate() {
+    const code = createForm.currencyCode.trim().toUpperCase();
+    let hasError = false;
+    if (!CURRENCY_CODE_RE.test(code)) {
+      setCreateCodeError('통화 코드는 영문 대문자 3자리여야 합니다 (예: PHP)');
+      hasError = true;
+    } else {
+      setCreateCodeError(null);
+    }
+    if (!isValidSpread(createForm.spread)) {
+      setCreateSpreadError('0 이상의 숫자를 입력하세요');
+      hasError = true;
+    } else {
+      setCreateSpreadError(null);
+    }
+    if (hasError) return;
+    createMut.mutate();
+  }
+
+  function handleSaveEdit(p: ExchangeRatePolicyResponse) {
+    if (!isValidSpread(editForm.spread)) {
+      setEditSpreadError('0 이상의 숫자를 입력하세요');
+      return;
+    }
+    setEditSpreadError(null);
+    updateMut.mutate(p);
+  }
 
   return (
     <div className={styles.wrap}>
@@ -65,18 +109,33 @@ export default function AdminExchangeRatePoliciesPage() {
               className={styles.input}
               placeholder="예: PHP"
               value={createForm.currencyCode}
-              onChange={(e) => setCreateForm((f) => ({ ...f, currencyCode: e.target.value }))}
+              onChange={(e) => {
+                const v = e.target.value
+                  .toUpperCase()
+                  .replace(/[^A-Z]/g, '')
+                  .slice(0, 3);
+                setCreateForm((f) => ({ ...f, currencyCode: v }));
+                setCreateCodeError(null);
+              }}
             />
           </div>
+          {createCodeError && <p className={styles.fieldError}>{createCodeError}</p>}
           <div className={styles.row}>
             <span className={styles.label}>스프레드(%)</span>
             <input
+              type="number"
+              step="0.01"
+              min="0"
               className={styles.input}
               placeholder="예: 1.50"
               value={createForm.spread}
-              onChange={(e) => setCreateForm((f) => ({ ...f, spread: e.target.value }))}
+              onChange={(e) => {
+                setCreateForm((f) => ({ ...f, spread: e.target.value }));
+                setCreateSpreadError(null);
+              }}
             />
           </div>
+          {createSpreadError && <p className={styles.fieldError}>{createSpreadError}</p>}
           <label className={styles.checkLabel}>
             <input
               type="checkbox"
@@ -92,7 +151,7 @@ export default function AdminExchangeRatePoliciesPage() {
             <button
               type="button"
               className={styles.saveBtn}
-              onClick={() => createMut.mutate()}
+              onClick={handleCreate}
               disabled={createMut.isPending}
             >
               등록
@@ -120,11 +179,18 @@ export default function AdminExchangeRatePoliciesPage() {
                   <div className={styles.row}>
                     <span className={styles.label}>스프레드(%)</span>
                     <input
+                      type="number"
+                      step="0.01"
+                      min="0"
                       className={styles.input}
                       value={editForm.spread}
-                      onChange={(e) => setEditForm((f) => ({ ...f, spread: e.target.value }))}
+                      onChange={(e) => {
+                        setEditForm((f) => ({ ...f, spread: e.target.value }));
+                        setEditSpreadError(null);
+                      }}
                     />
                   </div>
+                  {editSpreadError && <p className={styles.fieldError}>{editSpreadError}</p>}
                   <label className={styles.checkLabel}>
                     <input
                       type="checkbox"
@@ -144,7 +210,7 @@ export default function AdminExchangeRatePoliciesPage() {
                     <button
                       type="button"
                       className={styles.saveBtn}
-                      onClick={() => updateMut.mutate(p)}
+                      onClick={() => handleSaveEdit(p)}
                       disabled={updateMut.isPending}
                     >
                       저장

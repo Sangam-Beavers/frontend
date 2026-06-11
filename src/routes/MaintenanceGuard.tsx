@@ -12,7 +12,8 @@ export default function MaintenanceGuard() {
   const maintenanceMode = useSetting('MAINTENANCE_MODE', 'false');
   const isAdmin = isAdminUser();
 
-  if (maintenanceMode === 'true' && !isAdmin) {
+  const isMaintenanceOn = ['true', '1', 'yes'].includes(maintenanceMode.toLowerCase());
+  if (isMaintenanceOn && !isAdmin) {
     return <MaintenancePage />;
   }
 

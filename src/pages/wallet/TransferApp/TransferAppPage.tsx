@@ -91,6 +91,9 @@ export default function TransferAppPage() {
     if (maxAmount > 0 && num > maxAmount) {
       return `1회 최대 송금 금액은 ₩${maxAmount.toLocaleString()}입니다.`;
     }
+    if (dailyMax > 0 && num > dailyMax) {
+      return `일일 한도 ₩${dailyMax.toLocaleString()}을 초과합니다.`;
+    }
     return null;
   }
   const amountError = getAmountError();
