@@ -1,0 +1,70 @@
+/* GradeUpCelebration — 등급 상승 축하 모먼트 (비버 캐릭터 없음, 테두리 + 토스트 + 컨페티) */
+
+/* ── 오버레이 ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ── 컨페티 파티클 ── */
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: fall 1.5s ease-in forwards;
+}
+
+@keyframes fall {
+  0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+}
+
+/* ── 등급 상승 토스트 ── */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 910;
+  background: #1a1a2e;
+  color: #fff;
+  border-radius: 16px;
+  padding: 14px 24px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             fadeOut 0.4s ease 2.6s forwards;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.toastTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #f59e0b;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.toastMessage {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+@keyframes slideUp {
+  from { transform: translateX(-50%) translateY(24px); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
