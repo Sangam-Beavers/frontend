@@ -20,6 +20,7 @@ import { ApiException, memberApi } from '@/api';
 import { ROUTES } from '@/constants/routes';
 import { NATIONALITIES } from '@/constants/nationalities';
 import { SIGNUP_LANGUAGES as LANGUAGES } from '@/constants/languages';
+import { GENDERS, AGE_RANGES } from '@/constants/demographics';
 
 interface CheckboxRowProps {
   label: string;
@@ -50,6 +51,8 @@ function Signup() {
     nickname: '',
     nationality: '',
     language: '',
+    gender: '',
+    ageRange: '',
     agreeTerms: false,
     agreePrivacy: false,
   });
@@ -124,7 +127,16 @@ function Signup() {
     const name = form.name.trim();
     const nickname = form.nickname.trim();
 
-    if (!email || !form.password || !name || !nickname || !form.nationality || !form.language) {
+    if (
+      !email ||
+      !form.password ||
+      !name ||
+      !nickname ||
+      !form.nationality ||
+      !form.language ||
+      !form.gender ||
+      !form.ageRange
+    ) {
       setError(t('auth.signup.errorAllFieldsRequired'));
       return;
     }
@@ -146,6 +158,8 @@ function Signup() {
         nickname,
         nationality: form.nationality,
         language: form.language,
+        gender: form.gender,
+        age_range: form.ageRange,
       });
       setDone(true); // 201 — 가입 완료 (자동 로그인 아님 → 로그인 화면으로 안내)
     } catch (err) {
@@ -342,6 +356,42 @@ function Signup() {
                   {LANGUAGES.map((l) => (
                     <option key={l} value={l}>
                       {l}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="auth-grid2">
+              <div className="auth-field">
+                <label htmlFor="signup-gender">{t('auth.signup.genderLabel')}</label>
+                <select
+                  id="signup-gender"
+                  className="auth-select"
+                  value={form.gender}
+                  onChange={set('gender')}
+                >
+                  <option value="">{t('auth.signup.selectOption')}</option>
+                  {GENDERS.map((g) => (
+                    <option key={g.value} value={g.value}>
+                      {g.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="auth-field">
+                <label htmlFor="signup-age-range">{t('auth.signup.ageRangeLabel')}</label>
+                <select
+                  id="signup-age-range"
+                  className="auth-select"
+                  value={form.ageRange}
+                  onChange={set('ageRange')}
+                >
+                  <option value="">{t('auth.signup.selectOption')}</option>
+                  {AGE_RANGES.map((a) => (
+                    <option key={a.value} value={a.value}>
+                      {a.label}
                     </option>
                   ))}
                 </select>

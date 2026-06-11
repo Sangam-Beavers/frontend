@@ -19,6 +19,13 @@ export interface SignupBody {
   nickname: string;
   nationality: string;
   language: string;
+  /** 성별 — 백엔드 Gender enum 코드 (MALE / FEMALE). 이슈 #203. */
+  gender: string;
+  /**
+   * 연령대 — 백엔드 AgeRange enum 코드 (TEENS / TWENTIES / THIRTIES / FORTIES / FIFTIES / SIXTIES_PLUS).
+   * 백엔드 전역 SNAKE_CASE 규칙 — 필드명 그대로 사용. 이슈 #203.
+   */
+  age_range: string;
 }
 
 /** 가입 성공(201) 응답 data. 내부 id(BIGINT)는 노출되지 않는다(public_id만). */
