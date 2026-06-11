@@ -9,29 +9,7 @@ import { walletApi } from '@/api/wallet';
 import { ApiException } from '@/api/client';
 import styles from './AdditionalCertPage.module.css';
 
-/**
- * 추가 인증(신분증 인증) 화면. 이슈 #108 / 백엔드 #152.
- *
- * <p>OCR 미도입 단계 — 사용자가 신분증 번호를 직접 입력해 인증한다. 형식 검증 통과 시 백엔드가
- * 즉시 APPROVED + 인증 배지 + 전자지갑 자동 개설을 처리한다.
- *
- * <p>이슈 #108로 신분증 종류 정리:
- * <ul>
- *   <li>외국인 등록증 — 한국 거주 외국인 노동자(앱 주 사용자, 송금자)</li>
- *   <li>본국 신분증(한국/미국/베트남/필리핀) — 본국 거주 가족(INTERNAL_TRANSFER 수령자)</li>
- * </ul>
- * 여권은 외국인등록증/본국 신분증 두 분류로 사용자가 대부분 커버되므로 제거.
- */
-
-/** 본국 신분증 국가 코드(2단계 선택 시 사용). */
 type NationalCountryCode = 'KR' | 'US' | 'VN' | 'PH';
-
-/**
- * 신분증 번호 자동 포맷터(타입별).
- *
- * <p>사용자가 숫자/영문만 입력해도 표준 표기(예: `YYMMDD-Sxxxxxx`, `XXX-XX-XXXX`)로 자동 변환된다.
- * 정규식 검증·서버 전송도 포맷된 값을 그대로 사용 — UI 입력과 서버 데이터의 표기가 항상 일치한다.
- */
 
 /** YYMMDD-Sxxxxxx (외국인등록증·한국 RRN 공통). 숫자만 13자리, 6자리 후 자동 하이픈. */
 function formatRrnLike(raw: string): string {
@@ -70,9 +48,7 @@ interface NationalIdMeta {
   placeholderKey: string;
   pattern: RegExp;
   formatHintKey: string;
-  /** 자동 포맷 함수(타입별). */
   format: (raw: string) => string;
-  /** input maxLength — 포맷된 값 기준 자릿수. */
   maxLength: number;
 }
 
@@ -127,7 +103,6 @@ const NATIONAL_IDS: NationalIdMeta[] = [
   },
 ];
 
-/** 외국인 등록증(고정 1종). */
 const ALIEN_META = {
   serverCode: 'ALIEN_REGISTRATION' as IdentityDocumentTypeCode,
   titleKey: 'mypage2.cert.alien.title',
@@ -139,7 +114,6 @@ const ALIEN_META = {
   maxLength: 14,
 };
 
-/** 1단계 신분증 분류 — 외국인등록증 vs 본국 신분증. */
 type IdKind = 'ALIEN' | 'NATIONAL';
 
 export default function AdditionalCertPage() {
@@ -155,7 +129,6 @@ export default function AdditionalCertPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // 선택된 신분증 메타(외국인 등록증 OR 선택된 국가의 본국 신분증).
   const selectedMeta = useMemo(() => {
     if (kind === 'ALIEN') return ALIEN_META;
     if (kind === 'NATIONAL' && nationalCode) {
@@ -164,16 +137,12 @@ export default function AdditionalCertPage() {
     return null;
   }, [kind, nationalCode]);
 
-  /**
-   * 클라이언트 1차 정규식 검증(UX). 서버가 최종 검증(SSOT).
-   * 입력은 onChange에서 이미 format으로 정규화돼 들어오므로 그대로 매칭.
-   */
+  // 클라이언트 1차 검증(UX). 서버가 최종 검증(SSOT).
   const isFormatValid = useMemo(() => {
     if (!selectedMeta) return false;
     return selectedMeta.pattern.test(documentNumber);
   }, [selectedMeta, documentNumber]);
 
-  /** 1단계 분류 변경 — 하위 상태 초기화. */
   const selectKind = (next: IdKind) => {
     setKind(next);
     setNationalCode(null);
@@ -198,8 +167,6 @@ export default function AdditionalCertPage() {
 
     setSubmitting(true);
     try {
-      // 입력은 이미 format으로 정규화돼 documentNumber에 들어있다 — 그대로 전송한다.
-      // 서버도 IdentityDocumentType#normalize로 동일 정규화 후 검증·저장(예: 필리핀 PCN 대문자).
       await verificationApi.submit({
         identity_document_type: selectedMeta.serverCode,
         document_number: documentNumber,
@@ -215,8 +182,6 @@ export default function AdditionalCertPage() {
         // 인증은 이미 commit됐으니 막지 않는다 — 다음 흐름(PIN 설정 등)에서 보정.
       }
 
-      // 인증 성공 → is_verified=true가 즉시 반영되도록 프로필 캐시를 refetch한 뒤 이동한다.
-      // (VerifiedRoute가 그 다음 라우트들에서 캐시된 false를 보지 않게 하기 위함)
       await queryClient.refetchQueries({ queryKey: ['member', 'me'] });
       navigate(ROUTES.MYPAGE_BADGE_COMPLETE);
     } catch (e) {
@@ -241,7 +206,7 @@ export default function AdditionalCertPage() {
       <div className={styles.contentExtraPad}>
         <TopBar
           title={t('mypage2.cert.title')}
-          onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+          onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.MYPAGE))}
         />
 
         <div className={`${styles.card} ${styles.cardInfo}`}>
@@ -249,7 +214,6 @@ export default function AdditionalCertPage() {
           <div className={styles.cardText}>{t('mypage2.cert.infoText')}</div>
         </div>
 
-        {/* 1단계: 신분증 분류 */}
         <div className={styles.list}>
           <div
             className={`${styles.item} ${kind === 'ALIEN' ? styles.itemSelected : ''}`}
@@ -279,7 +243,6 @@ export default function AdditionalCertPage() {
           </div>
         </div>
 
-        {/* 2단계: 본국 신분증 선택 시 국가 라디오 */}
         {kind === 'NATIONAL' && (
           <div className={styles.countryRow}>
             {NATIONAL_IDS.map((m) => (
@@ -298,7 +261,6 @@ export default function AdditionalCertPage() {
           </div>
         )}
 
-        {/* 3단계: 번호 입력 */}
         {selectedMeta && (
           <div className={styles.inputBlock}>
             <label className={styles.inputLabel} htmlFor="documentNumber">
@@ -311,7 +273,6 @@ export default function AdditionalCertPage() {
               placeholder={t(selectedMeta.placeholderKey)}
               value={documentNumber}
               onChange={(e) => {
-                // 자동 포맷팅: 사용자가 숫자/영문만 입력해도 표준 표기(하이픈 등)로 변환된다.
                 setDocumentNumber(selectedMeta.format(e.target.value));
                 setErrorMsg(null);
               }}

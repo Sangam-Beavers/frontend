@@ -7,15 +7,14 @@ import { useVerifyAccount } from '@/hooks/useVerifyAccount';
 import { useConfirmAccount } from '@/hooks/useConfirmAccount';
 import { useRegisterAccount } from '@/hooks/useRegisterAccount';
 import { accountErrorMessage } from '@/utils/accountErrorMessage';
+import { ROUTES } from '@/constants/routes';
 import type { AuthStep, AccountRegisterDraft, RegisteredAccountView } from '@/types/charge';
 import styles from './AutoDebitAuthPage.module.css';
 
-/** ISO 8601 문자열로부터 남은 초를 계산. 0 미만이면 0 반환. */
 function secondsLeft(expiresAt: string): number {
   return Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
 }
 
-/** 초를 "MM:SS" 형식으로 변환. */
 function formatCountdown(secs: number): string {
   const m = Math.floor(secs / 60);
   const s = secs % 60;
@@ -73,7 +72,7 @@ export default function AutoDebitAuthPage() {
         <button
           type="button"
           className={styles.primary}
-          onClick={() => navigate('/charge/add-account')}
+          onClick={() => navigate(ROUTES.CHARGE_ADD_ACCOUNT)}
         >
           {t('charge.autoDebit.goAddAccount')}
         </button>
@@ -121,7 +120,7 @@ export default function AutoDebitAuthPage() {
             accountNumberMasked: acc.account_number_masked,
             holderName: draft.holderName,
           };
-          navigate('/charge/account-registered', { state: view });
+          navigate(ROUTES.CHARGE_ACCOUNT_REGISTERED, { state: view });
         },
       }
     );
@@ -223,7 +222,7 @@ export default function AutoDebitAuthPage() {
         <button
           type="button"
           className={styles.primary}
-          onClick={() => navigate('/mypage/accounts')}
+          onClick={() => navigate(ROUTES.MYPAGE_ACCOUNTS)}
         >
           {t('charge.autoDebit.viewAccounts')}
         </button>

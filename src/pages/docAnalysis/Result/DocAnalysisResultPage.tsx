@@ -200,8 +200,6 @@ export default function DocAnalysisResultPage() {
         </button>
       </div>
 
-      {/* 바텀시트 — 진입 버튼이 누르면 store.isOpen=true → 슬라이드 업.
-          시트 초기 화면에 도구 4종 안내 + 분석 결과 기반 추천 질문 노출. */}
       <ChatbotSheet suggestedTopics={suggestedTopics} />
     </div>
   );

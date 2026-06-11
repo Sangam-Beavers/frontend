@@ -316,7 +316,8 @@
         "DOCUMENT": "서류 분석",
         "ACCOUNT": "계정"
       },
-      "loadError": "불러올 수 없습니다."
+      "loadError": "불러올 수 없습니다.",
+      "bannerSub": "궁금한 내용을 카테고리별로 찾아보세요"
     }
   },
   "docAnalysis": {

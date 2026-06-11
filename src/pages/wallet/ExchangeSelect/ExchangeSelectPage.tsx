@@ -50,7 +50,7 @@ export default function ExchangeSelectPage() {
     <>
       <TopBar
         title={t('exchange.select.title')}
-        onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.HOME))}
       />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>

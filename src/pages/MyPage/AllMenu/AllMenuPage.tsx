@@ -1,5 +1,5 @@
-import { useMemo, useLayoutEffect, useRef, useState } from 'react';
-import { useNavigate, useNavigationType, useSearchParams } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { startLogout } from '@/auth/logout';
 import Identicon from '@/components/common/Identicon';
@@ -10,6 +10,9 @@ import styles from './AllMenuPage.module.css';
 
 const NAV_KEYS = ['all', 'finance', 'documents', 'community', 'mypage', 'support'] as const;
 type NavKey = (typeof NAV_KEYS)[number];
+
+const TAB_KEY = 'allMenu_activeNav';
+const SCROLL_KEY = 'allMenu_scroll';
 
 interface MenuItem {
   labelKey: string;
@@ -31,7 +34,6 @@ const docItems: MenuItem[] = [
   { labelKey: 'allmenu.items.docHistory', path: '/mypage/doc-analysis-history' },
 ];
 
-// 커뮤니티 카테고리는 community.categories.* 키 재사용 (COMMUNITY_TABS과 의미 동일)
 const communityItems: MenuItem[] = [
   { labelKey: 'allmenu.items.communityHome', path: ROUTES.COMMUNITY },
   { labelKey: 'community.categories.residence', path: ROUTES.COMMUNITY_RESIDENCE },
@@ -89,10 +91,9 @@ const QUICK_LINKS: MenuItem[] = [
   { labelKey: 'allmenu.quickLinks.language', path: ROUTES.MYPAGE_LANGUAGE },
 ];
 
-const SCROLL_KEY = 'allMenu_rightContent_scroll';
-
 export default function AllMenuPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const navType = useNavigationType();
   const { t } = useTranslation();
   const { data: profile, isLoading } = useMyProfile();
@@ -102,37 +103,43 @@ export default function AllMenuPage() {
     ? (LANGUAGE_CODE_TO_LABEL[profile.language] ?? profile.language)
     : '';
 
-  // ── 좌측 탭: URL search param으로 관리 → 뒤로가기 시 탭 상태 복원 ──────────
-  const [searchParams, setSearchParams] = useSearchParams();
-  const rawTab = searchParams.get('tab');
-  const activeNav: NavKey = NAV_KEYS.includes(rawTab as NavKey) ? (rawTab as NavKey) : 'all';
+  // useSearchParams 대신 sessionStorage: setSearchParams가 location.key를 바꿔
+  // useScrollRestoration이 스크롤을 0으로 리셋하는 부작용을 방지.
+  // POP(뒤로가기)이면 이전 탭 복원, 새 진입이면 '전체' 탭으로 초기화.
+  const [activeNav, setActiveNav] = useState<NavKey>(() => {
+    if (navType === 'POP') {
+      const saved = sessionStorage.getItem(TAB_KEY) as NavKey;
+      return NAV_KEYS.includes(saved) ? saved : 'all';
+    }
+    return 'all';
+  });
 
-  const setActiveNav = (key: NavKey) => {
-    const next = new URLSearchParams(searchParams);
-    if (key === 'all') next.delete('tab');
-    else next.set('tab', key);
-    setSearchParams(next, { replace: true });
+  const handleSetActiveNav = (key: NavKey) => {
+    setActiveNav(key);
+    sessionStorage.setItem(TAB_KEY, key);
   };
 
-  // ── rightContent 스크롤 복원 ────────────────────────────────────────────────
-  const rightContentRef = useRef<HTMLDivElement>(null);
+  // rightContent는 data-scroll-root가 아닌 자체 overflow-y: auto 컨테이너이므로
+  // 전역 useScrollRestoration 대신 여기서 직접 저장·복원한다.
+  const rightRef = useRef<HTMLDivElement>(null);
 
-  // POP(뒤로가기)으로 돌아온 경우에만 저장된 위치 복원
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useLayoutEffect(() => {
     if (navType !== 'POP') return;
-    const saved = sessionStorage.getItem(SCROLL_KEY);
-    if (saved && rightContentRef.current) {
-      rightContentRef.current.scrollTop = Number(saved);
-    }
-  }, [navType]);
+    const saved = sessionStorage.getItem(`${SCROLL_KEY}_${location.key}`);
+    if (saved !== null && rightRef.current) rightRef.current.scrollTop = Number(saved);
+  }, []);
 
-  // 메뉴 항목 클릭 시 스크롤 위치 저장 후 이동
-  const navigateTo = (path: string) => {
-    if (rightContentRef.current) {
-      sessionStorage.setItem(SCROLL_KEY, String(rightContentRef.current.scrollTop));
-    }
-    navigate(path, { state: { from: ROUTES.ALL_MENU } });
-  };
+  useEffect(() => {
+    const key = location.key;
+    return () => {
+      if (rightRef.current) {
+        try {
+          sessionStorage.setItem(`${SCROLL_KEY}_${key}`, String(rightRef.current.scrollTop));
+        } catch {}
+      }
+    };
+  }, [location.key]);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -179,7 +186,12 @@ export default function AllMenuPage() {
         {/* Quick access */}
         <div className={styles.quickGrid}>
           {QUICK_LINKS.map((q) => (
-            <span key={q.labelKey} onClick={() => navigateTo(q.path)}>
+            <span
+              key={q.labelKey}
+              onClick={() => {
+                navigate(q.path, { state: { from: ROUTES.ALL_MENU } });
+              }}
+            >
               {t(q.labelKey)}
             </span>
           ))}
@@ -199,7 +211,13 @@ export default function AllMenuPage() {
         {/* Tags */}
         <div className={styles.tagRow}>
           {TAGS.map((tag) => (
-            <span key={tag.labelKey} className={styles.tag} onClick={() => navigateTo(tag.path)}>
+            <span
+              key={tag.labelKey}
+              className={styles.tag}
+              onClick={() => {
+                navigate(tag.path, { state: { from: ROUTES.ALL_MENU } });
+              }}
+            >
               {t(tag.labelKey)}
             </span>
           ))}
@@ -215,7 +233,9 @@ export default function AllMenuPage() {
                 <div
                   key={item.labelKey + item.path}
                   className={styles.menuItem}
-                  onClick={() => navigateTo(item.path)}
+                  onClick={() => {
+                    navigate(item.path, { state: { from: ROUTES.ALL_MENU } });
+                  }}
                 >
                   <span>{t(item.labelKey)}</span>
                   <span className={styles.arrow}>›</span>
@@ -231,7 +251,7 @@ export default function AllMenuPage() {
                 <div
                   key={key}
                   className={`${styles.leftItem} ${activeNav === key ? styles.leftItemActive : ''}`}
-                  onClick={() => setActiveNav(key)}
+                  onClick={() => handleSetActiveNav(key)}
                 >
                   {t(`allmenu.nav.${key}`)}
                 </div>
@@ -239,7 +259,7 @@ export default function AllMenuPage() {
             </div>
 
             {/* Right content */}
-            <div ref={rightContentRef} className={styles.rightContent}>
+            <div ref={rightRef} className={styles.rightContent}>
               {MENU[activeNav].map((block) => (
                 <div key={block.titleKey} className={styles.menuBlock}>
                   <b className={styles.blockTitle}>{t(block.titleKey)}</b>
@@ -247,7 +267,9 @@ export default function AllMenuPage() {
                     <div
                       key={item.labelKey + item.path}
                       className={styles.menuItem}
-                      onClick={() => navigateTo(item.path)}
+                      onClick={() => {
+                        navigate(item.path, { state: { from: ROUTES.ALL_MENU } });
+                      }}
                     >
                       <span>{t(item.labelKey)}</span>
                       <span className={styles.arrow}>›</span>

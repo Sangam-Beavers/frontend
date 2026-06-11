@@ -316,7 +316,8 @@
         "DOCUMENT": "Document Analysis",
         "ACCOUNT": "Account"
       },
-      "loadError": "Failed to load FAQs."
+      "loadError": "Failed to load FAQs.",
+      "bannerSub": "Find answers by category"
     }
   },
   "docAnalysis": {

@@ -179,7 +179,7 @@ export default function TransferAppPage() {
       <div className={styles.contentExtraPad}>
         <TopBar
           title={t('transfer.app.title')}
-          onBack={() => navigate(location.state?.from ?? ROUTES.TRANSFER)}
+          onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.TRANSFER))}
         />
 
         <div className={styles.section}>{t('transfer.app.recentSection')}</div>

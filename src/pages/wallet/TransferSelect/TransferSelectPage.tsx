@@ -48,7 +48,7 @@ export default function TransferSelectPage() {
     <>
       <TopBar
         title={t('transfer.select.title')}
-        onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.HOME))}
       />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>

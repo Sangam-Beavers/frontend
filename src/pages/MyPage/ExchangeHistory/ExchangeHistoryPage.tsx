@@ -1,18 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// pages/MyPage/ExchangeHistory/ExchangeHistoryPage.tsx — 환전 내역 목록 + 단건 상세 모달
-//
-// 데이터: useExchangeHistory(page, size) → walletApi.getExchanges
-//   - 백엔드 응답에 단건 상세 필드가 다 포함돼 있어, 행 클릭 시 추가 API 호출 없이 모달에서 바로 표시.
-//   - walletApi.getExchange(publicId)는 향후 직접 URL 접근용으로 surface는 유지(현재 미사용).
-//
-// 상태:
-//   로딩         → 안내 카드
-//   빈 결과      → "환전 내역이 없습니다"
-//   에러         → 에러 메시지 (AUTH4011은 apiClient interceptor가 로그인 화면으로 이동)
-//   정상         → 리스트 + 페이지네이션 (prev/next 버튼)
-//   행 클릭      → 단건 상세 모달 (배경 클릭/ESC/X 버튼으로 닫기)
-// ─────────────────────────────────────────────────────────────
-
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -24,7 +9,6 @@ import styles from './ExchangeHistoryPage.module.css';
 
 const PAGE_SIZE = 20;
 
-// 통화 기호 — Complete 화면과 동일 (백엔드 응답에 기호 없음).
 const CURRENCY_SYMBOL: Record<string, string> = {
   KRW: '₩',
   USD: '$',
@@ -42,7 +26,6 @@ function formatAmount(currency: string, amount: string): string {
   })}`;
 }
 
-// "2026-05-26T05:30:00Z" → "2026.05.26"
 function formatDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
@@ -69,7 +52,6 @@ export default function ExchangeHistoryPage() {
   const [selected, setSelected] = useState<ExchangeResponse | null>(null);
   const { data, isLoading, isFetching, error } = useExchangeHistory(page, PAGE_SIZE);
 
-  // 모달 열려있을 때 ESC로 닫기
   useEffect(() => {
     if (!selected) return;
     const handler = (e: KeyboardEvent) => {
@@ -94,7 +76,7 @@ export default function ExchangeHistoryPage() {
     <>
       <TopBar
         title={t('mypage2.exchangeHistory.title')}
-        onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.MYPAGE))}
       />
 
       {isLoading ? (

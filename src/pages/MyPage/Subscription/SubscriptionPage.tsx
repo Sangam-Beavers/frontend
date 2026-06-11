@@ -15,7 +15,7 @@ export default function SubscriptionPage() {
     <>
       <TopBar
         title={t('mypage2.subscription.title')}
-        onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.MYPAGE))}
       />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>

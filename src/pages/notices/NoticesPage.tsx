@@ -28,7 +28,7 @@ export default function NoticesPage() {
     <div className={styles.wrap}>
       <TopBar
         title={t('notices.title')}
-        onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.HOME))}
       />
 
       {isLoading ? (

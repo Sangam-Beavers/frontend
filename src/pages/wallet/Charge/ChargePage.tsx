@@ -12,14 +12,6 @@ import styles from './ChargePage.module.css';
 
 const formatKRW = (value: number) => `₩${value.toLocaleString('ko-KR')}`;
 
-/**
- * 전자지갑 충전 화면.
- *
- * <p>실 API 연동(#102): {@link useMyAccounts}로 계좌 목록, {@link useBalances}로 KRW 잔액,
- * {@link useChargeAccount}로 충전 실행. 이슈 #108 — 인증 후 지갑은 만들어졌지만 연동 계좌가
- * 0건이면 충전 자체가 불가능하므로 <b>"계좌를 연동해주세요"</b> 빈 상태 UI를 우선 노출하고
- * 계좌 추가 CTA로 유도한다(잘못된 선택 차단).
- */
 export default function ChargePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -57,7 +49,6 @@ export default function ChargePage() {
   const handleCharge = () => {
     if (!selectedAccountId || chargeAmount <= 0 || charge.isPending) return;
     const prev = lastCharge.current;
-    // 같은 (계좌, 금액) 재시도면 같은 키 재사용(멱등), 바뀌면 새 키.
     const entry =
       prev && prev.account === selectedAccountId && prev.amount === chargeAmount
         ? prev
@@ -78,14 +69,12 @@ export default function ChargePage() {
     );
   };
 
-  // 계좌 0건 — 빈 상태 안내 우선 노출(이슈 #108). 충전 흐름 자체를 막아 잘못된 선택을 차단.
-  // 로딩/에러 중에는 빈 상태로 단정하지 않는다(false negative 방지).
   if (!isLoading && !error && !hasAccounts) {
     return (
       <>
         <TopBar
           title={t('charge.main.title')}
-          onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+          onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.HOME))}
         />
 
         <div className={`${styles.card} ${styles.cardInfo}`}>
@@ -117,7 +106,7 @@ export default function ChargePage() {
     <>
       <TopBar
         title={t('charge.main.title')}
-        onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.HOME))}
       />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>

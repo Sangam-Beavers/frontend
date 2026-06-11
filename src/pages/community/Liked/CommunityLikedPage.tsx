@@ -47,7 +47,7 @@ export default function CommunityLikedPage() {
     <>
       <TopBar
         title={t('community.likedPage.title')}
-        onBack={() => navigate(location.state?.from ?? ROUTES.COMMUNITY)}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.COMMUNITY))}
       />
 
       {isLoading ? (

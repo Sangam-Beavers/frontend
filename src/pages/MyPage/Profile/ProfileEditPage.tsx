@@ -15,7 +15,6 @@ import styles from './ProfileEditPage.module.css';
 
 const LANGUAGES = SETTING_LANGUAGES;
 
-// 한국어 라벨 → i18n 키 (현재 앱 언어로 언어명 표시)
 const OPTION_LABEL_KEY: Record<(typeof SETTING_LANGUAGES)[number], string> = {
   한국어: 'language.options.ko',
   영어: 'language.options.en',
@@ -23,7 +22,6 @@ const OPTION_LABEL_KEY: Record<(typeof SETTING_LANGUAGES)[number], string> = {
   필리핀어: 'language.options.fil',
 };
 
-/** 신뢰등급 테두리 톤 → CSS 클래스 (FE-5). 톤→색 근거는 utils/trustGrade.ts 주석 참고. */
 const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
   good: styles.avatarVerified,
   best: styles.avatarConnected,
@@ -31,7 +29,6 @@ const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
   default: styles.avatarNewcomer,
 };
 
-/** 백엔드 BCP 47 코드 → 화면 표시 라벨 매핑. 매핑 못 찾으면 '한국어' fallback. */
 const LANGUAGE_CODE_TO_LABEL: Record<string, string> = {
   ko: '한국어',
   zh: '중국어',
@@ -41,10 +38,6 @@ const LANGUAGE_CODE_TO_LABEL: Record<string, string> = {
   fil: '필리핀어',
 };
 
-/**
- * 화면 라벨 → 백엔드 BCP 47 코드 역매핑(저장 시 사용).
- * SETTING_LANGUAGES와 CODE_TO_LABEL의 정합이 깨지면 'ko' fallback — 백엔드에서 거부되지 않게 안전한 기본값.
- */
 const LANGUAGE_LABEL_TO_CODE: Record<string, string> = Object.fromEntries(
   Object.entries(LANGUAGE_CODE_TO_LABEL).map(([code, label]) => [label, code])
 );
@@ -62,10 +55,6 @@ export default function ProfileEditPage() {
   const [bio, setBio] = useState('');
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // 폼 초기화는 profile 도착 시 단 한 번만(ref로 가드) — 그 후엔 사용자 입력에 맡긴다.
-  // useState lazy initializer를 못 쓰는 이유: 첫 render 시점에 profile은 항상 undefined(비동기 도착).
-  // ref 가드를 안 두면 queryClient 재조회로 profile이 다시 들어올 때마다 setState가 사용자 입력을 덮어쓰고
-  // cascading render도 발생한다(React 19 비권장 패턴). CodeRabbit PR #91 리뷰 반영.
   const initializedRef = useRef(false);
   useEffect(() => {
     if (!profile || initializedRef.current) return;
@@ -75,18 +64,11 @@ export default function ProfileEditPage() {
     initializedRef.current = true;
   }, [profile]);
 
-  // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
   const avatarSeed = profile?.public_id ?? nickname;
 
-  // 신뢰등급 테두리 (이슈 #174 + Phase 2 FE-5) — NEWCOMER 회색 점선 / VERIFIED 초록 /
-  // CONNECTED 파랑 / TRUSTED 보라 실선. 누락·미지 값은 trustGradeToTone이 회색('default')으로 폴백.
   const avatarToneClass =
     AVATAR_TONE_CLASS[trustGradeToTone(profile?.trust_grade)] ?? styles.avatarNewcomer;
 
-  /**
-   * 닉네임 사전 중복 확인 (저장과 별개의 API 호출 — race는 저장 시 백엔드가 다시 검증).
-   * 본인 현재 닉네임과 같으면 호출 없이 OK 처리(checkNickname은 본인 보유분도 false로 응답하는 보수적 정책).
-   */
   const checkNickname = async () => {
     const trimmed = nickname.trim();
     if (!trimmed) return;
@@ -120,7 +102,7 @@ export default function ProfileEditPage() {
         bio: trimmedBio === '' ? null : trimmedBio,
       },
       {
-        onSuccess: () => navigate(location.state?.from ?? ROUTES.MYPAGE),
+        onSuccess: () => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.MYPAGE)),
         onError: (err) => {
           if (err instanceof ApiException) {
             if (err.code === 'MEMBER4003') {
@@ -142,7 +124,7 @@ export default function ProfileEditPage() {
       <div className={styles.contentExtraPad}>
         <TopBar
           title={t('mypage2.profile.title')}
-          onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+          onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.MYPAGE))}
         />
 
         {/* Avatar */}

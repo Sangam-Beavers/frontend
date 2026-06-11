@@ -1,17 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// pages/wallet/RecurringHistory/RecurringTransferHistoryPage.tsx
-// 정기 송금 회차 실행 이력 (api-spec — GET /api/v1/transfers/scheduled/{id}/history)
-//
-// 데이터: useScheduledHistory(transferPublicId, page, size) → walletApi.getScheduledHistory
-// 라우트: /recurring/:transferPublicId/history
-//
-// 상태:
-//   로딩         → 안내 카드
-//   에러         → 에러 메시지 (TRANSFER4001은 본인 아님·미존재 모호 매핑 → 단일 메시지)
-//   빈 결과      → "아직 실행된 회차가 없습니다"
-//   정상         → 회차별 카드 + 페이지네이션 (prev/next, totalPages>1일 때만)
-// ─────────────────────────────────────────────────────────────
-
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +9,6 @@ import styles from './RecurringTransferHistoryPage.module.css';
 
 const PAGE_SIZE = 20;
 
-/** 통화 기호 — 다른 페이지와 동일. */
 const CURRENCY_SYMBOL: Record<string, string> = {
   KRW: '₩',
   USD: '$',
@@ -32,7 +17,6 @@ const CURRENCY_SYMBOL: Record<string, string> = {
 };
 const currencySymbol = (code: string) => CURRENCY_SYMBOL[code] ?? `${code} `;
 
-/** BigDecimal string → 천단위 콤마 + 통화별 소수 자릿수. */
 function formatAmount(amount: string, currencyCode: string): string {
   const n = Number(amount);
   if (Number.isNaN(n)) return `${currencySymbol(currencyCode)}${amount}`;
@@ -43,7 +27,6 @@ function formatAmount(amount: string, currencyCode: string): string {
   })}`;
 }
 
-/** ISO 8601 UTC Z → "YYYY.MM.DD HH:mm" (사용자 로컬). */
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;

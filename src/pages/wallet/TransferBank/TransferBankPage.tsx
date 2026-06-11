@@ -120,7 +120,7 @@ export default function TransferBankPage() {
       <div className={styles.contentExtraPad}>
         <TopBar
           title={t('transfer.bank.title')}
-          onBack={() => navigate(location.state?.from ?? ROUTES.TRANSFER)}
+          onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.TRANSFER))}
         />
 
         {/* ─── 최근 송금한 계좌 (신규 #140) ─── */}

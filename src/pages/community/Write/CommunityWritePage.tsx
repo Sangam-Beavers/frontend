@@ -75,7 +75,7 @@ export default function CommunityWritePage() {
     <>
       <TopBar
         title={isEdit ? t('community.writePage.editTitle') : t('community.writePage.title')}
-        onBack={() => navigate(location.state?.from ?? ROUTES.COMMUNITY)}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.COMMUNITY))}
       />
 
       <div className={styles.field}>

@@ -316,7 +316,8 @@
         "DOCUMENT": "Phân tích tài liệu",
         "ACCOUNT": "Tài khoản"
       },
-      "loadError": "Không thể tải FAQ."
+      "loadError": "Không thể tải FAQ.",
+      "bannerSub": "Tìm câu trả lời theo danh mục"
     }
   },
   "docAnalysis": {

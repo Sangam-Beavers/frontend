@@ -26,7 +26,7 @@ export default function CommunityCountryPage() {
     <>
       <TopBar
         title={t('community.title')}
-        onBack={() => navigate(location.state?.from ?? ROUTES.COMMUNITY)}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.COMMUNITY))}
       />
 
       <CommunityTabs active="country" />

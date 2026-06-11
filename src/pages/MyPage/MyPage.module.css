@@ -1,5 +1,5 @@
 .noTopPad {
-  margin-top: -18px;
+  margin-top: 0;
 }
 
 /* Top bar */
@@ -72,7 +72,7 @@
   object-fit: cover;
 }
 
-/* 신뢰등급 테두리 (이슈 #174) — NEWCOMER 회색 점선(프로필 미완성 시그널) / VERIFIED 초록 실선 */
+/* 신뢰등급 테두리 — NEWCOMER 회색 점선(미완성 시그널) / VERIFIED 초록 실선 */
 .avatarNewcomer {
   border-color: #94a3b8;
   border-style: dashed;
@@ -82,7 +82,7 @@
   border-color: #22c55e;
 }
 
-/* Phase 2 (FE-5) — CONNECTED 파랑 실선 / TRUSTED 보라 실선. 색 근거: utils/trustGrade.ts 주석 */
+/* CONNECTED 파랑 실선 / TRUSTED 보라 실선 */
 .avatarConnected {
   border-color: #2563eb;
 }
@@ -91,7 +91,6 @@
   border-color: #7c3aed;
 }
 
-/* 아바타 탭 영역 (FE-4) — 버튼 리셋. 탭하면 등급 바텀시트가 열린다. */
 .avatarBtn {
   background: none;
   border: none;
@@ -101,7 +100,6 @@
   font-family: inherit;
 }
 
-/* 아바타 옆 등급명 라벨 (예: 새싹 비버 / 인증 비버). FE-4부터 탭 가능(버튼) — 등급 바텀시트 오픈. */
 .trustLabel {
   display: inline-flex;
   align-items: center;
@@ -203,7 +201,7 @@
   font-size: 11px;
 }
 
-/* 인증 배지 — 금색 (Toss/카카오페이 인증 배지 패턴). ★ 아이콘 prefix는 ::before로 처리. */
+/* 인증 배지 — ★ 아이콘은 ::before로 처리 */
 .verifiedPill {
   display: inline-flex;
   align-items: center;

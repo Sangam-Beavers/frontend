@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { faqsApi, type FaqItem } from '@/api/app';
@@ -23,6 +23,19 @@ export default function CommunityFaqPage() {
   const [category, setCategory] = useState('');
   const [openId, setOpenId] = useState<string | null>(null);
 
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const activeTabRef = useRef<HTMLButtonElement>(null);
+
+  useLayoutEffect(() => {
+    const list = tabsRef.current;
+    const tab = activeTabRef.current;
+    if (!list || !tab) return;
+    const listRect = list.getBoundingClientRect();
+    const tabRect = tab.getBoundingClientRect();
+    const delta = tabRect.left - listRect.left - (list.clientWidth - tabRect.width) / 2;
+    list.scrollLeft += delta;
+  }, [category]);
+
   const {
     data: faqs = [],
     isLoading,
@@ -36,23 +49,32 @@ export default function CommunityFaqPage() {
     <div className={styles.wrap}>
       <TopBar
         title={t('community.faq.title')}
-        onBack={() => navigate(location.state?.from ?? ROUTES.COMMUNITY)}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.COMMUNITY))}
       />
 
-      <div className={styles.tabs}>
-        {CATEGORIES.map((c) => (
-          <button
-            key={c.key}
-            type="button"
-            className={category === c.key ? `${styles.tab} ${styles.tabActive}` : styles.tab}
-            onClick={() => {
-              setCategory(c.key);
-              setOpenId(null);
-            }}
-          >
-            {t(c.labelKey)}
-          </button>
-        ))}
+      <div className={styles.banner}>
+        <b>{t('community.faq.title')}</b>
+        <span>{t('community.faq.bannerSub')}</span>
+      </div>
+
+      <div className={styles.tabs} ref={tabsRef}>
+        {CATEGORIES.map((c) => {
+          const isActive = category === c.key;
+          return (
+            <button
+              key={c.key}
+              ref={isActive ? activeTabRef : undefined}
+              type="button"
+              className={isActive ? `${styles.tab} ${styles.tabActive}` : styles.tab}
+              onClick={() => {
+                setCategory(c.key);
+                setOpenId(null);
+              }}
+            >
+              {t(c.labelKey)}
+            </button>
+          );
+        })}
       </div>
 
       {isLoading ? (
@@ -65,25 +87,28 @@ export default function CommunityFaqPage() {
         <div className={styles.empty}>{t('community.faq.empty')}</div>
       ) : (
         <div className={styles.list}>
-          {faqs.map((f: FaqItem) => (
-            <div key={f.publicId} className={styles.item}>
-              <button
-                type="button"
-                className={styles.question}
-                onClick={() => setOpenId(openId === f.publicId ? null : f.publicId)}
-              >
-                <span className={styles.qMark}>Q</span>
-                <span className={styles.qText}>{f.question}</span>
-                <span className={styles.chevron}>{openId === f.publicId ? '▲' : '▼'}</span>
-              </button>
-              {openId === f.publicId && (
-                <div className={styles.answer}>
-                  <span className={styles.aMark}>A</span>
-                  <span className={styles.aText}>{f.answer}</span>
+          {faqs.map((f: FaqItem) => {
+            const isOpen = openId === f.publicId;
+            return (
+              <div key={f.publicId} className={styles.item}>
+                <button
+                  type="button"
+                  className={`${styles.question} ${isOpen ? styles.questionOpen : ''}`}
+                  onClick={() => setOpenId(isOpen ? null : f.publicId)}
+                >
+                  <span className={styles.qMark}>Q</span>
+                  <span className={styles.qText}>{f.question}</span>
+                  <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}>›</span>
+                </button>
+                <div className={`${styles.answerWrap} ${isOpen ? styles.answerWrapOpen : ''}`}>
+                  <div className={styles.answer}>
+                    <span className={styles.aMark}>A</span>
+                    <span className={styles.aText}>{f.answer}</span>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

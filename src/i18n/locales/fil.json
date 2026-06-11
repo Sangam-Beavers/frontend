@@ -316,7 +316,8 @@
         "DOCUMENT": "Pagsusuri ng Dokumento",
         "ACCOUNT": "Account"
       },
-      "loadError": "Hindi ma-load ang mga FAQ."
+      "loadError": "Hindi ma-load ang mga FAQ.",
+      "bannerSub": "Hanapin ang mga sagot ayon sa kategorya"
     }
   },
   "docAnalysis": {
