@@ -1128,7 +1128,11 @@
       "backToStart": "Bumalik",
       "analyzingTitle": "Nag-a-analyze",
       "estimatedMinutes": "{{minutes}} min — pakihintay.",
-      "pleaseWait": "Pakihintay."
+      "pleaseWait": "Pakihintay.",
+      "cancelTitle": "Nag-a-analyze",
+      "cancelMessage": "Kung aalis na ngayon, mawawala ang screen na ito. Makikita mo ang resulta mamaya sa 'Kasaysayan ng Pagsusuri ng Dokumento'.",
+      "cancelConfirm": "Umalis",
+      "cancelDismiss": "Magpatuloy na Maghintay"
     },
     "result": {
       "title": "Resulta",

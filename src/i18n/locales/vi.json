@@ -1128,7 +1128,11 @@
       "backToStart": "Về đầu",
       "analyzingTitle": "Đang phân tích",
       "estimatedMinutes": "Khoảng {{minutes}} phút — vui lòng đợi.",
-      "pleaseWait": "Vui lòng đợi."
+      "pleaseWait": "Vui lòng đợi.",
+      "cancelTitle": "Đang phân tích",
+      "cancelMessage": "Nếu thoát ngay bây giờ, bạn sẽ rời khỏi màn hình này. Kết quả có thể xem sau trong 'Lịch sử phân tích tài liệu'.",
+      "cancelConfirm": "Thoát",
+      "cancelDismiss": "Tiếp tục chờ"
     },
     "result": {
       "title": "Kết quả",

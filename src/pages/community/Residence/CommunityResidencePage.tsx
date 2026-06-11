@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import CommunityMenu from '@/components/community/CommunityMenu';
 import CommunitySearchBar from '@/components/community/CommunitySearchBar';
@@ -8,10 +9,13 @@ import Pagination from '@/components/community/Pagination';
 import TopBar from '@/components/navigation/TopBar';
 import { usePagedPosts } from '@/hooks/usePagedPosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
+import { ROUTES } from '@/constants/routes';
 import styles from './CommunityResidencePage.module.css';
 
 export default function CommunityResidencePage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showSearch, setShowSearch] = useState(false);
   const { data, isLoading, error, page, goToPage, searchQuery, setSearchQuery, keyword } =
     usePagedPosts({ category: 'RESIDENCE' });
@@ -20,7 +24,10 @@ export default function CommunityResidencePage() {
 
   return (
     <>
-      <TopBar title={t('community.title')} />
+      <TopBar
+        title={t('community.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.COMMUNITY)}
+      />
 
       <CommunityTabs active="residence" />
 

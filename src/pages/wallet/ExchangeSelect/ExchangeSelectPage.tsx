@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import { useBalances } from '@/hooks/useBalances';
 import { useSupportedCurrencies } from '@/hooks/useSupportedCurrencies';
 import styles from './ExchangeSelectPage.module.css';
@@ -27,6 +28,7 @@ function formatBalance(code: string, balance: string): string {
 export default function ExchangeSelectPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: currenciesData } = useSupportedCurrencies();
   const { data: balancesData, isLoading: balancesLoading, error: balancesError } = useBalances();
 
@@ -46,7 +48,10 @@ export default function ExchangeSelectPage() {
 
   return (
     <>
-      <TopBar title={t('exchange.select.title')} />
+      <TopBar
+        title={t('exchange.select.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+      />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>{t('exchange.select.headerTitle')}</div>

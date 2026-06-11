@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import { useBalances } from '@/hooks/useBalances';
 import styles from './TransferSelectPage.module.css';
 
@@ -44,7 +45,7 @@ export default function TransferSelectPage() {
 
   return (
     <>
-      <TopBar title={t('transfer.select.title')} />
+      <TopBar title={t('transfer.select.title')} onBack={() => navigate(ROUTES.HOME)} />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>{t('transfer.select.availableBalance')}</div>

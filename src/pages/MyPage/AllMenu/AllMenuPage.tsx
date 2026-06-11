@@ -146,7 +146,10 @@ export default function AllMenuPage() {
         {/* Quick access */}
         <div className={styles.quickGrid}>
           {QUICK_LINKS.map((q) => (
-            <span key={q.labelKey} onClick={() => navigate(q.path)}>
+            <span
+              key={q.labelKey}
+              onClick={() => navigate(q.path, { state: { from: ROUTES.ALL_MENU } })}
+            >
               {t(q.labelKey)}
             </span>
           ))}
@@ -166,7 +169,11 @@ export default function AllMenuPage() {
         {/* Tags */}
         <div className={styles.tagRow}>
           {TAGS.map((tag) => (
-            <span key={tag.labelKey} className={styles.tag} onClick={() => navigate(tag.path)}>
+            <span
+              key={tag.labelKey}
+              className={styles.tag}
+              onClick={() => navigate(tag.path, { state: { from: ROUTES.ALL_MENU } })}
+            >
               {t(tag.labelKey)}
             </span>
           ))}
@@ -182,7 +189,7 @@ export default function AllMenuPage() {
                 <div
                   key={item.labelKey + item.path}
                   className={styles.menuItem}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => navigate(item.path, { state: { from: ROUTES.ALL_MENU } })}
                 >
                   <span>{t(item.labelKey)}</span>
                   <span className={styles.arrow}>›</span>
@@ -214,7 +221,7 @@ export default function AllMenuPage() {
                     <div
                       key={item.labelKey + item.path}
                       className={styles.menuItem}
-                      onClick={() => navigate(item.path)}
+                      onClick={() => navigate(item.path, { state: { from: ROUTES.ALL_MENU } })}
                     >
                       <span>{t(item.labelKey)}</span>
                       <span className={styles.arrow}>›</span>

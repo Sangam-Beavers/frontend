@@ -100,7 +100,7 @@ export default function ExchangeRateFullPage() {
     <>
       <TopBar
         title={t('exchange.rateFull.title')}
-        onBack={() => navigate('/')}
+        onBack={() => navigate(-1)}
         rightAction={
           <button
             className={styles.iconBtn}

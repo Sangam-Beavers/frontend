@@ -1128,7 +1128,11 @@
       "backToStart": "처음으로 돌아가기",
       "analyzingTitle": "분석 중입니다",
       "estimatedMinutes": "예상 소요 시간 약 {{minutes}}분 — 잠시만 기다려주세요.",
-      "pleaseWait": "잠시만 기다려주세요."
+      "pleaseWait": "잠시만 기다려주세요.",
+      "cancelTitle": "분석 중입니다",
+      "cancelMessage": "지금 나가면 진행 화면을 벗어납니다. 결과는 나중에 '문서 분석 내역'에서 확인할 수 있어요.",
+      "cancelConfirm": "나가기",
+      "cancelDismiss": "계속 기다리기"
     },
     "result": {
       "title": "분석 결과",

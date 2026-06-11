@@ -7,6 +7,7 @@ import {
   SETTING_LANGUAGES,
   LANGUAGE_LABEL_TO_CODE,
   LANGUAGE_CODE_TO_LABEL,
+  LANGUAGE_NATIVE_NAMES,
 } from '@/constants/languages';
 import { ApiException } from '@/api/client';
 import { useMyLanguage, useUpdateLanguage } from '@/hooks/useLanguage';
@@ -98,7 +99,14 @@ export default function LanguageSettingsPage() {
                 className={`${styles.item} ${selected === lang ? styles.itemSelected : ''}`}
                 onClick={() => setOverride(lang)}
               >
-                <span className={styles.itemLabel}>{t(LABEL_TO_OPTION_KEY[lang])}</span>
+                <span className={styles.itemLabel}>
+                  {(() => {
+                    const code = LANGUAGE_LABEL_TO_CODE[lang];
+                    const localized = t(LABEL_TO_OPTION_KEY[lang]);
+                    const native = LANGUAGE_NATIVE_NAMES[code];
+                    return localized === native ? localized : `${localized} (${native})`;
+                  })()}
+                </span>
                 {selected === lang ? (
                   <span className={styles.pill}>{t('language.select')}</span>
                 ) : (

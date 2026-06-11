@@ -73,7 +73,7 @@ export default function DocAnalysisResultPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <TopBar title={t('doc.result.title')} onBack={() => navigate(-1)} />
+      <TopBar title={t('doc.result.title')} showBack={false} />
 
       {/* ① 결론 — 메인 결과 강조 */}
       {isPending && (

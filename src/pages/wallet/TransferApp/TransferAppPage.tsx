@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import { useRecentInternalRecipients } from '@/hooks/useRecentInternalRecipients';
 import { useValidateMember } from '@/hooks/useValidateMember';
 import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
@@ -32,6 +33,7 @@ interface RecipientDisplay {
 
 export default function TransferAppPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
 
   // 통화 드롭다운 (#120 패턴)
@@ -175,7 +177,10 @@ export default function TransferAppPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title={t('transfer.app.title')} onBack={() => navigate('/transfer')} />
+        <TopBar
+          title={t('transfer.app.title')}
+          onBack={() => navigate(location.state?.from ?? ROUTES.TRANSFER)}
+        />
 
         <div className={styles.section}>{t('transfer.app.recentSection')}</div>
 

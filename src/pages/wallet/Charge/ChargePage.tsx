@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { ROUTES } from '@/constants/routes';
@@ -23,6 +23,7 @@ const formatKRW = (value: number) => `₩${value.toLocaleString('ko-KR')}`;
 export default function ChargePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { data, isLoading, error } = useMyAccounts();
   const accounts = data?.accounts ?? [];
   const hasAccounts = accounts.length > 0;
@@ -82,7 +83,10 @@ export default function ChargePage() {
   if (!isLoading && !error && !hasAccounts) {
     return (
       <>
-        <TopBar title={t('charge.main.title')} />
+        <TopBar
+          title={t('charge.main.title')}
+          onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+        />
 
         <div className={`${styles.card} ${styles.cardInfo}`}>
           <div className={styles.cardTitle}>{t('charge.main.currentBalance')}</div>

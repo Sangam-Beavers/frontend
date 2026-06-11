@@ -1128,7 +1128,11 @@
       "backToStart": "Back to Start",
       "analyzingTitle": "Analyzing",
       "estimatedMinutes": "About {{minutes}} min — please wait.",
-      "pleaseWait": "Please wait."
+      "pleaseWait": "Please wait.",
+      "cancelTitle": "Analysis in Progress",
+      "cancelMessage": "Leaving now will take you out of this screen. You can check the result later in 'Document Analysis History'.",
+      "cancelConfirm": "Leave",
+      "cancelDismiss": "Keep Waiting"
     },
     "result": {
       "title": "Analysis Result",

@@ -5,7 +5,7 @@ import { ApiException } from '@/api';
 import { memberApi } from '@/api/member';
 import Identicon from '@/components/common/Identicon';
 import TopBar from '@/components/navigation/TopBar';
-import { SETTING_LANGUAGES } from '@/constants/languages';
+import { SETTING_LANGUAGES, LANGUAGE_NATIVE_NAMES } from '@/constants/languages';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useUpdateMyProfile } from '@/hooks/useUpdateMyProfile';
 import type { AvatarTone } from '@/types/community';
@@ -13,6 +13,14 @@ import { trustGradeToTone } from '@/utils/trustGrade';
 import styles from './ProfileEditPage.module.css';
 
 const LANGUAGES = SETTING_LANGUAGES;
+
+// 한국어 라벨 → i18n 키 (현재 앱 언어로 언어명 표시)
+const OPTION_LABEL_KEY: Record<(typeof SETTING_LANGUAGES)[number], string> = {
+  한국어: 'language.options.ko',
+  영어: 'language.options.en',
+  베트남어: 'language.options.vi',
+  필리핀어: 'language.options.fil',
+};
 
 /** 신뢰등급 테두리 톤 → CSS 클래스 (FE-5). 톤→색 근거는 utils/trustGrade.ts 주석 참고. */
 const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
@@ -29,6 +37,7 @@ const LANGUAGE_CODE_TO_LABEL: Record<string, string> = {
   vi: '베트남어',
   th: '태국어',
   en: '영어',
+  fil: '필리핀어',
 };
 
 /**
@@ -184,11 +193,17 @@ export default function ProfileEditPage() {
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
           >
-            {LANGUAGES.map((l) => (
-              <option key={l} value={l}>
-                {l}
-              </option>
-            ))}
+            {LANGUAGES.map((l) => {
+              const code = LANGUAGE_LABEL_TO_CODE[l] ?? 'ko';
+              const localized = t(OPTION_LABEL_KEY[l]);
+              const native = LANGUAGE_NATIVE_NAMES[code];
+              const display = localized === native ? localized : `${localized} (${native})`;
+              return (
+                <option key={l} value={l}>
+                  {display}
+                </option>
+              );
+            })}
           </select>
         </div>
 

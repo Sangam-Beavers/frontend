@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import CommunityMenu from '@/components/community/CommunityMenu';
 import CommunitySearchBar from '@/components/community/CommunitySearchBar';
@@ -9,10 +10,13 @@ import TopBar from '@/components/navigation/TopBar';
 import { useQna } from '@/hooks/useQna';
 import { usePagedPosts } from '@/hooks/usePagedPosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
+import { ROUTES } from '@/constants/routes';
 import styles from './CommunityJobPage.module.css';
 
 export default function CommunityJobPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showSearch, setShowSearch] = useState(false);
 
   // 주요 QnA — JOB 카테고리 답변 많은 순 Top 1 (api-spec §8).
@@ -32,7 +36,10 @@ export default function CommunityJobPage() {
 
   return (
     <>
-      <TopBar title={t('community.job.title')} />
+      <TopBar
+        title={t('community.job.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.COMMUNITY)}
+      />
 
       <CommunityTabs active="job" />
 
