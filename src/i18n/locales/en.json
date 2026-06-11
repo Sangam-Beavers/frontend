@@ -34,7 +34,7 @@
     "import": "Top up",
     "send": "Send",
     "exchange": "Exchange",
-    "myKrwTitle": "My KRW value",
+    "myKrwTitle": "💰 My KRW value",
     "myKrwSub": "Converted from all currencies at current rates",
     "ratesTitle": "Live exchange rates",
     "ratesViewAll": "View all",
@@ -47,13 +47,13 @@
     "unverifiedHint": "Shown after verification",
     "ratesLoading": "Loading…",
     "notices": {
-      "title": "Notices",
+      "title": "📢 Notices",
       "desc": "Check the latest announcements"
     },
     "notifications": {
-      "fraudTitle": "Fraud detection",
+      "fraudTitle": "🛡️ Fraud detection",
       "fraudDesc": "Your wallet is currently safe.",
-      "legalTitle": "Lawyer consultation",
+      "legalTitle": "⚖️ Lawyer consultation",
       "legalDesc": "Get a consultation to review your employment contract."
     },
     "currencies": {

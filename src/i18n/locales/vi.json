@@ -34,7 +34,7 @@
     "import": "Nạp tiền",
     "send": "Gửi",
     "exchange": "Đổi tiền",
-    "myKrwTitle": "Giá trị KRW của tôi",
+    "myKrwTitle": "💰 Giá trị KRW của tôi",
     "myKrwSub": "Quy đổi từ tất cả tiền tệ theo tỷ giá hiện tại",
     "ratesTitle": "Tỷ giá trực tiếp",
     "ratesViewAll": "Xem tất cả",
@@ -47,13 +47,13 @@
     "unverifiedHint": "Hiển thị sau khi xác minh",
     "ratesLoading": "Đang tải…",
     "notices": {
-      "title": "Thông báo",
+      "title": "📢 Thông báo",
       "desc": "Kiểm tra thông báo mới nhất"
     },
     "notifications": {
-      "fraudTitle": "Phát hiện giao dịch bất thường",
+      "fraudTitle": "🛡️ Phát hiện giao dịch bất thường",
       "fraudDesc": "Ví điện tử của bạn hiện đang an toàn.",
-      "legalTitle": "Tư vấn luật sư",
+      "legalTitle": "⚖️ Tư vấn luật sư",
       "legalDesc": "Nhận tư vấn để xem xét hợp đồng lao động."
     },
     "currencies": {
