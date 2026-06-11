@@ -153,7 +153,12 @@ export interface LanguageResponse {
 export type TrustMilestoneType =
   | 'ID_VERIFIED'
   | 'BANK_ACCOUNT_CONNECTED'
-  | 'FIRST_TRANSACTION_COMPLETED';
+  | 'FIRST_TRANSACTION_COMPLETED'
+  // Phase 3 GOLD 보너스 마일스톤 4종
+  | 'DOCUMENT_ANALYZED'
+  | 'COMMUNITY_ACTIVE'
+  | 'TRANSACTION_FIVE_COMPLETED'
+  | 'ACCOUNT_NINETY_DAYS';
 
 /** 마일스톤 1건 — 미달성 항목도 카탈로그에 포함된다(프론트가 "다음 단계"를 그리기 위함). */
 export interface TrustMilestone {

@@ -22,6 +22,7 @@ const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
   good: styles.avatarVerified,
   best: styles.avatarConnected,
   purple: styles.avatarTrusted,
+  gold: styles.avatarGold,
   default: styles.avatarNewcomer,
 };
 

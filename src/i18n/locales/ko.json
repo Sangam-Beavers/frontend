@@ -72,7 +72,12 @@
       "newcomer": "새싹 비버",
       "verified": "인증 비버",
       "connected": "연결 비버",
-      "trusted": "거래 비버"
+      "trusted": "거래 비버",
+      "gold": "골드 비버"
+    },
+    "celebrate": {
+      "title": "등급 상승!",
+      "message": "{{grade}} 달성을 축하해요 🎉"
     },
     "sheet": {
       "open": "신뢰 등급 안내 열기",
@@ -97,12 +102,36 @@
         "FIRST_TRANSACTION_COMPLETED": {
           "name": "첫 거래 완료",
           "next": "첫 거래를 완료하면 보라 테두리를 받아요"
+        },
+        "DOCUMENT_ANALYZED": {
+          "name": "서류 전문가",
+          "next": "AI 서류 분석을 1회 이상 이용해 보세요"
+        },
+        "COMMUNITY_ACTIVE": {
+          "name": "커뮤니티 데뷔",
+          "next": "게시글 또는 댓글을 작성해 보세요"
+        },
+        "TRANSACTION_FIVE_COMPLETED": {
+          "name": "꾸준한 거래",
+          "next": "누적 거래 5건을 완료하면 달성해요"
+        },
+        "ACCOUNT_NINETY_DAYS": {
+          "name": "함께한 시간",
+          "next": "가입 후 90일이 지나면 자동으로 달성해요"
         }
+      },
+      "goldSection": {
+        "title": "골드 비버 달성 조건",
+        "subtitle": "아래 4가지 중 2개 이상 달성하면 GOLD 등급!"
       },
       "cta": {
         "ID_VERIFIED": "신분증 인증하러 가기",
         "BANK_ACCOUNT_CONNECTED": "계좌 연결하러 가기",
-        "FIRST_TRANSACTION_COMPLETED": "충전하러 가기"
+        "FIRST_TRANSACTION_COMPLETED": "충전하러 가기",
+        "DOCUMENT_ANALYZED": "서류 분석하러 가기",
+        "COMMUNITY_ACTIVE": "커뮤니티 글 쓰러 가기",
+        "TRANSACTION_FIVE_COMPLETED": "충전하러 가기",
+        "ACCOUNT_NINETY_DAYS": "조금만 더 기다려요"
       }
     }
   },

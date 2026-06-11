@@ -72,7 +72,12 @@
       "newcomer": "Newcomer Beaver",
       "verified": "Verified Beaver",
       "connected": "Connected Beaver",
-      "trusted": "Trusted Beaver"
+      "trusted": "Trusted Beaver",
+      "gold": "Gold Beaver"
+    },
+    "celebrate": {
+      "title": "Level Up!",
+      "message": "Binabati kita sa pag-abot ng {{grade}} 🎉"
     },
     "sheet": {
       "open": "Buksan ang gabay sa trust level",
@@ -97,12 +102,36 @@
         "FIRST_TRANSACTION_COMPLETED": {
           "name": "Unang transaksyon",
           "next": "Kumpletuhin ang unang transaksyon para makuha ang lilang border"
+        },
+        "DOCUMENT_ANALYZED": {
+          "name": "Eksperto sa Dokumento",
+          "next": "Gumamit ng AI document analysis nang kahit isang beses"
+        },
+        "COMMUNITY_ACTIVE": {
+          "name": "Community Debut",
+          "next": "Sumulat ng post o komento sa komunidad"
+        },
+        "TRANSACTION_FIVE_COMPLETED": {
+          "name": "Regular na Trader",
+          "next": "Kumpletuhin ang kabuuang 5 transaksyon"
+        },
+        "ACCOUNT_NINETY_DAYS": {
+          "name": "90 Araw na Magkasama",
+          "next": "Awtomatikong maaabot pagkatapos ng 90 araw mula sa pag-sign up"
         }
+      },
+      "goldSection": {
+        "title": "Mga Kinakailangan ng Gold Beaver",
+        "subtitle": "Abutin ang 2 sa 4 na item sa ibaba para maabot ang GOLD!"
       },
       "cta": {
         "ID_VERIFIED": "I-verify ang aking ID",
         "BANK_ACCOUNT_CONNECTED": "Ikonekta ang account",
-        "FIRST_TRANSACTION_COMPLETED": "Mag-top up ng wallet"
+        "FIRST_TRANSACTION_COMPLETED": "Mag-top up ng wallet",
+        "DOCUMENT_ANALYZED": "Subukan ang document analysis",
+        "COMMUNITY_ACTIVE": "Sumulat ng post sa komunidad",
+        "TRANSACTION_FIVE_COMPLETED": "Mag-top up ng wallet",
+        "ACCOUNT_NINETY_DAYS": "Konti na lang!"
       }
     }
   },

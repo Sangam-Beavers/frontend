@@ -141,6 +141,7 @@
 .avatarMid  { background: #f59e0b; }
 .avatarWarn { background: #f97316; }
 .avatarBad  { background: #ef4444; }
+.avatarGold { background: #f59e0b; }
 
 .recipientName {
   font-weight: 800;
@@ -281,6 +282,12 @@
 .verifiedCard .avatarBig.avatarWarn { border-color: #f59e0b; }
 .recentCard .avatarBig.avatarBad,
 .verifiedCard .avatarBig.avatarBad { border-color: #ef4444; }
+/* Phase 3 — GOLD */
+.recentCard .avatarBig.avatarGold,
+.verifiedCard .avatarBig.avatarGold {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25), 0 0 8px rgba(245, 158, 11, 0.4);
+}
 
 .recentName {
   font-weight: 900;

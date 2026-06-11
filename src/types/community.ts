@@ -1,6 +1,6 @@
 export type CommunityCategory = 'all' | 'residence' | 'life' | 'job' | 'visa' | 'country' | 'free';
 
-export type AvatarTone = 'best' | 'good' | 'mid' | 'warn' | 'bad' | 'purple' | 'default';
+export type AvatarTone = 'best' | 'good' | 'mid' | 'warn' | 'bad' | 'purple' | 'gold' | 'default';
 
 export interface FeedPostItem {
   id: string;

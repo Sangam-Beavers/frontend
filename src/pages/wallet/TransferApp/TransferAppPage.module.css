@@ -57,16 +57,27 @@
   margin: 0 auto 8px;
 }
 
+/* 신뢰등급 테두리 (Phase 3 실데이터 연결 — mock 순환 배색 제거, 색 근거: utils/trustGrade.ts) */
+.avatarDefault {
+  border-color: #94a3b8;
+  border-style: dashed;
+}
+
+.avatarGood {
+  border-color: #22c55e;
+}
+
 .avatarBest {
   border-color: #2563eb;
 }
 
-.avatarGood {
+.avatarPurple {
   border-color: #7c3aed;
 }
 
-.avatarMid {
-  border-color: #22c55e;
+.avatarGold {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25), 0 0 8px rgba(245, 158, 11, 0.4);
 }
 
 .recentName {

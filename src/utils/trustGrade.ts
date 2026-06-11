@@ -62,3 +62,38 @@ export function trustGradeToLabelKey(grade?: string): string {
       return 'trust.grade.newcomer';
   }
 }
+
+/**
+ * 등급 순위 (낮음 → 높음). 미지/누락 값은 순위 없음으로 취급한다.
+ * GOLD는 라벨/톤에만 존재하고 {@link TrustGrade} 유니온엔 아직 없으나(BE 미배포),
+ * 향후 도입 대비해 순위표에 포함해 둔다.
+ */
+const GRADE_ORDER: Record<string, number> = {
+  NEWCOMER: 0,
+  VERIFIED: 1,
+  CONNECTED: 2,
+  TRUSTED: 3,
+  GOLD: 4,
+};
+
+/**
+ * 신뢰등급이 상승했는지 판정 — MyPage 등급 상승 축하 모먼트(Phase 3) 트리거에 사용.
+ *
+ * <p>{@code next}가 {@code prev}보다 순위가 높을 때만 {@code true}. 다음 경우는 모두 {@code false}다:
+ * <ul>
+ *   <li>{@code prev}가 없음(최초 방문) — 신규 유저 진입마다 컨페티가 터지지 않도록 축하하지 않는다.
+ *       호출부는 이때도 현재 등급을 lastSeen에 저장하므로, 이후 실제 상승부터 축하된다.</li>
+ *   <li>{@code next}가 없거나 순위표에 없는 미지 값 — BE 미배포/구버전 응답 안전망.</li>
+ *   <li>같거나 하락 — 강등은 축하 대상 아님.</li>
+ * </ul>
+ *
+ * @param prev 직전에 사용자가 본 등급(localStorage). 없으면 undefined.
+ * @param next 현재 등급.
+ */
+export function isGradeUpgrade(prev?: string, next?: string): boolean {
+  if (!prev || !next) return false;
+  const nextRank = GRADE_ORDER[next];
+  const prevRank = GRADE_ORDER[prev];
+  if (nextRank === undefined || prevRank === undefined) return false;
+  return nextRank > prevRank;
+}
