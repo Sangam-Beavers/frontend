@@ -387,7 +387,7 @@
     "step2HeadingWithName": "{{nickname}}, are you sure?",
     "step2Sub": "All of the data below will be erased.",
     "lossWalletBalance": "Wallet balance",
-    "lossWalletBalanceDesc": "We recommend withdrawing first.",
+    "lossWalletBalanceDesc": "Any remaining balance is lost when you leave. Please withdraw first.",
     "lossTransactions": "Transaction history",
     "lossTransactionsDesc": "Cannot be recovered.",
     "lossCommunity": "Community posts and comments",
