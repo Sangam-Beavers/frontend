@@ -34,7 +34,7 @@
     "import": "가져오기",
     "send": "보내기",
     "exchange": "환전하기",
-    "myKrwTitle": "지금 나의 원화",
+    "myKrwTitle": "💰 지금 나의 원화",
     "myKrwSub": "모든 통화를 현재 환율로 바꾸면",
     "ratesTitle": "실시간 환율",
     "ratesViewAll": "전체보기",
@@ -47,13 +47,13 @@
     "unverifiedHint": "인증 후 표시됩니다",
     "ratesLoading": "불러오는 중...",
     "notices": {
-      "title": "공지사항",
+      "title": "📢 공지사항",
       "desc": "새로운 공지사항을 확인하세요"
     },
     "notifications": {
-      "fraudTitle": "이상거래 탐지",
+      "fraudTitle": "🛡️ 이상거래 탐지",
       "fraudDesc": "현재 전자지갑은 안전합니다.",
-      "legalTitle": "변호사 상담",
+      "legalTitle": "⚖️ 변호사 상담",
       "legalDesc": "근로계약서 확인 상담을 받아보세요."
     },
     "currencies": {
