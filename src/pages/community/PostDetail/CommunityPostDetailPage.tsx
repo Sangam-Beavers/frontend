@@ -165,6 +165,7 @@ export default function CommunityPostDetailPage() {
         <div className={styles.authorRow}>
           <div
             className={`${styles.avatar} ${AVATAR_TONE_CLASS[trustGradeToTone(post.author_trust_grade)] ?? styles.avatarNewcomer}`}
+            style={{ filter: `hue-rotate(${post.author_avatar_hue ?? 0}deg)` }}
           >
             {post.author_profile_image_url ? (
               <img src={post.author_profile_image_url} alt="" className={styles.avatarImg} />

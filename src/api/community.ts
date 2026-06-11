@@ -55,6 +55,8 @@ export interface PostSummaryItem {
    * TODO: BE #194 배포 후 openapi 재생성 필요.
    */
   author_trust_grade?: string;
+  /** 작성자 아바타 색조 회전 각도(0~359°). 마이페이지 '색깔 변경' 저장값 — hue-rotate 표시용. 누락 시 0. */
+  author_avatar_hue?: number;
   like_count: number;
   comment_count: number;
   /** 작성 시각 (ISO 8601 UTC Z). */
@@ -100,6 +102,8 @@ export interface PostDetailResponse {
   author_is_verified: boolean;
   /** 작성자 신뢰등급(NEWCOMER/VERIFIED/CONNECTED/TRUSTED/GOLD). 누락 시 NEWCOMER 폴백. */
   author_trust_grade?: string;
+  /** 작성자 아바타 색조 회전 각도(0~359°). 마이페이지 저장값 — 미설정 시 0. */
+  author_avatar_hue?: number;
   /** 요청자가 작성자인지 — 수정·삭제 노출 판단. 비로그인/타인은 false. */
   is_author: boolean;
   like_count: number;
@@ -167,6 +171,8 @@ export interface CommentItem {
   /** 작성자 프로필 사진 URL. 미설정 시 null — 프론트는 기본 아바타로 대체. */
   author_profile_image_url: string | null;
   author_is_verified: boolean;
+  /** 작성자 아바타 색조 회전 각도(0~359°). 마이페이지 저장값 — 미설정 시 0. */
+  author_avatar_hue?: number;
   /** 요청자가 작성자인지 — 댓글 삭제 노출 판단. 비로그인/타인은 false. */
   is_author: boolean;
   created_at: string;

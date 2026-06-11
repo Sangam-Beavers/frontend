@@ -159,7 +159,10 @@ export default function AllMenuPage() {
             onClick={() => navigate(ROUTES.MYPAGE)}
             style={{ cursor: 'pointer' }}
           >
-            <div className={styles.avatar}>
+            <div
+              className={styles.avatar}
+              style={{ filter: `hue-rotate(${profile?.avatar_hue ?? 0}deg)` }}
+            >
               {profile?.profile_image_url ? (
                 <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
               ) : (

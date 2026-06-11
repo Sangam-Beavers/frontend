@@ -60,6 +60,8 @@ export function toFeedPostItem(item: PostSummaryItem): FeedPostItem {
     // 작성자 신뢰등급 → 테두리 톤(이슈 #175). 랜덤/시드 배색이 아니라 등급이 SSOT.
     // BE #194 배포 전엔 author_trust_grade가 없어 회색('default') 폴백.
     avatarTone: trustGradeToTone(item.author_trust_grade),
+    // 작성자가 마이페이지에서 저장한 아바타 색조 — 사진/identicon에 hue-rotate로 적용(미설정 시 0).
+    avatarHue: item.author_avatar_hue ?? 0,
     language: item.language,
   };
 }

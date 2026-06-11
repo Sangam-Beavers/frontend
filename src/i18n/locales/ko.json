@@ -563,6 +563,7 @@
     "profile": {
       "title": "프로필 편집",
       "changePhoto": "프로필 사진 변경",
+      "changeColor": "색깔 변경",
       "nicknameLabel": "닉네임",
       "checkDuplicate": "중복확인",
       "nicknameOk": "✓ 사용 가능한 닉네임입니다",

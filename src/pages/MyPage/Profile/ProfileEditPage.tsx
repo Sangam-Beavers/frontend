@@ -55,12 +55,28 @@ export default function ProfileEditPage() {
   const [bio, setBio] = useState('');
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // 프로필 이미지 색조(hue) 회전 각도. "색깔 변경" 버튼을 누를 때마다 새 각도로 바꿔 사진/Identicon 색을
+  // 무작위로 변경한다. 저장(PATCH /me) 시 백엔드에 영구 저장되고, 프로필 도착 시 저장값으로 초기화된다.
+  const [avatarHue, setAvatarHue] = useState(0);
+
+  const randomizeAvatarColor = () => {
+    // 직전 각도와 충분히 다르게(>=40도) 골라 "색이 안 바뀐 것 같은" 인접 값 반복을 피한다.
+    setAvatarHue((prev) => {
+      let next = prev;
+      while (Math.abs(next - prev) < 40) {
+        next = Math.floor(Math.random() * 360);
+      }
+      return next;
+    });
+  };
+
   const initializedRef = useRef(false);
   useEffect(() => {
     if (!profile || initializedRef.current) return;
     setNickname(profile.nickname);
     setLanguage(LANGUAGE_CODE_TO_LABEL[profile.language] ?? '한국어');
     setBio(profile.bio ?? '');
+    setAvatarHue(profile.avatar_hue ?? 0);
     initializedRef.current = true;
   }, [profile]);
 
@@ -100,6 +116,8 @@ export default function ProfileEditPage() {
         language: languageCode,
         // 백엔드 컬럼은 nullable이라 빈 문자열을 null로 정규화(저장 후 다시 빈 값으로 표시).
         bio: trimmedBio === '' ? null : trimmedBio,
+        // "색깔 변경"으로 고른 색조를 닉네임/언어/소개와 함께 영구 저장한다.
+        avatar_hue: avatarHue,
       },
       {
         onSuccess: () => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.MYPAGE)),
@@ -129,7 +147,10 @@ export default function ProfileEditPage() {
 
         {/* Avatar */}
         <div className={styles.avatarWrap}>
-          <div className={`${styles.avatar} ${avatarToneClass}`}>
+          <div
+            className={`${styles.avatar} ${avatarToneClass}`}
+            style={{ filter: `hue-rotate(${avatarHue}deg)` }}
+          >
             {profile?.profile_image_url ? (
               <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
             ) : (
@@ -137,8 +158,8 @@ export default function ProfileEditPage() {
             )}
           </div>
         </div>
-        <button type="button" className={styles.secondaryBtn} disabled>
-          {t('mypage2.profile.changePhoto')}
+        <button type="button" className={styles.secondaryBtn} onClick={randomizeAvatarColor}>
+          {t('mypage2.profile.changeColor')}
         </button>
 
         {/* Nickname */}
