@@ -1,18 +1,18 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import Toast, { type ToastVariant } from '@/components/common/Toast';
 import { startLogout } from '@/auth/logout';
 import { ApiException } from '@/api/client';
+import { ROUTES } from '@/constants/routes';
 import { useWithdraw } from '@/hooks/useWithdraw';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import styles from './WithdrawPage.module.css';
 
 type Step = 'reason' | 'info';
 
-/** 탈퇴 사유 옵션 키 — 카카오페이/Toss 패턴. 마지막 'etc'은 자유 입력. */
 const REASON_KEYS = [
   'rarelyUsed',
   'useOther',
@@ -22,22 +22,9 @@ const REASON_KEYS = [
   'etc',
 ] as const;
 
-/**
- * 회원 탈퇴 화면 (다단계 흐름 — Toss/카카오페이 패턴).
- *
- * <p>1단계 (reason): 탈퇴 사유 선택 + 자유 입력(선택). 사유 자체는 백엔드로 전송하지 않음
- *     (현재 API 스펙엔 사유 필드 없음). 사용자에게 한 번 더 의사 확인 + 미래 통계용 로컬 로깅 자리.
- * <p>2단계 (info): 잃게 되는 데이터 안내 + 최종 ConfirmDialog 트리거.
- * <p>최종 확인 (ConfirmDialog): 실제 DELETE /members/me 호출. 성공 시 startLogout()으로
- *     로컬 토큰 정리 + IdP 세션 종료 + /login redirect.
- *
- * <p>실패 처리: 500 COMMON5000(IdP 연동 실패, 로컬 무변경) → 재시도 안내 토스트.
- * 401 AUTH4011은 apiClient interceptor가 자동 처리(이미 만료 → /login).
- *
- * <p>이슈 #153 — 모든 텍스트 i18n 키화.
- */
 export default function WithdrawPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { data: profile } = useMyProfile();
   const withdraw = useWithdraw();
@@ -76,7 +63,13 @@ export default function WithdrawPage() {
     <>
       <TopBar
         title={t('withdraw.title')}
-        onBack={() => (step === 'info' ? setStep('reason') : navigate(-1))}
+        onBack={() =>
+          step === 'info'
+            ? setStep('reason')
+            : location.state?.from != null
+              ? navigate(-1)
+              : navigate(ROUTES.MYPAGE)
+        }
       />
 
       {step === 'reason' && (

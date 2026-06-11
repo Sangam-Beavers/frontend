@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import { useMyAccounts } from '@/hooks/useMyAccounts';
 import { useRecentRemittanceAccounts } from '@/hooks/useRecentRemittanceAccounts';
 import type { AccountItem, RecentRemittanceAccountItem } from '@/api/wallet';
@@ -47,6 +48,7 @@ function findMyAccountForRecent(
 
 export default function TransferBankPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { data, isLoading, error } = useMyAccounts();
   const accounts = data?.accounts ?? [];
@@ -116,7 +118,10 @@ export default function TransferBankPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title={t('transfer.bank.title')} onBack={() => navigate('/transfer')} />
+        <TopBar
+          title={t('transfer.bank.title')}
+          onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.TRANSFER))}
+        />
 
         {/* ─── 최근 송금한 계좌 (신규 #140) ─── */}
         {!recentHidden && (

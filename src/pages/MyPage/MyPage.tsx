@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Identicon from '@/components/common/Identicon';
+import TopBar from '@/components/navigation/TopBar';
 import TrustGradeSheet from '@/components/mypage/TrustGradeSheet';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useMyVerification } from '@/hooks/useMyVerification';
@@ -11,7 +12,6 @@ import { isAdminUser } from '@/auth/tokenStore';
 import { ROUTES } from '@/constants/routes';
 import styles from './MyPage.module.css';
 
-/** 신뢰등급 테두리 톤 → CSS 클래스 (FE-5). 톤→색 근거는 utils/trustGrade.ts 주석 참고. */
 const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
   good: styles.avatarVerified,
   best: styles.avatarConnected,
@@ -21,19 +21,14 @@ const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
-  // 내 프로필 — 닉네임/아바타에 사용. 로딩 중엔 placeholder, 실패는 일단 빈값으로 표시.
-  // (사이클 1: 에러 분기 단순화 — 마이페이지 진입 자체가 인증 필요라 토큰 만료는 interceptor가 /login으로 redirect.)
   const { data: profile, isLoading } = useMyProfile();
-  // 인증 상태 — 닉네임 옆 '인증' / 설정 '추가 인증' 옆 '완료' 배지의 SSOT.
-  // 이력 없는 신규 회원은 null이라 자연스럽게 미표시. status === 'APPROVED'일 때만 인증 완료.
   const { data: verification } = useMyVerification();
   const isVerified = verification?.status === 'APPROVED';
 
-  // 등급 바텀시트 (FE-4) — 아바타/등급라벨 탭으로 오픈. 닫혀 있으면 마일스톤 API 미호출.
   const [isTrustSheetOpen, setTrustSheetOpen] = useState(false);
 
-  // 라벨이 언어 변경마다 재계산되도록 컴포넌트 안에서 구성한다.
   const MY_ACTIVITY = [
     { label: t('mypage.items.walletHistory'), path: '/mypage/wallet-history' },
     { label: t('mypage.items.exchangeHistory'), path: '/mypage/exchange-history' },
@@ -43,8 +38,6 @@ export default function MyPage() {
     { label: t('mypage.items.subscription'), path: '/mypage/subscription' },
   ];
 
-  // 설정/관리 행은 인증 상태에 따라 배지가 바뀌므로 컴포넌트 안에서 구성한다.
-  // 회원 탈퇴(이슈 #148)는 마지막에 둠 — 위험 동작은 의도적으로 뒤로.
   const SETTINGS: { label: string; badge: string | null; path: string }[] = [
     {
       label: t('mypage.items.additionalCert'),
@@ -60,31 +53,21 @@ export default function MyPage() {
   const ADMIN_ITEMS = [{ label: t('mypage.items.appManage'), path: ROUTES.ADMIN_APP }];
 
   const nickname = profile?.nickname ?? '';
-  // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
   const avatarSeed = profile?.public_id ?? nickname;
-
-  // 신뢰등급 테두리 (이슈 #174 + Phase 2 FE-5) — NEWCOMER 회색 점선 / VERIFIED 초록 /
-  // CONNECTED 파랑 / TRUSTED 보라 실선. 누락·미지 값은 trustGradeToTone이 회색('default')으로 폴백.
   const trustTone = trustGradeToTone(profile?.trust_grade);
   const avatarToneClass = AVATAR_TONE_CLASS[trustTone] ?? styles.avatarNewcomer;
   const trustGradeLabel = t(trustGradeToLabelKey(profile?.trust_grade));
 
   return (
     <>
+      <TopBar
+        title={t('mypage.title')}
+        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.HOME))}
+      />
       <div className={styles.noTopPad}>
-        {/* Custom top bar */}
-        <div className={styles.topBar}>
-          <button type="button" className={styles.iconBtn} onClick={() => navigate(-1)}>
-            ‹
-          </button>
-          <span className={styles.topTitle}>{t('mypage.title')}</span>
-          <div style={{ width: 40 }} />
-        </div>
-
         {/* Profile card */}
         <div className={styles.card}>
           <div className={styles.profileRow}>
-            {/* 아바타 탭 → 등급 바텀시트 (FE-4, 기획서 §4-2) */}
             <button
               type="button"
               className={styles.avatarBtn}
@@ -126,7 +109,6 @@ export default function MyPage() {
           </button>
         </div>
 
-        {/* 관리자 전용 섹션 — 최상단 배치. JWT groups: ["admin"] 인 경우에만 표시 */}
         {isAdmin && (
           <>
             <div className={styles.section}>앱 관리</div>
@@ -168,7 +150,6 @@ export default function MyPage() {
         </div>
       </div>
 
-      {/* 등급 바텀시트 (FE-4) — MobileScreen 안 절대 위치. 닫혀 있으면 null 렌더 + API 미호출. */}
       <TrustGradeSheet
         isOpen={isTrustSheetOpen}
         onClose={() => setTrustSheetOpen(false)}

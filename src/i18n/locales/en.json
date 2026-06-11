@@ -303,6 +303,21 @@
       "emptyPage": "No liked posts on this page.",
       "backToFirst": "Back to First",
       "empty": "No liked posts yet. Tap ♥ on posts you like."
+    },
+    "faq": {
+      "title": "FAQ",
+      "loading": "Loading...",
+      "empty": "No FAQs available.",
+      "categories": {
+        "all": "All",
+        "GENERAL": "General",
+        "TRANSFER": "Transfer",
+        "EXCHANGE": "Exchange",
+        "DOCUMENT": "Document Analysis",
+        "ACCOUNT": "Account"
+      },
+      "loadError": "Failed to load FAQs.",
+      "bannerSub": "Find answers by category"
     }
   },
   "docAnalysis": {
@@ -1089,6 +1104,24 @@
       "errValidateFmt": "Validation failed.",
       "noticeTextNew": "The next run date is calculated automatically. A reminder is sent before each transfer; insufficient balance may cause failure."
     },
+    "history": {
+      "title": "Recurring Transfer History",
+      "loading": "Loading...",
+      "notFound": "Recurring transfer history not found.",
+      "loadError": "Failed to load history.",
+      "empty": "No executions yet.",
+      "fee": "Fee",
+      "prev": "Previous",
+      "next": "Next",
+      "pageInfo": "{{current}} / {{total}} ({{count}} total)",
+      "status": {
+        "COMPLETED": "Completed",
+        "PENDING": "Pending",
+        "PROCESSING": "Processing",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      }
+    },
     "complete": {
       "title": "Recurring set",
       "cardTitle": "Recurring transfer set",
@@ -1134,7 +1167,11 @@
       "backToStart": "Back to Start",
       "analyzingTitle": "Analyzing",
       "estimatedMinutes": "About {{minutes}} min — please wait.",
-      "pleaseWait": "Please wait."
+      "pleaseWait": "Please wait.",
+      "cancelTitle": "Analysis in Progress",
+      "cancelMessage": "Leaving now will take you out of this screen. You can check the result later in 'Document Analysis History'.",
+      "cancelConfirm": "Leave",
+      "cancelDismiss": "Keep Waiting"
     },
     "result": {
       "title": "Analysis Result",
@@ -1222,5 +1259,17 @@
     "askMoreAria": "Ask AI more about {{title}}",
     "typingAria": "Generating response",
     "fabLabel": "Have a question? Just ask"
+  },
+  "maintenance": {
+    "title": "Service Maintenance",
+    "body": "We are currently performing maintenance to improve our service.",
+    "retry": "Please try again later."
+  },
+  "notices": {
+    "title": "Notices",
+    "loading": "Loading...",
+    "loadError": "Failed to load notices.",
+    "empty": "No notices available.",
+    "pinned": "📌 Notice"
   }
 }

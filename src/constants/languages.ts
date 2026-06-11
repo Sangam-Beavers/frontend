@@ -26,3 +26,11 @@ export const LANGUAGE_CODE_TO_LABEL: Record<string, SettingLanguage> = {
   vi: '베트남어',
   fil: '필리핀어',
 };
+
+// 각 언어 고유의 자국어 표기 — UI 언어와 무관하게 항상 이 이름으로 표시
+export const LANGUAGE_NATIVE_NAMES: Record<string, string> = {
+  ko: '한국어',
+  en: 'English',
+  vi: 'Tiếng Việt',
+  fil: 'Filipino',
+};

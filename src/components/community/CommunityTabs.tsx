@@ -5,7 +5,7 @@ import { COMMUNITY_TABS, type CommunityCategory } from '@/types/community';
 import styles from './CommunityTabs.module.css';
 
 interface CommunityTabsProps {
-  active: CommunityCategory;
+  active?: CommunityCategory;
 }
 
 export default function CommunityTabs({ active }: CommunityTabsProps) {
@@ -14,8 +14,7 @@ export default function CommunityTabs({ active }: CommunityTabsProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLButtonElement>(null);
 
-  // 선택된 탭을 가로 스크롤 영역 가운데로 가져온다(특히 마지막 '자유게시판'이 오른쪽으로 잘리는 문제).
-  // 컨테이너의 scrollLeft만 조정 — 세로 스크롤(목록 위치)은 건드리지 않는다.
+  // scrollLeft만 조정 — 세로 스크롤(목록 위치)은 건드리지 않는다.
   useLayoutEffect(() => {
     const list = listRef.current;
     const tab = activeRef.current;

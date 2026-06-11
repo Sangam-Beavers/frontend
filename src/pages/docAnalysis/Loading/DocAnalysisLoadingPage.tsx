@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { documentApi } from '@/api';
 import { useDocAnalysisStore } from '@/stores/docAnalysisStore';
 import styles from './DocAnalysisLoadingPage.module.css';
@@ -94,6 +95,7 @@ export default function DocAnalysisLoadingPage() {
   // 시간이 흐른다고 다음 단계로 옮겨가면 안 되므로.
   const [startedAt] = useState(() => Date.now());
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const terminal = failed || status?.status === 'COMPLETED';
   useEffect(() => {
     if (terminal) return;
@@ -116,9 +118,27 @@ export default function DocAnalysisLoadingPage() {
     return failed ? 'failed' : 'active';
   };
 
+  const handleBack = () => {
+    if (!terminal) {
+      setShowCancelDialog(true);
+    } else {
+      navigate('/doc-analysis', { replace: true });
+    }
+  };
+
   return (
     <>
-      <TopBar title={t('doc.loading.title')} onBack={() => navigate(-1)} />
+      <TopBar title={t('doc.loading.title')} onBack={handleBack} />
+      {showCancelDialog && (
+        <ConfirmDialog
+          title={t('doc.loading.cancelTitle')}
+          message={t('doc.loading.cancelMessage')}
+          confirmLabel={t('doc.loading.cancelConfirm')}
+          cancelLabel={t('doc.loading.cancelDismiss')}
+          onConfirm={() => navigate('/doc-analysis', { replace: true })}
+          onCancel={() => setShowCancelDialog(false)}
+        />
+      )}
 
       <div className={styles.preview}>
         {imageUrl ? (

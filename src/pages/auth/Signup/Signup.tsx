@@ -1,18 +1,5 @@
-// ─────────────────────────────────────────────────────────────
-// pages/auth/Signup/Signup.tsx — 회원가입 화면 (프론트 #82)
-//
-// 흐름:
-//   1) 이메일/닉네임 중복확인(선택) → GET /members/check-email · /check-nickname → available 안내
-//   2) 제출 → POST /api/v1/auth/register (snake_case body)
-//      성공(201) → 완료 카드 + "로그인하러 가기"
-//      MEMBER4002(이메일 중복) / MEMBER4003(닉네임 중복) / COMMON4001(형식) → 에러 표시
-//
-// 비밀번호는 우리 DB에 저장되지 않는다 — 백엔드가 IdP(Authentik)에 사용자 생성+비번 설정(방식 B).
-// 가입 직후 로그인은 Authentik 로그인 페이지에서 진행(자동 로그인 아님).
-// ─────────────────────────────────────────────────────────────
-
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 
@@ -37,12 +24,12 @@ function CheckboxRow({ label, checked, onChange }: CheckboxRowProps) {
   );
 }
 
-// 중복확인 상태(이메일·닉네임 공용): 안 함 / 확인 중 / 사용 가능 / 이미 사용 중
 type DupCheck = 'idle' | 'checking' | 'available' | 'taken';
 
 function Signup() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -59,7 +46,7 @@ function Signup() {
   const [emailCheck, setEmailCheck] = useState<DupCheck>('idle');
   const [nicknameCheck, setNicknameCheck] = useState<DupCheck>('idle');
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false); // 가입 완료
+  const [done, setDone] = useState((location.state as { done?: boolean } | null)?.done ?? false);
   const [error, setError] = useState<string | null>(null);
 
   const set =
@@ -73,7 +60,6 @@ function Signup() {
   const toggle = (key: 'agreeTerms' | 'agreePrivacy') =>
     setForm((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  // 이메일 중복확인 버튼
   const handleCheckEmail = async () => {
     const email = form.email.trim();
     if (!email) {
@@ -96,7 +82,6 @@ function Signup() {
     }
   };
 
-  // 닉네임 중복확인 버튼
   const handleCheckNickname = async () => {
     const nickname = form.nickname.trim();
     if (!nickname) {
@@ -161,7 +146,8 @@ function Signup() {
         gender: form.gender,
         age_range: form.ageRange,
       });
-      setDone(true); // 201 — 가입 완료 (자동 로그인 아님 → 로그인 화면으로 안내)
+      setDone(true);
+      navigate(location.pathname, { replace: true, state: { done: true } });
     } catch (err) {
       if (err instanceof ApiException) {
         if (err.code === 'MEMBER4002') {
@@ -184,7 +170,6 @@ function Signup() {
     }
   };
 
-  // 가입 완료 화면
   if (done) {
     return (
       <div className="auth-page">
@@ -218,7 +203,7 @@ function Signup() {
             <button
               type="button"
               className="auth-icon"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(ROUTES.LOGIN)}
               aria-label={t('auth.signup.backButton')}
             >
               ‹

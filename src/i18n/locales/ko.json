@@ -303,6 +303,21 @@
       "emptyPage": "이 페이지에는 관심글이 없어요.",
       "backToFirst": "처음으로",
       "empty": "아직 관심글이 없어요. 마음에 드는 글에 ♥를 눌러보세요."
+    },
+    "faq": {
+      "title": "자주 묻는 질문",
+      "loading": "불러오는 중...",
+      "empty": "등록된 FAQ가 없습니다.",
+      "categories": {
+        "all": "전체",
+        "GENERAL": "일반",
+        "TRANSFER": "송금",
+        "EXCHANGE": "환전",
+        "DOCUMENT": "서류 분석",
+        "ACCOUNT": "계정"
+      },
+      "loadError": "불러올 수 없습니다.",
+      "bannerSub": "궁금한 내용을 카테고리별로 찾아보세요"
     }
   },
   "docAnalysis": {
@@ -1089,6 +1104,24 @@
       "errValidateFmt": "검증에 실패했습니다.",
       "noticeTextNew": "다음 실행 예정일은 등록 시 자동 계산됩니다. 송금일 전 알림이 발송되며, 잔액 부족 시 송금이 실패할 수 있습니다."
     },
+    "history": {
+      "title": "정기 송금 진행 내역",
+      "loading": "불러오는 중...",
+      "notFound": "정기 송금 이력을 찾을 수 없습니다.",
+      "loadError": "이력을 불러오지 못했습니다.",
+      "empty": "아직 실행된 회차가 없습니다.",
+      "fee": "수수료",
+      "prev": "이전",
+      "next": "다음",
+      "pageInfo": "{{current}} / {{total}} (총 {{count}}건)",
+      "status": {
+        "COMPLETED": "완료",
+        "PENDING": "대기",
+        "PROCESSING": "처리중",
+        "FAILED": "실패",
+        "CANCELLED": "취소"
+      }
+    },
     "complete": {
       "title": "정기 송금 완료",
       "cardTitle": "정기 송금이 진행되었습니다",
@@ -1134,7 +1167,11 @@
       "backToStart": "처음으로 돌아가기",
       "analyzingTitle": "분석 중입니다",
       "estimatedMinutes": "예상 소요 시간 약 {{minutes}}분 — 잠시만 기다려주세요.",
-      "pleaseWait": "잠시만 기다려주세요."
+      "pleaseWait": "잠시만 기다려주세요.",
+      "cancelTitle": "분석 중입니다",
+      "cancelMessage": "지금 나가면 진행 화면을 벗어납니다. 결과는 나중에 '문서 분석 내역'에서 확인할 수 있어요.",
+      "cancelConfirm": "나가기",
+      "cancelDismiss": "계속 기다리기"
     },
     "result": {
       "title": "분석 결과",
@@ -1222,5 +1259,17 @@
     "askMoreAria": "{{title}} AI에게 더 묻기",
     "typingAria": "응답 생성 중",
     "fabLabel": "모르겠으면 물어봐요"
+  },
+  "maintenance": {
+    "title": "서비스 점검 중",
+    "body": "더 나은 서비스를 위해 점검 작업이 진행 중입니다.",
+    "retry": "잠시 후 다시 이용해 주세요."
+  },
+  "notices": {
+    "title": "공지사항",
+    "loading": "불러오는 중...",
+    "loadError": "공지사항을 불러올 수 없습니다.",
+    "empty": "등록된 공지사항이 없습니다.",
+    "pinned": "📌 공지"
   }
 }
