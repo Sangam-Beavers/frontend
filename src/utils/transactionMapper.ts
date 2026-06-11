@@ -85,18 +85,19 @@ const STATUS_LABEL: Record<TransactionStatusCode, string> = {
 /**
  * meta 행 — mock 패턴 모사 (예: "Linh · 2026.05.15 · 완료" / "2026.05.20 · 완료").
  *
- * 표시 가능한 상대 정보가 다른 경우 우선순위:
- * 1) receiver_name(송금/해외송금)
- * 2) EXCHANGE — "KRW → USD" 통화쌍
- * 3) CHARGE / INTERNAL_TRANSFER IN — 상대 정보 없음(백엔드 응답에 sender_name 없음 — TODO)
+ * 표시 가능한 상대 정보 우선순위:
+ * 1) INTERNAL_TRANSFER(앱 사용자 간 송금/받기) — counterparty_nickname(OUT=받는 사람, IN=보낸 사람) (#207)
+ * 2) REMITTANCE(해외 송금) — receiver_name(외부 수취인)
+ * 3) EXCHANGE — "KRW → USD" 통화쌍
+ * 4) CHARGE — 상대 정보 없음
  */
 function buildMeta(item: TransactionHistoryItem): string {
   const parts: string[] = [];
 
-  if (
-    item.type === 'REMITTANCE' ||
-    (item.type === 'INTERNAL_TRANSFER' && item.direction === 'OUT')
-  ) {
+  if (item.type === 'INTERNAL_TRANSFER') {
+    // OUT=받는 사람, IN=보낸 사람의 닉네임. 조회 불가 시 null이면 생략.
+    if (item.counterparty_nickname) parts.push(item.counterparty_nickname);
+  } else if (item.type === 'REMITTANCE') {
     if (item.receiver_name) parts.push(item.receiver_name);
   } else if (item.type === 'EXCHANGE' && item.receive_currency_code) {
     parts.push(`${item.currency_code} → ${item.receive_currency_code}`);
