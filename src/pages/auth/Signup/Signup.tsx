@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 
@@ -42,6 +42,7 @@ type DupCheck = 'idle' | 'checking' | 'available' | 'taken';
 function Signup() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -56,7 +57,7 @@ function Signup() {
   const [emailCheck, setEmailCheck] = useState<DupCheck>('idle');
   const [nicknameCheck, setNicknameCheck] = useState<DupCheck>('idle');
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false); // 가입 완료
+  const [done, setDone] = useState((location.state as { done?: boolean } | null)?.done ?? false);
   const [error, setError] = useState<string | null>(null);
 
   const set =
@@ -147,7 +148,8 @@ function Signup() {
         nationality: form.nationality,
         language: form.language,
       });
-      setDone(true); // 201 — 가입 완료 (자동 로그인 아님 → 로그인 화면으로 안내)
+      setDone(true);
+      navigate(location.pathname, { replace: true, state: { done: true } });
     } catch (err) {
       if (err instanceof ApiException) {
         if (err.code === 'MEMBER4002') {
@@ -204,7 +206,7 @@ function Signup() {
             <button
               type="button"
               className="auth-icon"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(ROUTES.LOGIN)}
               aria-label={t('auth.signup.backButton')}
             >
               ‹

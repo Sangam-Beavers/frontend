@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 
+import { ROUTES } from '@/constants/routes';
 import { NATIONALITIES } from '@/constants/nationalities';
 import { SIGNUP_LANGUAGES as LANGUAGES } from '@/constants/languages';
 
@@ -42,7 +43,7 @@ function GoogleSignupInfo() {
             <button
               type="button"
               className="auth-icon"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(ROUTES.LOGIN)}
               aria-label={t('auth.googleSignup.backButton')}
             >
               ‹

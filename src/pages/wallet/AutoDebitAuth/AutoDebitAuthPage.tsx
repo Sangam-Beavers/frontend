@@ -62,7 +62,10 @@ export default function AutoDebitAuthPage() {
   if (!draft) {
     return (
       <>
-        <TopBar title={t('charge.autoDebit.title')} />
+        <TopBar
+          title={t('charge.autoDebit.title')}
+          onBack={() => navigate(ROUTES.CHARGE_ADD_ACCOUNT)}
+        />
         <div className={`${styles.card} ${styles.cardInfo}`}>
           <div className={styles.cardTitle}>{t('charge.autoDebit.noDraftTitle')}</div>
           <div className={styles.cardText}>{t('charge.autoDebit.noDraftText')}</div>
@@ -138,7 +141,10 @@ export default function AutoDebitAuthPage() {
 
   return (
     <>
-      <TopBar title={t('charge.autoDebit.title')} />
+      <TopBar
+        title={t('charge.autoDebit.title')}
+        onBack={() => navigate(ROUTES.CHARGE_ADD_ACCOUNT)}
+      />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>{t('charge.autoDebit.linkAuthTitle')}</div>

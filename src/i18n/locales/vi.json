@@ -303,6 +303,20 @@
       "emptyPage": "Trang này không có.",
       "backToFirst": "Về đầu",
       "empty": "Chưa có. Nhấn ♥ vào bài thích."
+    },
+    "faq": {
+      "title": "Câu hỏi thường gặp",
+      "loading": "Đang tải...",
+      "empty": "Không có câu hỏi nào.",
+      "categories": {
+        "all": "Tất cả",
+        "GENERAL": "Chung",
+        "TRANSFER": "Chuyển tiền",
+        "EXCHANGE": "Đổi tiền",
+        "DOCUMENT": "Phân tích tài liệu",
+        "ACCOUNT": "Tài khoản"
+      },
+      "loadError": "Không thể tải FAQ."
     }
   },
   "docAnalysis": {
@@ -1083,6 +1097,24 @@
       "errValidateFmt": "Xác thực thất bại.",
       "noticeTextNew": "Ngày chạy tiếp theo được tính tự động. Thông báo sẽ gửi trước mỗi lần chuyển; số dư không đủ có thể gây thất bại."
     },
+    "history": {
+      "title": "Lịch sử chuyển tiền định kỳ",
+      "loading": "Đang tải...",
+      "notFound": "Không tìm thấy lịch sử chuyển tiền định kỳ.",
+      "loadError": "Không thể tải lịch sử.",
+      "empty": "Chưa có lần thực hiện nào.",
+      "fee": "Phí",
+      "prev": "Trước",
+      "next": "Tiếp",
+      "pageInfo": "{{current}} / {{total}} (tổng {{count}})",
+      "status": {
+        "COMPLETED": "Hoàn thành",
+        "PENDING": "Chờ xử lý",
+        "PROCESSING": "Đang xử lý",
+        "FAILED": "Thất bại",
+        "CANCELLED": "Đã hủy"
+      }
+    },
     "complete": {
       "title": "Đã thiết lập",
       "cardTitle": "Đã thiết lập",
@@ -1220,5 +1252,17 @@
     "askMoreAria": "Hỏi AI thêm về {{title}}",
     "typingAria": "Đang tạo phản hồi",
     "fabLabel": "Có câu hỏi? Cứ hỏi nhé"
+  },
+  "maintenance": {
+    "title": "Bảo trì dịch vụ",
+    "body": "Chúng tôi đang thực hiện bảo trì để cải thiện dịch vụ.",
+    "retry": "Vui lòng thử lại sau."
+  },
+  "notices": {
+    "title": "Thông báo",
+    "loading": "Đang tải...",
+    "loadError": "Không thể tải thông báo.",
+    "empty": "Không có thông báo.",
+    "pinned": "📌 Thông báo"
   }
 }

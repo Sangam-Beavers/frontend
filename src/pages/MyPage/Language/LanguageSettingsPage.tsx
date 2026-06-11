@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import Toast, { type ToastVariant } from '@/components/common/Toast';
@@ -10,6 +10,7 @@ import {
   LANGUAGE_NATIVE_NAMES,
 } from '@/constants/languages';
 import { ApiException } from '@/api/client';
+import { ROUTES } from '@/constants/routes';
 import { useMyLanguage, useUpdateLanguage } from '@/hooks/useLanguage';
 import styles from './LanguageSettingsPage.module.css';
 
@@ -32,6 +33,7 @@ const DEFAULT_LABEL: (typeof LANGUAGES)[number] = '한국어';
  */
 export default function LanguageSettingsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { data, isLoading } = useMyLanguage();
   const update = useUpdateLanguage();
@@ -60,7 +62,7 @@ export default function LanguageSettingsPage() {
       onSuccess: () => {
         showToast(t('language.successToast'), 'success');
         // 토스트가 보이고 살짝 뒤 자연스럽게 이동.
-        window.setTimeout(() => navigate(-1), 700);
+        window.setTimeout(() => navigate(location.state?.from ?? ROUTES.MYPAGE), 700);
       },
       onError: (e) => {
         const code = e instanceof ApiException ? e.code : null;
@@ -87,7 +89,10 @@ export default function LanguageSettingsPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title={t('language.title')} onBack={() => navigate(-1)} />
+        <TopBar
+          title={t('language.title')}
+          onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+        />
 
         {isLoading ? (
           <div className={styles.loading}>{t('common.loading')}</div>

@@ -115,7 +115,10 @@ export default function ChargePage() {
 
   return (
     <>
-      <TopBar title={t('charge.main.title')} />
+      <TopBar
+        title={t('charge.main.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+      />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>{t('charge.main.currentBalance')}</div>

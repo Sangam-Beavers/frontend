@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
 import { ROUTES } from '@/constants/routes';
 import { verificationApi, type IdentityDocumentTypeCode } from '@/api/member';
@@ -145,6 +145,7 @@ type IdKind = 'ALIEN' | 'NATIONAL';
 export default function AdditionalCertPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   // 인증 직후 ['member','me'] 캐시를 강제 refetch — 안 그러면 useMyProfile staleTime(5분) 때문에
   // VerifiedRoute가 is_verified=false 캐시를 그대로 읽어 PIN 설정 페이지(금융 라우트)로 못 들어간다.
   const queryClient = useQueryClient();
@@ -212,7 +213,6 @@ export default function AdditionalCertPage() {
         await walletApi.createWallet();
       } catch (walletErr) {
         // 인증은 이미 commit됐으니 막지 않는다 — 다음 흐름(PIN 설정 등)에서 보정.
-        console.warn('[verification] 지갑 자동 개설 안전망 호출 실패', walletErr);
       }
 
       // 인증 성공 → is_verified=true가 즉시 반영되도록 프로필 캐시를 refetch한 뒤 이동한다.
@@ -239,7 +239,10 @@ export default function AdditionalCertPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title={t('mypage2.cert.title')} onBack={() => navigate(-1)} />
+        <TopBar
+          title={t('mypage2.cert.title')}
+          onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+        />
 
         <div className={`${styles.card} ${styles.cardInfo}`}>
           <div className={styles.cardTitle}>{t('mypage2.cert.infoTitle')}</div>

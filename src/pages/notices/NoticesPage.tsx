@@ -1,7 +1,9 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { noticesApi, type NoticeItem } from '@/api/app';
 import { useQuery } from '@tanstack/react-query';
-import { buildNoticeDetailPath } from '@/constants/routes';
+import TopBar from '@/components/navigation/TopBar';
+import { buildNoticeDetailPath, ROUTES } from '@/constants/routes';
 import styles from './NoticesPage.module.css';
 
 function formatDate(iso: string) {
@@ -9,27 +11,34 @@ function formatDate(iso: string) {
 }
 
 export default function NoticesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const { data: notices = [], isLoading } = useQuery({
+  const {
+    data: notices = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['notices'],
     queryFn: () => noticesApi.listPublished(),
   });
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.topBar}>
-        <button type="button" className={styles.backBtn} onClick={() => navigate(-1)}>
-          ‹
-        </button>
-        <span className={styles.title}>공지사항</span>
-        <div style={{ width: 40 }} />
-      </div>
+      <TopBar
+        title={t('notices.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+      />
 
       {isLoading ? (
-        <div className={styles.empty}>불러오는 중...</div>
+        <div className={styles.empty}>{t('notices.loading')}</div>
+      ) : isError ? (
+        <div className={styles.empty} role="alert">
+          {t('notices.loadError')}
+        </div>
       ) : notices.length === 0 ? (
-        <div className={styles.empty}>등록된 공지사항이 없습니다.</div>
+        <div className={styles.empty}>{t('notices.empty')}</div>
       ) : (
         <div className={styles.list}>
           {notices.map((n: NoticeItem) => (
@@ -39,7 +48,7 @@ export default function NoticesPage() {
               onClick={() => navigate(buildNoticeDetailPath(n.public_id))}
             >
               <div className={styles.itemHeader}>
-                {n.pinned && <span className={styles.pinBadge}>📌 공지</span>}
+                {n.pinned && <span className={styles.pinBadge}>{t('notices.pinned')}</span>}
                 <span className={styles.date}>{formatDate(n.created_at)}</span>
               </div>
               <div className={styles.itemTitle}>{n.title}</div>

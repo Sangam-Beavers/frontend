@@ -19,10 +19,10 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
-import { buildTransferReceiptPath } from '@/constants/routes';
+import { buildTransferReceiptPath, ROUTES } from '@/constants/routes';
 import { useTransactions } from '@/hooks/useTransactions';
 import type { WalletTabKey, WalletTransaction } from '@/types/history';
 import { toWalletTransaction } from '@/utils/transactionMapper';
@@ -48,6 +48,7 @@ const matchesTab = (kind: WalletTransaction['kind'], tab: WalletTabKey) =>
 export default function WalletHistoryPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<WalletTabKey>('all');
   const [page, setPage] = useState(0);
   const { data, isLoading, isFetching, error } = useTransactions(page, PAGE_SIZE);
@@ -78,7 +79,10 @@ export default function WalletHistoryPage() {
 
   return (
     <>
-      <TopBar title={t('mypage2.walletHistory.title')} />
+      <TopBar
+        title={t('mypage2.walletHistory.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+      />
 
       <div className={styles.tabs}>
         {TABS.map((tab) => (

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
@@ -32,6 +32,7 @@ import styles from './AccountManagePage.module.css';
  */
 export default function AccountManagePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { data, isLoading, error } = useMyAccounts();
   const accounts = data?.accounts ?? [];
@@ -77,7 +78,10 @@ export default function AccountManagePage() {
 
   return (
     <>
-      <TopBar title={t('account.title')} onBack={() => navigate(-1)} />
+      <TopBar
+        title={t('account.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+      />
 
       {isLoading && <div className={styles.state}>{t('account.loading')}</div>}
       {error && <div className={styles.state}>{t('account.loadError')}</div>}
@@ -142,7 +146,7 @@ export default function AccountManagePage() {
       <button
         type="button"
         className={styles.primaryBtn}
-        onClick={() => navigate(ROUTES.CHARGE_ADD_ACCOUNT)}
+        onClick={() => navigate(ROUTES.CHARGE_ADD_ACCOUNT, { state: { from: '/mypage/accounts' } })}
       >
         {t('account.addAccount')}
       </button>

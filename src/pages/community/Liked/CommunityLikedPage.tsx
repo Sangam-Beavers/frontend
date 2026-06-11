@@ -1,8 +1,9 @@
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import FeedPost from '@/components/community/FeedPost';
 import Pagination from '@/components/community/Pagination';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import { useLikedPosts } from '@/hooks/useLikedPosts';
 import { formatRelativeTime, toFeedPostItem } from '@/utils/communityFeed';
 import styles from './CommunityLikedPage.module.css';
@@ -15,6 +16,8 @@ import styles from './CommunityLikedPage.module.css';
  */
 export default function CommunityLikedPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   // URL은 1-index(사람 친화), 내부/백엔드는 0-index.
   const rawPage = Number(searchParams.get('page'));
@@ -42,7 +45,10 @@ export default function CommunityLikedPage() {
 
   return (
     <>
-      <TopBar title={t('community.likedPage.title')} />
+      <TopBar
+        title={t('community.likedPage.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.COMMUNITY)}
+      />
 
       {isLoading ? (
         <div className={styles.empty}>{t('community.likedPage.loading')}</div>

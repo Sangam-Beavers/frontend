@@ -134,6 +134,7 @@ export default function TransferAuthPage() {
             {
               onSuccess: (res) => {
                 navigate(ROUTES.TRANSFER_COMPLETE, {
+                  replace: true,
                   state: {
                     recipientName: state.recipientName,
                     currency: state.currency,

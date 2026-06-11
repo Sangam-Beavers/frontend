@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
-import { buildCommunityPostPath } from '@/constants/routes';
+import { buildCommunityPostPath, ROUTES } from '@/constants/routes';
 import { useCreatePost } from '@/hooks/useCreatePost';
 import { usePostDetail } from '@/hooks/usePostDetail';
 import { useUpdatePost } from '@/hooks/useUpdatePost';
@@ -23,6 +23,7 @@ const CATEGORY_VALUES = [
 
 export default function CommunityWritePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   // 편집 모드: /community/posts/:postId/edit 로 진입 시 postId가 있음.
   const { postId } = useParams<{ postId: string }>();
@@ -74,7 +75,7 @@ export default function CommunityWritePage() {
     <>
       <TopBar
         title={isEdit ? t('community.writePage.editTitle') : t('community.writePage.title')}
-        onBack={() => navigate(-1)}
+        onBack={() => navigate(location.state?.from ?? ROUTES.COMMUNITY)}
       />
 
       <div className={styles.field}>

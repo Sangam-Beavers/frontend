@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo, useLayoutEffect, useRef, useState } from 'react';
+import { useNavigate, useNavigationType, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { startLogout } from '@/auth/logout';
 import Identicon from '@/components/common/Identicon';
@@ -54,9 +54,9 @@ const mypageItems: MenuItem[] = [
 ];
 
 const supportItems: MenuItem[] = [
-  { labelKey: 'allmenu.items.notices', path: '/community' },
-  { labelKey: 'allmenu.items.faq', path: '/community' },
-  { labelKey: 'allmenu.items.contact', path: '/community/write' },
+  { labelKey: 'allmenu.items.notices', path: ROUTES.NOTICES },
+  { labelKey: 'allmenu.items.faq', path: ROUTES.COMMUNITY_FAQ },
+  { labelKey: 'allmenu.items.contact', path: ROUTES.COMMUNITY_WRITE },
 ];
 
 const ALL_ITEMS: MenuItem[] = [
@@ -84,23 +84,56 @@ const TAGS: MenuItem[] = [
 ];
 
 const QUICK_LINKS: MenuItem[] = [
-  { labelKey: 'allmenu.quickLinks.finance', path: '/charge' },
-  { labelKey: 'allmenu.quickLinks.languageTranslate', path: '/mypage/language' },
-  { labelKey: 'allmenu.quickLinks.language', path: '/mypage/language' },
+  { labelKey: 'allmenu.quickLinks.finance', path: ROUTES.CHARGE },
+  { labelKey: 'allmenu.quickLinks.languageTranslate', path: ROUTES.MYPAGE_LANGUAGE },
+  { labelKey: 'allmenu.quickLinks.language', path: ROUTES.MYPAGE_LANGUAGE },
 ];
+
+const SCROLL_KEY = 'allMenu_rightContent_scroll';
 
 export default function AllMenuPage() {
   const navigate = useNavigate();
+  const navType = useNavigationType();
   const { t } = useTranslation();
-  // 헤더 프로필 — 실제 로그인 사용자(GET /members/me). 마이페이지와 동일 소스.
   const { data: profile, isLoading } = useMyProfile();
   const nickname = profile?.nickname ?? '';
-  // 사진 미설정 시 닉네임 첫 글자 대신 사용자별 고유 패턴(public_id 시드)을 보여준다.
   const avatarSeed = profile?.public_id ?? nickname;
   const languageLabel = profile?.language
     ? (LANGUAGE_CODE_TO_LABEL[profile.language] ?? profile.language)
     : '';
-  const [activeNav, setActiveNav] = useState<NavKey>('all');
+
+  // ── 좌측 탭: URL search param으로 관리 → 뒤로가기 시 탭 상태 복원 ──────────
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawTab = searchParams.get('tab');
+  const activeNav: NavKey = NAV_KEYS.includes(rawTab as NavKey) ? (rawTab as NavKey) : 'all';
+
+  const setActiveNav = (key: NavKey) => {
+    const next = new URLSearchParams(searchParams);
+    if (key === 'all') next.delete('tab');
+    else next.set('tab', key);
+    setSearchParams(next, { replace: true });
+  };
+
+  // ── rightContent 스크롤 복원 ────────────────────────────────────────────────
+  const rightContentRef = useRef<HTMLDivElement>(null);
+
+  // POP(뒤로가기)으로 돌아온 경우에만 저장된 위치 복원
+  useLayoutEffect(() => {
+    if (navType !== 'POP') return;
+    const saved = sessionStorage.getItem(SCROLL_KEY);
+    if (saved && rightContentRef.current) {
+      rightContentRef.current.scrollTop = Number(saved);
+    }
+  }, [navType]);
+
+  // 메뉴 항목 클릭 시 스크롤 위치 저장 후 이동
+  const navigateTo = (path: string) => {
+    if (rightContentRef.current) {
+      sessionStorage.setItem(SCROLL_KEY, String(rightContentRef.current.scrollTop));
+    }
+    navigate(path, { state: { from: ROUTES.ALL_MENU } });
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const searchResults = useMemo(() => {
@@ -116,7 +149,7 @@ export default function AllMenuPage() {
         <div className={styles.head}>
           <div
             className={styles.profileRow}
-            onClick={() => navigate('/mypage')}
+            onClick={() => navigate(ROUTES.MYPAGE)}
             style={{ cursor: 'pointer' }}
           >
             <div className={styles.avatar}>
@@ -137,7 +170,7 @@ export default function AllMenuPage() {
             </div>
           </div>
           <div className={styles.headIcons}>
-            <span onClick={() => navigate('/mypage')} style={{ cursor: 'pointer' }}>
+            <span onClick={() => navigate(ROUTES.MYPAGE)} style={{ cursor: 'pointer' }}>
               ⚙️
             </span>
           </div>
@@ -146,10 +179,7 @@ export default function AllMenuPage() {
         {/* Quick access */}
         <div className={styles.quickGrid}>
           {QUICK_LINKS.map((q) => (
-            <span
-              key={q.labelKey}
-              onClick={() => navigate(q.path, { state: { from: ROUTES.ALL_MENU } })}
-            >
+            <span key={q.labelKey} onClick={() => navigateTo(q.path)}>
               {t(q.labelKey)}
             </span>
           ))}
@@ -169,11 +199,7 @@ export default function AllMenuPage() {
         {/* Tags */}
         <div className={styles.tagRow}>
           {TAGS.map((tag) => (
-            <span
-              key={tag.labelKey}
-              className={styles.tag}
-              onClick={() => navigate(tag.path, { state: { from: ROUTES.ALL_MENU } })}
-            >
+            <span key={tag.labelKey} className={styles.tag} onClick={() => navigateTo(tag.path)}>
               {t(tag.labelKey)}
             </span>
           ))}
@@ -189,7 +215,7 @@ export default function AllMenuPage() {
                 <div
                   key={item.labelKey + item.path}
                   className={styles.menuItem}
-                  onClick={() => navigate(item.path, { state: { from: ROUTES.ALL_MENU } })}
+                  onClick={() => navigateTo(item.path)}
                 >
                   <span>{t(item.labelKey)}</span>
                   <span className={styles.arrow}>›</span>
@@ -213,7 +239,7 @@ export default function AllMenuPage() {
             </div>
 
             {/* Right content */}
-            <div className={styles.rightContent}>
+            <div ref={rightContentRef} className={styles.rightContent}>
               {MENU[activeNav].map((block) => (
                 <div key={block.titleKey} className={styles.menuBlock}>
                   <b className={styles.blockTitle}>{t(block.titleKey)}</b>
@@ -221,7 +247,7 @@ export default function AllMenuPage() {
                     <div
                       key={item.labelKey + item.path}
                       className={styles.menuItem}
-                      onClick={() => navigate(item.path, { state: { from: ROUTES.ALL_MENU } })}
+                      onClick={() => navigateTo(item.path)}
                     >
                       <span>{t(item.labelKey)}</span>
                       <span className={styles.arrow}>›</span>
@@ -235,8 +261,8 @@ export default function AllMenuPage() {
 
         {/* Footer links */}
         <div className={styles.footer}>
-          <span onClick={() => navigate('/mypage')}>{t('allmenu.footer.privacy')}</span>
-          <span onClick={() => navigate('/mypage')}>{t('allmenu.footer.terms')}</span>
+          <span onClick={() => navigate(ROUTES.MYPAGE)}>{t('allmenu.footer.privacy')}</span>
+          <span onClick={() => navigate(ROUTES.MYPAGE)}>{t('allmenu.footer.terms')}</span>
           <span onClick={() => startLogout()}>{t('allmenu.footer.logout')}</span>
         </div>
       </div>

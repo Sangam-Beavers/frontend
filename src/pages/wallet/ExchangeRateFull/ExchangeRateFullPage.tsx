@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
 import { useExchangeRatesWidget } from '@/hooks/useExchangeRatesWidget';
@@ -22,6 +22,7 @@ type Tab = (typeof TABS)[number];
 export default function ExchangeRateFullPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<Tab>('전체');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const { data, isLoading, isFetching, error, refetch } = useExchangeRatesWidget();
@@ -100,7 +101,7 @@ export default function ExchangeRateFullPage() {
     <>
       <TopBar
         title={t('exchange.rateFull.title')}
-        onBack={() => navigate(-1)}
+        onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
         rightAction={
           <button
             className={styles.iconBtn}

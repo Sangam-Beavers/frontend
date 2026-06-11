@@ -303,6 +303,20 @@
       "emptyPage": "Walang gusto sa pahinang ito.",
       "backToFirst": "Sa Una",
       "empty": "Wala pang gusto. Pindutin ang ♥."
+    },
+    "faq": {
+      "title": "Mga Madalas na Tanong",
+      "loading": "Naglo-load...",
+      "empty": "Walang mga FAQ.",
+      "categories": {
+        "all": "Lahat",
+        "GENERAL": "Pangkalahatan",
+        "TRANSFER": "Paglipat",
+        "EXCHANGE": "Palitan",
+        "DOCUMENT": "Pagsusuri ng Dokumento",
+        "ACCOUNT": "Account"
+      },
+      "loadError": "Hindi ma-load ang mga FAQ."
     }
   },
   "docAnalysis": {
@@ -1083,6 +1097,24 @@
       "errValidateFmt": "Nabigo ang validation.",
       "noticeTextNew": "Ang susunod na petsa ay awtomatikong kinakalkula. May abiso bago ang transfer; kulang na balanse ay maaaring magdulot ng failure."
     },
+    "history": {
+      "title": "Kasaysayan ng Paulit-ulit na Paglipat",
+      "loading": "Naglo-load...",
+      "notFound": "Hindi nahanap ang kasaysayan ng paulit-ulit na paglipat.",
+      "loadError": "Hindi ma-load ang kasaysayan.",
+      "empty": "Wala pang mga pagpapatupad.",
+      "fee": "Bayad",
+      "prev": "Nakaraan",
+      "next": "Susunod",
+      "pageInfo": "{{current}} / {{total}} (kabuuan {{count}})",
+      "status": {
+        "COMPLETED": "Nakumpleto",
+        "PENDING": "Nakabinbin",
+        "PROCESSING": "Pinoproseso",
+        "FAILED": "Nabigo",
+        "CANCELLED": "Nakansela"
+      }
+    },
     "complete": {
       "title": "Nakatakda",
       "cardTitle": "Nakatakda na",
@@ -1220,5 +1252,17 @@
     "askMoreAria": "Tanungin ang AI pa tungkol sa {{title}}",
     "typingAria": "Bumubuo ng tugon",
     "fabLabel": "May tanong? Itanong lang"
+  },
+  "maintenance": {
+    "title": "Pagpapanatili ng Serbisyo",
+    "body": "Kasalukuyan kaming nag-aayos ng aming serbisyo.",
+    "retry": "Pakisubukang muli mamaya."
+  },
+  "notices": {
+    "title": "Mga Abiso",
+    "loading": "Naglo-load...",
+    "loadError": "Hindi ma-load ang mga abiso.",
+    "empty": "Walang mga abiso.",
+    "pinned": "📌 Abiso"
   }
 }

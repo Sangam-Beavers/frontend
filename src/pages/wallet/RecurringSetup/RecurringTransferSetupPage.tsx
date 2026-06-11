@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/constants/routes';
 import { ApiException } from '@/api';
 import type { CreateScheduledTransferRequest, ScheduledTransferFrequency } from '@/api/wallet';
 import TopBar from '@/components/navigation/TopBar';
@@ -197,7 +198,7 @@ export default function RecurringTransferSetupPage() {
 
   return (
     <div className={styles.contentPad}>
-      <TopBar title={t('recurring.setup.title')} />
+      <TopBar title={t('recurring.setup.title')} onBack={() => navigate(ROUTES.RECURRING)} />
 
       <div className={styles.section}>{t('recurring.setup.recentSection')}</div>
       {recipientsLoading ? (

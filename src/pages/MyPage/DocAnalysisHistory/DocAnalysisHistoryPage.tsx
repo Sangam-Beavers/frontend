@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import { useDocuments } from '@/hooks/useDocuments';
 import { docDateLabel, docStatusLabel, docTypeLabel } from '@/utils/docAnalysisDisplay';
 import styles from './DocAnalysisHistoryPage.module.css';
@@ -11,6 +12,7 @@ const FREE_VISIBLE_COUNT = 3;
 export default function DocAnalysisHistoryPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   // document_submissions + document_results join 목록 (최근순).
   // 실패(FAILED) 내역은 서버 status 필터(api-spec §4)로 숨기고 최근 3건만 노출.
   const {
@@ -22,7 +24,10 @@ export default function DocAnalysisHistoryPage() {
 
   return (
     <>
-      <TopBar title={t('mypage2.docHistory.title')} />
+      <TopBar
+        title={t('mypage2.docHistory.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+      />
 
       <div className={styles.card}>
         <div className={styles.cardTitle}>{t('mypage2.docHistory.cardTitle')}</div>
@@ -78,11 +83,7 @@ export default function DocAnalysisHistoryPage() {
         })}
       </div>
 
-      <button
-        type="button"
-        className={styles.primary}
-        onClick={() => navigate('/doc-analysis/payment')}
-      >
+      <button type="button" className={styles.primary} onClick={() => navigate('/doc-analysis')}>
         {t('mypage2.docHistory.subscribe')}
       </button>
     </>

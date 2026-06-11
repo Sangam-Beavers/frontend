@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '@/pages/auth/auth.css';
 import { ApiException, memberApi } from '@/api';
@@ -21,13 +21,14 @@ import { ROUTES } from '@/constants/routes';
 function ResetPassword() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
 
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState((location.state as { done?: boolean } | null)?.done ?? false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,7 +49,8 @@ function ResetPassword() {
       // body는 snake_case(new_password) — 백엔드 전역 규칙(memberApi.ResetPasswordBody 타입 참고).
       // 성공 시 interceptor가 envelope을 풀어 void 반환. 실패는 ApiException으로 throw.
       await memberApi.resetPassword({ token, new_password: password });
-      setDone(true); // 변경 완료 — 아래에서 완료 카드 + 로그인 버튼 표시
+      setDone(true);
+      navigate('/reset-password', { replace: true, state: { done: true } });
     } catch (e) {
       if (e instanceof ApiException) {
         if (e.code === 'MEMBER4004') {

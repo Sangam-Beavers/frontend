@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Identicon from '@/components/common/Identicon';
+import TopBar from '@/components/navigation/TopBar';
 import TrustGradeSheet from '@/components/mypage/TrustGradeSheet';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useMyVerification } from '@/hooks/useMyVerification';
@@ -21,6 +22,7 @@ const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   // 내 프로필 — 닉네임/아바타에 사용. 로딩 중엔 placeholder, 실패는 일단 빈값으로 표시.
   // (사이클 1: 에러 분기 단순화 — 마이페이지 진입 자체가 인증 필요라 토큰 만료는 interceptor가 /login으로 redirect.)
@@ -71,16 +73,11 @@ export default function MyPage() {
 
   return (
     <>
+      <TopBar
+        title={t('mypage.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+      />
       <div className={styles.noTopPad}>
-        {/* Custom top bar */}
-        <div className={styles.topBar}>
-          <button type="button" className={styles.iconBtn} onClick={() => navigate(-1)}>
-            ‹
-          </button>
-          <span className={styles.topTitle}>{t('mypage.title')}</span>
-          <div style={{ width: 40 }} />
-        </div>
-
         {/* Profile card */}
         <div className={styles.card}>
           <div className={styles.profileRow}>

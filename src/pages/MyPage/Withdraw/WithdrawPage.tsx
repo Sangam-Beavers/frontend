@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import Toast, { type ToastVariant } from '@/components/common/Toast';
 import { startLogout } from '@/auth/logout';
 import { ApiException } from '@/api/client';
+import { ROUTES } from '@/constants/routes';
 import { useWithdraw } from '@/hooks/useWithdraw';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import styles from './WithdrawPage.module.css';
@@ -38,6 +39,7 @@ const REASON_KEYS = [
  */
 export default function WithdrawPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { data: profile } = useMyProfile();
   const withdraw = useWithdraw();
@@ -76,7 +78,9 @@ export default function WithdrawPage() {
     <>
       <TopBar
         title={t('withdraw.title')}
-        onBack={() => (step === 'info' ? setStep('reason') : navigate(-1))}
+        onBack={() =>
+          step === 'info' ? setStep('reason') : navigate(location.state?.from ?? ROUTES.MYPAGE)
+        }
       />
 
       {step === 'reason' && (

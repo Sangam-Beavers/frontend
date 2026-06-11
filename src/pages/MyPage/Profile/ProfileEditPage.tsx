@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import { memberApi } from '@/api/member';
 import Identicon from '@/components/common/Identicon';
 import TopBar from '@/components/navigation/TopBar';
 import { SETTING_LANGUAGES, LANGUAGE_NATIVE_NAMES } from '@/constants/languages';
+import { ROUTES } from '@/constants/routes';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useUpdateMyProfile } from '@/hooks/useUpdateMyProfile';
 import type { AvatarTone } from '@/types/community';
@@ -51,6 +52,7 @@ const LANGUAGE_LABEL_TO_CODE: Record<string, string> = Object.fromEntries(
 export default function ProfileEditPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: profile } = useMyProfile();
   const update = useUpdateMyProfile();
 
@@ -118,7 +120,7 @@ export default function ProfileEditPage() {
         bio: trimmedBio === '' ? null : trimmedBio,
       },
       {
-        onSuccess: () => navigate(-1),
+        onSuccess: () => navigate(location.state?.from ?? ROUTES.MYPAGE),
         onError: (err) => {
           if (err instanceof ApiException) {
             if (err.code === 'MEMBER4003') {
@@ -138,7 +140,10 @@ export default function ProfileEditPage() {
   return (
     <>
       <div className={styles.contentExtraPad}>
-        <TopBar title={t('mypage2.profile.title')} onBack={() => navigate(-1)} />
+        <TopBar
+          title={t('mypage2.profile.title')}
+          onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+        />
 
         {/* Avatar */}
         <div className={styles.avatarWrap}>

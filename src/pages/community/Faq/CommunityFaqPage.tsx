@@ -1,39 +1,44 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { faqsApi, type FaqItem } from '@/api/app';
 import { useQuery } from '@tanstack/react-query';
+import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import styles from './CommunityFaqPage.module.css';
 
 const CATEGORIES = [
-  { key: '', label: '전체' },
-  { key: 'GENERAL', label: '일반' },
-  { key: 'TRANSFER', label: '송금' },
-  { key: 'EXCHANGE', label: '환전' },
-  { key: 'DOCUMENT', label: '서류 분석' },
-  { key: 'ACCOUNT', label: '계정' },
+  { key: '', labelKey: 'community.faq.categories.all' },
+  { key: 'GENERAL', labelKey: 'community.faq.categories.GENERAL' },
+  { key: 'TRANSFER', labelKey: 'community.faq.categories.TRANSFER' },
+  { key: 'EXCHANGE', labelKey: 'community.faq.categories.EXCHANGE' },
+  { key: 'DOCUMENT', labelKey: 'community.faq.categories.DOCUMENT' },
+  { key: 'ACCOUNT', labelKey: 'community.faq.categories.ACCOUNT' },
 ];
 
 export default function CommunityFaqPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [category, setCategory] = useState('');
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const { data: faqs = [], isLoading } = useQuery({
+  const {
+    data: faqs = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['faqs', category],
     queryFn: () => faqsApi.listPublished(category || undefined),
   });
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.topBar}>
-        <button type="button" className={styles.backBtn} onClick={() => navigate(-1)}>
-          ‹
-        </button>
-        <span className={styles.title}>자주 묻는 질문</span>
-        <div style={{ width: 40 }} />
-      </div>
+      <TopBar
+        title={t('community.faq.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.COMMUNITY)}
+      />
 
-      {/* 카테고리 탭 */}
       <div className={styles.tabs}>
         {CATEGORIES.map((c) => (
           <button
@@ -45,15 +50,19 @@ export default function CommunityFaqPage() {
               setOpenId(null);
             }}
           >
-            {c.label}
+            {t(c.labelKey)}
           </button>
         ))}
       </div>
 
       {isLoading ? (
-        <div className={styles.empty}>불러오는 중...</div>
+        <div className={styles.empty}>{t('community.faq.loading')}</div>
+      ) : isError ? (
+        <div className={styles.empty} role="alert">
+          {t('community.faq.loadError')}
+        </div>
       ) : faqs.length === 0 ? (
-        <div className={styles.empty}>등록된 FAQ가 없습니다.</div>
+        <div className={styles.empty}>{t('community.faq.empty')}</div>
       ) : (
         <div className={styles.list}>
           {faqs.map((f: FaqItem) => (

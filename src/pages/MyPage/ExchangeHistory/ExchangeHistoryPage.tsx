@@ -15,8 +15,10 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException, type ExchangeResponse } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import { useExchangeHistory } from '@/hooks/useExchangeHistory';
 import styles from './ExchangeHistoryPage.module.css';
 
@@ -61,6 +63,8 @@ function formatDateTime(iso: string): string {
 
 export default function ExchangeHistoryPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<ExchangeResponse | null>(null);
   const { data, isLoading, isFetching, error } = useExchangeHistory(page, PAGE_SIZE);
@@ -88,7 +92,10 @@ export default function ExchangeHistoryPage() {
 
   return (
     <>
-      <TopBar title={t('mypage2.exchangeHistory.title')} />
+      <TopBar
+        title={t('mypage2.exchangeHistory.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+      />
 
       {isLoading ? (
         <div className={styles.stateCard}>{t('mypage2.exchangeHistory.loading')}</div>

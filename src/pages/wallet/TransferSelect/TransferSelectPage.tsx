@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
@@ -26,6 +26,7 @@ function formatBalance(code: string, balance: string): string {
 
 export default function TransferSelectPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { data: balances, isLoading, error } = useBalances();
 
@@ -45,7 +46,10 @@ export default function TransferSelectPage() {
 
   return (
     <>
-      <TopBar title={t('transfer.select.title')} onBack={() => navigate(ROUTES.HOME)} />
+      <TopBar
+        title={t('transfer.select.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.HOME)}
+      />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>{t('transfer.select.availableBalance')}</div>

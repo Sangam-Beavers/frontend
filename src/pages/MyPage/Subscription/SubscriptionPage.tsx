@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
+import { ROUTES } from '@/constants/routes';
 import styles from './SubscriptionPage.module.css';
 
 export default function SubscriptionPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [cancelled, setCancelled] = useState(false);
 
   return (
     <>
-      <TopBar title={t('mypage2.subscription.title')} onBack={() => navigate(-1)} />
+      <TopBar
+        title={t('mypage2.subscription.title')}
+        onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+      />
 
       <div className={`${styles.card} ${styles.cardInfo}`}>
         <div className={styles.cardTitle}>
@@ -31,7 +36,7 @@ export default function SubscriptionPage() {
         <button
           type="button"
           className={styles.primaryBtn}
-          onClick={() => navigate('/doc-analysis/payment')}
+          onClick={() => navigate('/doc-analysis')}
         >
           {t('mypage2.subscription.subscribe')}
         </button>
