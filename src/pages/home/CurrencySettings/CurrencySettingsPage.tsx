@@ -2,24 +2,42 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
-import { HOME_ALL_CURRENCIES_MOCK } from '@/mocks/homeMock';
+import { SUPPORTED_CURRENCIES, isSupportedCurrency } from '@/constants/currencies';
 import styles from './CurrencySettingsPage.module.css';
 
 const STORAGE_KEY = 'homeCurrencies';
+const MAIN_CURRENCY_KEY = 'homeMainCurrency';
 const MAX_SELECT = 2;
 
-function loadSaved(): string[] {
+/** 메인 통화(이슈 #194) — 표시 통화 후보에서 제외 대상. */
+function loadMainCurrency(): string {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as string[]) : ['USD', 'VND'];
+    const raw = localStorage.getItem(MAIN_CURRENCY_KEY);
+    return raw && isSupportedCurrency(raw) ? raw : 'KRW';
   } catch {
-    return ['USD', 'VND'];
+    return 'KRW';
   }
 }
 
 export default function CurrencySettingsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  // 표시 통화 후보 = 지원 통화 4개 − 메인 통화 1개 = 3개(이슈 #194).
+  const mainCurrency = loadMainCurrency();
+  const candidates = SUPPORTED_CURRENCIES.filter((code) => code !== mainCurrency);
+
+  // 저장값 정제: 후보(지원 통화 ∧ ≠메인)에 없는 코드는 제거.
+  function loadSaved(): string[] {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const codes: string[] = raw ? (JSON.parse(raw) as string[]) : ['USD', 'VND'];
+      return codes.filter((code) => (candidates as readonly string[]).includes(code));
+    } catch {
+      return candidates.filter((c) => c === 'USD' || c === 'VND');
+    }
+  }
+
   const [selected, setSelected] = useState<string[]>(loadSaved);
 
   const toggle = (code: string) => {
@@ -43,20 +61,18 @@ export default function CurrencySettingsPage() {
         <p className={styles.desc}>{t('currencySettings.description')}</p>
 
         <div className={styles.list}>
-          {HOME_ALL_CURRENCIES_MOCK.map((cur) => {
-            const checked = selected.includes(cur.code);
+          {candidates.map((code) => {
+            const checked = selected.includes(code);
             const disabled = !checked && selected.length >= MAX_SELECT;
             return (
               <div
-                key={cur.code}
+                key={code}
                 className={`${styles.item} ${disabled ? styles.itemDisabled : ''}`}
-                onClick={() => !disabled && toggle(cur.code)}
+                onClick={() => !disabled && toggle(code)}
               >
                 <div className={styles.itemInfo}>
-                  <div className={styles.itemCode}>{cur.code}</div>
-                  <div className={styles.itemLabel}>
-                    {t(`home.currencies.${cur.code}`, { defaultValue: cur.label })}
-                  </div>
+                  <div className={styles.itemCode}>{code}</div>
+                  <div className={styles.itemLabel}>{t(`home.currencies.${code}`)}</div>
                 </div>
                 <div className={`${styles.checkbox} ${checked ? styles.checkboxChecked : ''}`}>
                   {checked && '✓'}
