@@ -155,8 +155,10 @@ export interface TransactionHistoryItem {
   receive_amount: string | null;
   /** 수령 통화 코드 — 환전·송금만. */
   receive_currency_code: string | null;
-  /** 수취인 이름 — 송금만. */
+  /** 수취인 이름 — REMITTANCE 해외송금 외부 수취인. */
   receiver_name: string | null;
+  /** 거래 상대 닉네임 — INTERNAL_TRANSFER(앱 사용자 간 송금)만. OUT=받는 사람, IN=보낸 사람. 그 외/조회불가 null. (#207) */
+  counterparty_nickname: string | null;
   /** 거래 시각 (ISO 8601 UTC Z). */
   created_at: string;
 }
