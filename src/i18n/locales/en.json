@@ -563,6 +563,7 @@
     "profile": {
       "title": "Edit Profile",
       "changePhoto": "Change profile photo",
+      "changeColor": "Change color",
       "nicknameLabel": "Nickname",
       "checkDuplicate": "Check",
       "nicknameOk": "✓ Nickname is available",

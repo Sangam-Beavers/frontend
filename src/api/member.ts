@@ -124,6 +124,8 @@ export interface ProfileResponse {
   trust_grade?: string;
   /** 프로필 사진 URL. 이미지 도메인 미구현으로 현재 항상 null. */
   profile_image_url: string | null;
+  /** 아바타 색조(hue) 회전 각도(0~359°). 미설정 시 0. 사진/Identicon에 hue-rotate로 적용. */
+  avatar_hue: number;
   /** 가입 일시 (ISO 8601 UTC Z). */
   created_at: string;
 }
@@ -141,6 +143,8 @@ export interface ProfileUpdateBody {
   language: string;
   /** 자기소개 (최대 200자, nullable). 빈 문자열 또는 미입력 가능. */
   bio: string | null;
+  /** 아바타 색조(hue) 회전 각도(0~359°). 미전송 시 백엔드가 기존 값 유지. */
+  avatar_hue?: number;
 }
 
 /** GET/PATCH /api/v1/members/me/language 응답 본문. */

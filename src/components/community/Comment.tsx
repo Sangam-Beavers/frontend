@@ -84,7 +84,10 @@ export default function Comment({
 
   return (
     <div className={classNames.root}>
-      <div className={classNames.avatar}>
+      <div
+        className={classNames.avatar}
+        style={{ filter: `hue-rotate(${comment.author_avatar_hue ?? 0}deg)` }}
+      >
         {comment.author_profile_image_url ? (
           <img src={comment.author_profile_image_url} alt="" className={classNames.avatarImg} />
         ) : (

@@ -563,6 +563,7 @@
     "profile": {
       "title": "I-edit ang Profile",
       "changePhoto": "Palitan ang larawan ng profile",
+      "changeColor": "Palitan ang kulay",
       "nicknameLabel": "Palayaw",
       "checkDuplicate": "Suriin",
       "nicknameOk": "✓ Available ang palayaw",

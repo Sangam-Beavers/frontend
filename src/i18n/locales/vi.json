@@ -563,6 +563,7 @@
     "profile": {
       "title": "Chỉnh sửa hồ sơ",
       "changePhoto": "Thay ảnh đại diện",
+      "changeColor": "Đổi màu",
       "nicknameLabel": "Biệt danh",
       "checkDuplicate": "Kiểm tra",
       "nicknameOk": "✓ Biệt danh có thể sử dụng",

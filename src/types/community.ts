@@ -16,6 +16,8 @@ export interface FeedPostItem {
    * VERIFIED → 'good'(초록 실선), NEWCOMER·누락 → 'default'(회색 점선). 미지정도 회색 폴백.
    */
   avatarTone?: AvatarTone;
+  /** 작성자 아바타 색조 회전 각도(0~359°). 마이페이지 '색깔 변경' 저장값 — 아바타 hue-rotate 적용. 미설정 시 0. */
+  avatarHue?: number;
   /**
    * 작성 언어 코드. 카드별 "Translate" 버튼이 `i18n.language`와 비교해 같으면 숨긴다.
    * 백엔드가 응답에 안 채워주면 undefined — 그땐 가드 못해 버튼 항상 노출(안전 fallback).

@@ -65,6 +65,7 @@ export default function FeedPost({ post }: FeedPostProps) {
       <div className={styles.head}>
         <div
           className={`${styles.avatar} ${AVATAR_TONE_CLASS[post.avatarTone ?? 'default'] ?? styles.avatarNewcomer}`}
+          style={{ filter: `hue-rotate(${post.avatarHue ?? 0}deg)` }}
         >
           {post.avatarImageUrl ? (
             <img src={post.avatarImageUrl} alt="" className={styles.avatarImg} />

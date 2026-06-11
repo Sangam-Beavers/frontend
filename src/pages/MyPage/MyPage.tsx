@@ -96,7 +96,10 @@ export default function MyPage() {
               onClick={() => setTrustSheetOpen(true)}
               aria-label={t('trust.sheet.open')}
             >
-              <div className={`${styles.avatar} ${avatarToneClass}`}>
+              <div
+                className={`${styles.avatar} ${avatarToneClass}`}
+                style={{ filter: `hue-rotate(${profile?.avatar_hue ?? 0}deg)` }}
+              >
                 {profile?.profile_image_url ? (
                   <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
                 ) : (
