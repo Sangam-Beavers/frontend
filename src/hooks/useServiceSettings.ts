@@ -9,13 +9,13 @@ export interface ServiceSetting {
 }
 
 /**
- * 공개 서비스 설정 조회 (GET /api/v1/app/settings).
+ * 공개 서비스 설정 조회 (GET /api/v1/app-admin/app/settings).
  * 1분 staleTime — 설정은 자주 안 바뀌지만 점검 모드는 빨리 반영돼야 함.
  */
 export function useServiceSettings() {
   return useQuery<ServiceSetting[]>({
     queryKey: ['app', 'settings'],
-    queryFn: () => apiClient.get<unknown, ServiceSetting[]>('/app/settings'),
+    queryFn: () => apiClient.get<unknown, ServiceSetting[]>('/app-admin/app/settings'),
     staleTime: 60_000,
     retry: 1,
   });

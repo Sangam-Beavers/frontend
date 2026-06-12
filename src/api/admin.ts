@@ -1,7 +1,7 @@
 /**
  * 앱 관리 API (app-admin-service, port 8086)
- * - 공개 읽기:  GET /api/v1/app/{resource}
- * - 관리자 쓰기: POST/PATCH/DELETE /api/v1/admin/app/{resource}
+ * - 공개 읽기:  GET /api/v1/app-admin/app/{resource}
+ * - 관리자 쓰기: POST/PATCH/DELETE /api/v1/app-admin/admin/{resource}
  *
  * apiClient request interceptor가 JWT Bearer 헤더 자동 부착.
  * response interceptor가 ApiResponse envelope 자동 언래핑.
@@ -104,27 +104,28 @@ export interface UserActivityResponse {
 // ─────── 공지사항 ──────────────────────────────────────────────────────────────
 
 export const noticeApi = {
-  listAll: () => apiClient.get<unknown, NoticeResponse[]>('/admin/app/notices'),
+  listAll: () => apiClient.get<unknown, NoticeResponse[]>('/app-admin/admin/notices'),
   create: (data: { title: string; content: string; pinned?: boolean; published?: boolean }) =>
-    apiClient.post<unknown, NoticeResponse>('/admin/app/notices', data),
+    apiClient.post<unknown, NoticeResponse>('/app-admin/admin/notices', data),
   update: (
     publicId: string,
     data: Partial<{ title: string; content: string; pinned: boolean; published: boolean }>
-  ) => apiClient.patch<unknown, NoticeResponse>(`/admin/app/notices/${publicId}`, data),
-  delete: (publicId: string) => apiClient.delete<unknown, void>(`/admin/app/notices/${publicId}`),
+  ) => apiClient.patch<unknown, NoticeResponse>(`/app-admin/admin/notices/${publicId}`, data),
+  delete: (publicId: string) =>
+    apiClient.delete<unknown, void>(`/app-admin/admin/notices/${publicId}`),
 };
 
 // ─────── FAQ ─────────────────────────────────────────────────────────────────
 
 export const faqApi = {
-  listAll: () => apiClient.get<unknown, FaqResponse[]>('/admin/app/faqs'),
+  listAll: () => apiClient.get<unknown, FaqResponse[]>('/app-admin/admin/faqs'),
   create: (data: {
     question: string;
     answer: string;
     category: string;
     published?: boolean;
     sortOrder?: number;
-  }) => apiClient.post<unknown, FaqResponse>('/admin/app/faqs', data),
+  }) => apiClient.post<unknown, FaqResponse>('/app-admin/admin/faqs', data),
   update: (
     publicId: string,
     data: Partial<{
@@ -134,14 +135,15 @@ export const faqApi = {
       published: boolean;
       sortOrder: number;
     }>
-  ) => apiClient.patch<unknown, FaqResponse>(`/admin/app/faqs/${publicId}`, data),
-  delete: (publicId: string) => apiClient.delete<unknown, void>(`/admin/app/faqs/${publicId}`),
+  ) => apiClient.patch<unknown, FaqResponse>(`/app-admin/admin/faqs/${publicId}`, data),
+  delete: (publicId: string) =>
+    apiClient.delete<unknown, void>(`/app-admin/admin/faqs/${publicId}`),
 };
 
 // ─────── 수수료 정책 (EXCHANGE: 환전, CASHOUT: 외부 은행 출금) ────────────────
 
 export const feePolicyApi = {
-  listAll: () => apiClient.get<unknown, FeePolicyResponse[]>('/admin/app/fee-policies'),
+  listAll: () => apiClient.get<unknown, FeePolicyResponse[]>('/app-admin/admin/fee-policies'),
   update: (
     publicId: string,
     data: Partial<{
@@ -151,23 +153,25 @@ export const feePolicyApi = {
       maxFee: string;
       active: boolean;
     }>
-  ) => apiClient.patch<unknown, FeePolicyResponse>(`/admin/app/fee-policies/${publicId}`, data),
+  ) =>
+    apiClient.patch<unknown, FeePolicyResponse>(`/app-admin/admin/fee-policies/${publicId}`, data),
 };
 
 // ─────── 서비스 설정 ────────────────────────────────────────────────────────────
 
 export const serviceSettingApi = {
-  listAll: () => apiClient.get<unknown, ServiceSettingResponse[]>('/admin/app/settings'),
+  listAll: () => apiClient.get<unknown, ServiceSettingResponse[]>('/app-admin/admin/settings'),
   create: (data: {
     setting_key: string;
     setting_value: string;
     description?: string;
     active?: boolean;
-  }) => apiClient.post<unknown, ServiceSettingResponse>('/admin/app/settings', data),
+  }) => apiClient.post<unknown, ServiceSettingResponse>('/app-admin/admin/settings', data),
   update: (
     publicId: string,
     data: Partial<{ setting_value: string; description: string; active: boolean }>
-  ) => apiClient.patch<unknown, ServiceSettingResponse>(`/admin/app/settings/${publicId}`, data),
+  ) =>
+    apiClient.patch<unknown, ServiceSettingResponse>(`/app-admin/admin/settings/${publicId}`, data),
 };
 
 // ─────── 환율 정책 ────────────────────────────────────────────────────────────
@@ -182,12 +186,15 @@ export interface ExchangeRatePolicyResponse {
 
 export const exchangeRatePolicyApi = {
   listAll: () =>
-    apiClient.get<unknown, ExchangeRatePolicyResponse[]>('/admin/app/exchange-rate-policies'),
+    apiClient.get<unknown, ExchangeRatePolicyResponse[]>('/app-admin/admin/exchange-rate-policies'),
   create: (data: { currencyCode: string; spread: string; active: boolean }) =>
-    apiClient.post<unknown, ExchangeRatePolicyResponse>('/admin/app/exchange-rate-policies', data),
+    apiClient.post<unknown, ExchangeRatePolicyResponse>(
+      '/app-admin/admin/exchange-rate-policies',
+      data
+    ),
   update: (publicId: string, data: Partial<{ spread: string; active: boolean }>) =>
     apiClient.patch<unknown, ExchangeRatePolicyResponse>(
-      `/admin/app/exchange-rate-policies/${publicId}`,
+      `/app-admin/admin/exchange-rate-policies/${publicId}`,
       data
     ),
 };
@@ -231,10 +238,12 @@ export interface MemberReportsResponse {
 export const adminReportApi = {
   // 신고당한 회원 목록
   getReportedAuthors: (params?: { page?: number; size?: number }) =>
-    apiClient.get<unknown, ReportedAuthorPageResponse>('/admin/app/reports', { params }),
+    apiClient.get<unknown, ReportedAuthorPageResponse>('/app-admin/admin/reports', { params }),
   // 특정 회원이 받은 신고 상세
   getMemberReports: (userPublicId: string) =>
-    apiClient.get<unknown, MemberReportsResponse>(`/admin/app/members/${userPublicId}/reports`),
+    apiClient.get<unknown, MemberReportsResponse>(
+      `/app-admin/admin/members/${userPublicId}/reports`
+    ),
 };
 
 // ─────── 회원 관리 ────────────────────────────────────────────────────────────
@@ -242,13 +251,13 @@ export const adminReportApi = {
 export const adminMemberApi = {
   // 프론트 → app-admin-service(8086) → member-service(8081) 내부 API
   search: (params?: { q?: string; kycStatus?: string; page?: number; size?: number }) =>
-    apiClient.get<unknown, AppMemberPageResponse>('/admin/app/members', { params }),
+    apiClient.get<unknown, AppMemberPageResponse>('/app-admin/admin/members', { params }),
   changeStatus: (userPublicId: string, status: 'ACTIVE' | 'SUSPENDED') =>
-    apiClient.patch<unknown, void>(`/admin/app/members/${userPublicId}/status`, null, {
+    apiClient.patch<unknown, void>(`/app-admin/admin/members/${userPublicId}/status`, null, {
       params: { status },
     }),
   setCommunityBan: (userPublicId: string, banned: boolean) =>
-    apiClient.patch<unknown, void>(`/admin/app/members/${userPublicId}/community-ban`, null, {
+    apiClient.patch<unknown, void>(`/app-admin/admin/members/${userPublicId}/community-ban`, null, {
       params: { banned },
     }),
   // 프론트 → app-admin-service(8086) → community-service(8083) 내부 API
@@ -256,7 +265,10 @@ export const adminMemberApi = {
     userPublicId: string,
     params?: { postPage?: number; commentPage?: number; size?: number }
   ) =>
-    apiClient.get<unknown, UserActivityResponse>(`/admin/app/members/${userPublicId}/activity`, {
-      params,
-    }),
+    apiClient.get<unknown, UserActivityResponse>(
+      `/app-admin/admin/members/${userPublicId}/activity`,
+      {
+        params,
+      }
+    ),
 };

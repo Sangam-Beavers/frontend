@@ -1,7 +1,7 @@
 /**
  * 앱 공개 API (app-admin-service, port 8086)
  * 인증 불필요 — 모든 사용자가 조회 가능.
- * /api/v1/app/* 경로.
+ * /api/v1/app-admin/app/* 경로.
  */
 import { apiClient } from './client';
 
@@ -27,11 +27,14 @@ export interface FaqItem {
 }
 
 export const noticesApi = {
-  listPublished: () => apiClient.get<unknown, NoticeItem[]>('/app/notices'),
-  getOne: (publicId: string) => apiClient.get<unknown, NoticeItem>(`/app/notices/${publicId}`),
+  listPublished: () => apiClient.get<unknown, NoticeItem[]>('/app-admin/app/notices'),
+  getOne: (publicId: string) =>
+    apiClient.get<unknown, NoticeItem>(`/app-admin/app/notices/${publicId}`),
 };
 
 export const faqsApi = {
   listPublished: (category?: string) =>
-    apiClient.get<unknown, FaqItem[]>('/app/faqs', { params: category ? { category } : undefined }),
+    apiClient.get<unknown, FaqItem[]>('/app-admin/app/faqs', {
+      params: category ? { category } : undefined,
+    }),
 };
