@@ -41,6 +41,7 @@ export default defineConfig({
       '/api/v1/scheduled': { target: BACKEND.WALLET, changeOrigin: true },
       '/api/v1/exchanges': { target: BACKEND.WALLET, changeOrigin: true },
       '/api/v1/accounts': { target: BACKEND.WALLET, changeOrigin: true },
+      '/api/v1/rewards': { target: BACKEND.WALLET, changeOrigin: true },
       // community-service (8082)
       '/api/v1/community': { target: BACKEND.COMMUNITY, changeOrigin: true },
       // app-admin-service (8086) — /admin/app 가 /admin 보다 먼저 와야 올바르게 매칭됨

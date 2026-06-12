@@ -23,6 +23,8 @@ export interface ExecuteTransferParams {
  * - `['wallet','recent-recipients']` (INTERNAL — 최근 송금 앱 사용자)
  * - `['wallet','recent-remittance-accounts']` (REMITTANCE — 최근 송금 외부 계좌, CodeRabbit 반영)
  * - `['wallet','wallet-me']` (홈 원화 환산)
+ * - `['reward','stamp-card']` / `['reward','coupons']` (송금 적립 스탬프·쿠폰, #215 —
+ *    송금 1건당 스탬프 1개 적립, 5개 충족 시 쿠폰 발급되므로 완료 화면/홈의 카드를 최신화)
  *
  * <p>에러는 ApiException으로 throw — 호출 측 onError에서 코드별 분기.
  * 자주 마주칠 코드: WALLET4002(잔액 부족), TRANSFER4010(PIN 마커 없음), TRANSFER4008(PIN 잠금),
@@ -38,6 +40,8 @@ export const useExecuteTransfer = () => {
       queryClient.invalidateQueries({ queryKey: ['wallet', 'recent-recipients'] });
       queryClient.invalidateQueries({ queryKey: ['wallet', 'recent-remittance-accounts'] });
       queryClient.invalidateQueries({ queryKey: ['wallet', 'wallet-me'] });
+      queryClient.invalidateQueries({ queryKey: ['reward', 'stamp-card'] });
+      queryClient.invalidateQueries({ queryKey: ['reward', 'coupons'] });
     },
   });
 };
