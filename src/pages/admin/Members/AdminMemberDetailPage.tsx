@@ -1,5 +1,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { adminMemberApi, type UserPostView, type UserCommentView } from '@/api/admin';
+import {
+  adminMemberApi,
+  adminReportApi,
+  type UserPostView,
+  type UserCommentView,
+  type MemberReportItemResponse,
+} from '@/api/admin';
 import { useQuery } from '@tanstack/react-query';
 import styles from './AdminMemberDetailPage.module.css';
 
@@ -17,8 +23,15 @@ export default function AdminMemberDetailPage() {
     enabled: !!userId,
   });
 
+  const { data: reportsData, isLoading: reportsLoading } = useQuery({
+    queryKey: ['admin', 'member-reports', userId],
+    queryFn: () => adminReportApi.getMemberReports(userId!),
+    enabled: !!userId,
+  });
+
   const posts: UserPostView[] = data?.posts ?? [];
   const comments: UserCommentView[] = data?.comments ?? [];
+  const reports: MemberReportItemResponse[] = reportsData?.reports ?? [];
 
   return (
     <div className={styles.wrap}>
@@ -74,6 +87,38 @@ export default function AdminMemberDetailPage() {
                   <div className={styles.commentContent}>{c.content}</div>
                   <div className={styles.commentMeta}>
                     좋아요 {c.like_count} · {formatDate(c.created_at)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 신고 내역 */}
+          <div className={styles.sectionHeader} style={{ marginTop: 20 }}>
+            <span className={styles.sectionTitle}>신고 내역</span>
+            <span className={styles.sectionCount}>{reportsData?.reports.length ?? 0}건</span>
+          </div>
+          {reportsLoading ? (
+            <div className={styles.emptySection}>불러오는 중...</div>
+          ) : reports.length === 0 ? (
+            <div className={styles.emptySection}>신고 내역이 없습니다.</div>
+          ) : (
+            <div className={styles.list}>
+              {reports.map((r, idx) => (
+                <div key={`${r.post_public_id}-${idx}`} className={styles.reportCard}>
+                  <div className={styles.reportHeader}>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <span className={styles.reportTargetBadge}>{r.target_type}</span>
+                      <span className={styles.reportCategoryBadge}>{r.category}</span>
+                    </div>
+                    <span className={styles.reportDate}>{formatDate(r.last_reported_at)}</span>
+                  </div>
+                  <div className={styles.reportTitle}>{r.post_title ?? '(제목 없음)'}</div>
+                  <div className={styles.reportMeta}>
+                    <span>신고 {r.report_count}회</span>
+                    <span className={styles.reportStatusBadge} data-status={r.status}>
+                      {r.status}
+                    </span>
                   </div>
                 </div>
               ))}

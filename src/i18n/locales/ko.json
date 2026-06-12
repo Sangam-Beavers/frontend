@@ -310,6 +310,26 @@
       "commentSubmitting": "등록 중…",
       "commentDelete": "삭제"
     },
+    "report": {
+      "button": "신고",
+      "title": "신고하기",
+      "reason": {
+        "SPAM": "스팸",
+        "ABUSE": "욕설/혐오",
+        "FRAUD": "사기/허위정보",
+        "SEXUAL": "성적 콘텐츠",
+        "ETC": "기타"
+      },
+      "detailPlaceholder": "상세 내용을 입력해주세요 (선택, 최대 500자)",
+      "cancel": "취소",
+      "submit": "신고하기",
+      "submitting": "신고 중…",
+      "error": {
+        "duplicate": "이미 신고한 게시글/댓글입니다.",
+        "invalidReason": "잘못된 신고 사유입니다.",
+        "unknown": "신고 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요."
+      }
+    },
     "job": {
       "title": "커뮤니티",
       "adTitle": "잡코리아 연동 공고",

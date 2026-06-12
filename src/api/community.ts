@@ -212,6 +212,23 @@ export interface CommentCreateRequest {
   content: string;
 }
 
+/** 신고 사유 (백엔드 enum SSOT). */
+export type ReportReason = 'SPAM' | 'ABUSE' | 'FRAUD' | 'SEXUAL' | 'ETC';
+
+/** 신고 요청 body. reason 필수, detail 선택(최대 500자). */
+export interface ReportRequest {
+  reason: ReportReason;
+  detail?: string;
+}
+
+/** 신고 생성 응답 (201). */
+export interface ReportResponse {
+  public_id: string;
+  reason: ReportReason;
+  status: string;
+  created_at: string;
+}
+
 /** 게시글 수정 요청 body (PATCH /community/posts/{id}). 부분 수정 — 보낸 필드만 변경. */
 export interface PostUpdateRequest {
   category?: string;
@@ -382,5 +399,29 @@ export const communityApi = {
     apiClient.get<unknown, CommentTranslationResponse>(
       `/community/posts/${postId}/comments/${commentId}/translation`,
       { params: { language } }
+    ),
+
+  /**
+   * 게시글 신고 (201) — 성공 시 생성된 신고(ReportResponse)를 반환한다.
+   *
+   * <p>실패 코드:
+   * <ul>
+   *   <li>COMMUNITY4001 — 없는 게시글(404)</li>
+   *   <li>COMMUNITY4006 — 이미 신고한 대상(409)</li>
+   *   <li>COMMUNITY4007 — 잘못된 신고 사유(400)</li>
+   * </ul>
+   */
+  reportPost: (postId: string, body: ReportRequest) =>
+    apiClient.post<unknown, ReportResponse>(`/community/posts/${postId}/reports`, body),
+
+  /**
+   * 댓글 신고 (201) — 성공 시 생성된 신고(ReportResponse)를 반환한다.
+   *
+   * <p>실패 코드: COMMUNITY4002(없는 댓글), COMMUNITY4006(중복), COMMUNITY4007(잘못된 사유).
+   */
+  reportComment: (postId: string, commentId: string, body: ReportRequest) =>
+    apiClient.post<unknown, ReportResponse>(
+      `/community/posts/${postId}/comments/${commentId}/reports`,
+      body
     ),
 };

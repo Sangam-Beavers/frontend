@@ -192,6 +192,51 @@ export const exchangeRatePolicyApi = {
     ),
 };
 
+// ─────── 신고 관리 ────────────────────────────────────────────────────────────
+
+export interface ReportedAuthorSummary {
+  author_public_id: string;
+  name: string | null;
+  nickname: string | null;
+  total_report_count: number;
+  reported_content_count: number;
+}
+
+export interface ReportedAuthorPageResponse {
+  authors: ReportedAuthorSummary[];
+  page: number;
+  size: number;
+  total_elements: number;
+  total_pages: number;
+}
+
+export interface MemberReportItemResponse {
+  post_public_id: string;
+  post_title: string | null;
+  author_public_id: string;
+  target_type: 'POST' | 'COMMENT';
+  category: 'SPAM' | 'ABUSE' | 'FRAUD' | 'SEXUAL' | 'ETC';
+  report_count: number;
+  status: 'PENDING' | 'RESOLVED_DELETED' | 'DISMISSED';
+  last_reported_at: string;
+}
+
+export interface MemberReportsResponse {
+  author_public_id: string;
+  name: string | null;
+  nickname: string | null;
+  reports: MemberReportItemResponse[];
+}
+
+export const adminReportApi = {
+  // 신고당한 회원 목록
+  getReportedAuthors: (params?: { page?: number; size?: number }) =>
+    apiClient.get<unknown, ReportedAuthorPageResponse>('/admin/app/reports', { params }),
+  // 특정 회원이 받은 신고 상세
+  getMemberReports: (userPublicId: string) =>
+    apiClient.get<unknown, MemberReportsResponse>(`/admin/app/members/${userPublicId}/reports`),
+};
+
 // ─────── 회원 관리 ────────────────────────────────────────────────────────────
 
 export const adminMemberApi = {

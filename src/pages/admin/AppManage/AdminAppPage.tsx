@@ -8,6 +8,7 @@ const MENU = [
   { label: '수수료 정책', path: ROUTES.ADMIN_FEE_POLICIES },
   { label: '서비스 설정', path: ROUTES.ADMIN_SERVICE_SETTINGS },
   { label: '회원 관리', path: ROUTES.ADMIN_MEMBERS },
+  { label: '신고 관리', path: ROUTES.ADMIN_REPORTS },
 ];
 
 export default function AdminAppPage() {

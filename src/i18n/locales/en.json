@@ -310,6 +310,26 @@
       "commentSubmitting": "Posting…",
       "commentDelete": "Delete"
     },
+    "report": {
+      "button": "Report",
+      "title": "Report",
+      "reason": {
+        "SPAM": "Spam",
+        "ABUSE": "Hate / Abuse",
+        "FRAUD": "Fraud / Misinformation",
+        "SEXUAL": "Sexual content",
+        "ETC": "Other"
+      },
+      "detailPlaceholder": "Add details (optional, max 500 chars)",
+      "cancel": "Cancel",
+      "submit": "Submit report",
+      "submitting": "Submitting…",
+      "error": {
+        "duplicate": "You have already reported this content.",
+        "invalidReason": "Invalid report reason.",
+        "unknown": "Something went wrong. Please try again."
+      }
+    },
     "job": {
       "title": "Community",
       "adTitle": "JobKorea Listings",

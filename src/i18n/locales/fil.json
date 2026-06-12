@@ -310,6 +310,26 @@
       "commentSubmitting": "Pino-post…",
       "commentDelete": "Tanggalin"
     },
+    "report": {
+      "button": "I-report",
+      "title": "Mag-report",
+      "reason": {
+        "SPAM": "Spam",
+        "ABUSE": "Poot / Pang-aabuso",
+        "FRAUD": "Pandaraya / Maling impormasyon",
+        "SEXUAL": "Sekswal na nilalaman",
+        "ETC": "Iba pa"
+      },
+      "detailPlaceholder": "Magdagdag ng detalye (opsyonal, max 500 karakter)",
+      "cancel": "Kanselahin",
+      "submit": "Isumite ang report",
+      "submitting": "Isinusumite…",
+      "error": {
+        "duplicate": "Na-report mo na ang nilalamang ito.",
+        "invalidReason": "Hindi wastong dahilan ng report.",
+        "unknown": "May naganap na error. Subukan muli."
+      }
+    },
     "job": {
       "title": "Komunidad",
       "adTitle": "Trabaho mula JobKorea",

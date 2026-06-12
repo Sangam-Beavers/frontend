@@ -5,6 +5,7 @@ import { ApiException } from '@/api';
 import Comment from '@/components/community/Comment';
 import TranslateButton from '@/components/community/TranslateButton';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
+import ReportModal from '@/components/community/ReportModal';
 import Identicon from '@/components/common/Identicon';
 import TopBar from '@/components/navigation/TopBar';
 import { buildCommunityPostEditPath } from '@/constants/routes';
@@ -14,6 +15,7 @@ import { useDeleteComment } from '@/hooks/useDeleteComment';
 import { useDeletePost } from '@/hooks/useDeletePost';
 import { usePostDetail } from '@/hooks/usePostDetail';
 import { usePostTranslation } from '@/hooks/usePostTranslation';
+import { useReportPost } from '@/hooks/useReportPost';
 import { useToggleLike } from '@/hooks/useToggleLike';
 import { trustGradeToTone } from '@/utils/trustGrade';
 import type { AvatarTone } from '@/types/community';
@@ -21,6 +23,7 @@ import { categoryLabel, formatCommunityDate } from '@/utils/communityFeed';
 import { normalizeAppLanguage } from '@/utils/detectLanguage';
 import { communityErrorMessage } from '@/utils/communityErrorMessage';
 import { translationErrorMessage } from '@/utils/translationErrorMessage';
+import { reportErrorMessage } from '@/utils/reportErrorMessage';
 import styles from './CommunityPostDetailPage.module.css';
 
 /** 신뢰등급 테두리 톤 → CSS 클래스 (FeedPost/MyPage와 동일 팔레트). */
@@ -39,6 +42,8 @@ export default function CommunityPostDetailPage() {
   const [draft, setDraft] = useState<string>('');
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
   const [confirmCommentId, setConfirmCommentId] = useState<string | null>(null);
+  const [showReportPost, setShowReportPost] = useState(false);
+  const reportPost = useReportPost(postId);
 
   // 이슈 #160 — 게시글 번역 상태. 같은 (post, language) 조합은 react-query 캐시에 들어가
   // 토글 시 즉시 전환. 사용자가 i18n.language를 바꾸면 새 key로 다시 호출된다.
@@ -213,6 +218,16 @@ export default function CommunityPostDetailPage() {
         >
           {liked ? '♥' : '♡'} {t('community.postDetail.like')} {likeCount}
         </button>
+        <button
+          type="button"
+          className={styles.secondary}
+          onClick={() => {
+            reportPost.reset();
+            setShowReportPost(true);
+          }}
+        >
+          {t('community.report.button')}
+        </button>
       </div>
 
       {translateError && <div className={styles.likeError}>{translateError}</div>}
@@ -246,6 +261,22 @@ export default function CommunityPostDetailPage() {
             setConfirmDelete(false);
             del.reset();
           }}
+        />
+      )}
+
+      {showReportPost && (
+        <ReportModal
+          onSubmit={(body) =>
+            reportPost.mutate(body, {
+              onSuccess: () => setShowReportPost(false),
+            })
+          }
+          onCancel={() => {
+            setShowReportPost(false);
+            reportPost.reset();
+          }}
+          isPending={reportPost.isPending}
+          error={reportPost.error ? reportErrorMessage(reportPost.error, t) : null}
         />
       )}
 
