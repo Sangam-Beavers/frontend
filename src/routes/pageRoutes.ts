@@ -63,6 +63,7 @@ import AdminFeePoliciesPage from '@/pages/admin/FeePolicies/AdminFeePoliciesPage
 import AdminServiceSettingsPage from '@/pages/admin/ServiceSettings/AdminServiceSettingsPage';
 import AdminMembersPage from '@/pages/admin/Members/AdminMembersPage';
 import AdminMemberDetailPage from '@/pages/admin/Members/AdminMemberDetailPage';
+import AdminReportsPage from '@/pages/admin/Reports/AdminReportsPage';
 import NoticesPage from '@/pages/notices/NoticesPage';
 import NoticeDetailPage from '@/pages/notices/NoticeDetailPage';
 import CommunityFaqPage from '@/pages/community/Faq/CommunityFaqPage';
@@ -181,4 +182,5 @@ export const adminRoutes: PageRoute[] = [
   { path: ROUTES.ADMIN_SERVICE_SETTINGS, Component: AdminServiceSettingsPage },
   { path: ROUTES.ADMIN_MEMBERS, Component: AdminMembersPage },
   { path: ROUTES.ADMIN_MEMBER_DETAIL, Component: AdminMemberDetailPage },
+  { path: ROUTES.ADMIN_REPORTS, Component: AdminReportsPage },
 ];

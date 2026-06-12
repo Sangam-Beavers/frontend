@@ -30,11 +30,28 @@
   line-height: 1.45;
 }
 
-/* 카드 하단 번역 토글 영역 — comment variant TranslateButton 한 개 */
+/* 카드 하단 액션 영역 — 번역 버튼 + 신고 버튼 */
 .actions {
   margin-top: 8px;
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 8px;
+}
+
+.reportBtn {
+  background: none;
+  border: none;
+  padding: 3px 6px;
+  font-size: 11px;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.reportBtn:hover {
+  color: #ef4444;
+  background: #fef2f2;
 }
 
 .avatar {

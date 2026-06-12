@@ -84,6 +84,7 @@ export const ROUTES = {
   ADMIN_SERVICE_SETTINGS: '/admin/app/settings',
   ADMIN_MEMBERS: '/admin/app/members',
   ADMIN_MEMBER_DETAIL: '/admin/app/members/:userId',
+  ADMIN_REPORTS: '/admin/app/reports',
 
   // ===== App: 공지사항 / FAQ (공개) =====
   NOTICES: '/notices',

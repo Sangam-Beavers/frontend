@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Identicon from '@/components/common/Identicon';
 import TranslateButton from '@/components/community/TranslateButton';
+import ReportModal from '@/components/community/ReportModal';
 import { buildCommunityPostPath } from '@/constants/routes';
 import { usePostTranslation } from '@/hooks/usePostTranslation';
+import { useReportPost } from '@/hooks/useReportPost';
+import { reportErrorMessage } from '@/utils/reportErrorMessage';
 import type { AvatarTone, FeedPostItem } from '@/types/community';
 import styles from './FeedPost.module.css';
 
@@ -38,9 +41,11 @@ const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
  */
 export default function FeedPost({ post }: FeedPostProps) {
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [showTranslated, setShowTranslated] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const targetLanguage = i18n.language;
+  const reportPost = useReportPost(post.id);
 
   const { data: translation, isFetching: isTranslating } = usePostTranslation(
     post.id,
@@ -87,7 +92,33 @@ export default function FeedPost({ post }: FeedPostProps) {
           isLoading={isTranslating}
           onClick={handleTranslateClick}
         />
+        <button
+          type="button"
+          className={styles.reportBtn}
+          onClick={() => {
+            reportPost.reset();
+            setShowReport(true);
+          }}
+        >
+          {t('community.report.button')}
+        </button>
       </div>
+
+      {showReport && (
+        <ReportModal
+          onSubmit={(body) =>
+            reportPost.mutate(body, {
+              onSuccess: () => setShowReport(false),
+            })
+          }
+          onCancel={() => {
+            setShowReport(false);
+            reportPost.reset();
+          }}
+          isPending={reportPost.isPending}
+          error={reportPost.error ? reportErrorMessage(reportPost.error, t) : null}
+        />
+      )}
     </article>
   );
 }

@@ -310,6 +310,26 @@
       "commentSubmitting": "Đang đăng…",
       "commentDelete": "Xóa"
     },
+    "report": {
+      "button": "Báo cáo",
+      "title": "Báo cáo nội dung",
+      "reason": {
+        "SPAM": "Spam",
+        "ABUSE": "Thù ghét / Lạm dụng",
+        "FRAUD": "Lừa đảo / Thông tin sai",
+        "SEXUAL": "Nội dung tình dục",
+        "ETC": "Khác"
+      },
+      "detailPlaceholder": "Thêm chi tiết (tùy chọn, tối đa 500 ký tự)",
+      "cancel": "Hủy",
+      "submit": "Gửi báo cáo",
+      "submitting": "Đang gửi…",
+      "error": {
+        "duplicate": "Bạn đã báo cáo nội dung này rồi.",
+        "invalidReason": "Lý do báo cáo không hợp lệ.",
+        "unknown": "Đã xảy ra lỗi. Vui lòng thử lại."
+      }
+    },
     "job": {
       "title": "Cộng đồng",
       "adTitle": "Tin tuyển dụng JobKorea",

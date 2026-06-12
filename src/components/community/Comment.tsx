@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Identicon from '@/components/common/Identicon';
+import ReportModal from '@/components/community/ReportModal';
 import { useCommentTranslation } from '@/hooks/useCommentTranslation';
+import { useReportComment } from '@/hooks/useReportComment';
 import { formatCommunityDate } from '@/utils/communityFeed';
 import { translationErrorMessage } from '@/utils/translationErrorMessage';
+import { reportErrorMessage } from '@/utils/reportErrorMessage';
 import type { CommentItem } from '@/api/community';
 import TranslateButton from './TranslateButton';
 
@@ -55,6 +58,8 @@ export default function Comment({
 }: CommentProps) {
   const { t, i18n } = useTranslation();
   const [showTranslated, setShowTranslated] = useState<boolean>(false);
+  const [showReport, setShowReport] = useState(false);
+  const reportComment = useReportComment(postId, comment.public_id);
 
   const targetLanguage = i18n.language;
   const {
@@ -120,9 +125,35 @@ export default function Comment({
               {deleteLabel}
             </button>
           )}
+          <button
+            type="button"
+            className={classNames.delete}
+            onClick={() => {
+              reportComment.reset();
+              setShowReport(true);
+            }}
+          >
+            {t('community.report.button')}
+          </button>
         </div>
         {translateError && <div className={classNames.error}>{translateError}</div>}
       </div>
+
+      {showReport && (
+        <ReportModal
+          onSubmit={(body) =>
+            reportComment.mutate(body, {
+              onSuccess: () => setShowReport(false),
+            })
+          }
+          onCancel={() => {
+            setShowReport(false);
+            reportComment.reset();
+          }}
+          isPending={reportComment.isPending}
+          error={reportComment.error ? reportErrorMessage(reportComment.error, t) : null}
+        />
+      )}
     </div>
   );
 }
