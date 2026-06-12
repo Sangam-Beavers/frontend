@@ -44,9 +44,8 @@ export default defineConfig({
       '/api/v1/rewards': { target: BACKEND.WALLET, changeOrigin: true },
       // community-service (8082)
       '/api/v1/community': { target: BACKEND.COMMUNITY, changeOrigin: true },
-      // app-admin-service (8086) — /admin/app 가 /admin 보다 먼저 와야 올바르게 매칭됨
-      '/api/v1/admin/app': { target: BACKEND.APP_ADMIN, changeOrigin: true },
-      '/api/v1/app': { target: BACKEND.APP_ADMIN, changeOrigin: true },
+      // app-admin-service (8086) — /api/v1/app-admin/** 단일 prefix로 통합
+      '/api/v1/app-admin': { target: BACKEND.APP_ADMIN, changeOrigin: true },
       // admin-service (8085)
       '/api/v1/admin': { target: BACKEND.ADMIN, changeOrigin: true },
       // document-service (8083)
