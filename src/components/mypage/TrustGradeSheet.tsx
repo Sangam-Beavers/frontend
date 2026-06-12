@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { TrustMilestone, TrustMilestoneType } from '@/api/member';
+import Identicon from '@/components/common/Identicon';
 import { ROUTES } from '@/constants/routes';
+import { useMyProfile } from '@/hooks/useMyProfile';
 import { useTrustMilestones } from '@/hooks/useTrustMilestones';
 import type { AvatarTone } from '@/types/community';
 import { trustGradeToLabelKey, trustGradeToTone } from '@/utils/trustGrade';
@@ -69,6 +71,8 @@ export default function TrustGradeSheet({ isOpen, onClose, fallbackGrade }: Trus
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useTrustMilestones(isOpen);
+  // 미리보기 아바타에 실제 프로필 사진/식별 아이콘을 그리기 위한 프로필 (react-query 캐시 공유).
+  const { data: profile } = useMyProfile();
 
   if (!isOpen) return null;
 
@@ -151,9 +155,19 @@ export default function TrustGradeSheet({ isOpen, onClose, fallbackGrade }: Trus
         </div>
 
         <div className={styles.body}>
-          {/* ① 현재 등급 미리보기 */}
+          {/* ① 현재 등급 미리보기 — MyPage와 동일한 프로필 사진 + 등급 테두리 */}
           <div className={styles.gradePreview}>
-            <div className={`${styles.previewAvatar} ${toneClass}`} aria-hidden />
+            <div
+              className={`${styles.previewAvatar} ${toneClass}`}
+              style={{ filter: `hue-rotate(${profile?.avatar_hue ?? 0}deg)` }}
+              aria-hidden
+            >
+              {profile?.profile_image_url ? (
+                <img src={profile.profile_image_url} alt="" className={styles.previewAvatarImg} />
+              ) : (
+                <Identicon seed={profile?.public_id ?? profile?.nickname ?? ''} />
+              )}
+            </div>
             <div className={styles.gradeName}>{t(trustGradeToLabelKey(grade))}</div>
           </div>
 

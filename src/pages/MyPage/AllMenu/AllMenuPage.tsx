@@ -6,6 +6,8 @@ import Identicon from '@/components/common/Identicon';
 import { LANGUAGE_CODE_TO_LABEL } from '@/constants/languages';
 import { ROUTES } from '@/constants/routes';
 import { useMyProfile } from '@/hooks/useMyProfile';
+import type { AvatarTone } from '@/types/community';
+import { trustGradeToTone } from '@/utils/trustGrade';
 import styles from './AllMenuPage.module.css';
 
 const NAV_KEYS = ['all', 'finance', 'documents', 'community', 'mypage', 'support'] as const;
@@ -91,6 +93,15 @@ const QUICK_LINKS: MenuItem[] = [
   { labelKey: 'allmenu.quickLinks.language', path: ROUTES.MYPAGE_LANGUAGE },
 ];
 
+/** 신뢰등급 테두리 톤 → CSS 클래스. MyPage와 동일 팔레트(utils/trustGrade.ts 주석). */
+const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
+  good: styles.avatarVerified,
+  best: styles.avatarConnected,
+  purple: styles.avatarTrusted,
+  gold: styles.avatarGold,
+  default: styles.avatarNewcomer,
+};
+
 export default function AllMenuPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -99,6 +110,9 @@ export default function AllMenuPage() {
   const { data: profile, isLoading } = useMyProfile();
   const nickname = profile?.nickname ?? '';
   const avatarSeed = profile?.public_id ?? nickname;
+  // 신뢰등급 테두리 (MyPage와 동일) — 누락·미지 값은 회색('default') 폴백.
+  const avatarToneClass =
+    AVATAR_TONE_CLASS[trustGradeToTone(profile?.trust_grade)] ?? styles.avatarNewcomer;
   const languageLabel = profile?.language
     ? (LANGUAGE_CODE_TO_LABEL[profile.language] ?? profile.language)
     : '';
@@ -160,7 +174,7 @@ export default function AllMenuPage() {
             style={{ cursor: 'pointer' }}
           >
             <div
-              className={styles.avatar}
+              className={`${styles.avatar} ${avatarToneClass}`}
               style={{ filter: `hue-rotate(${profile?.avatar_hue ?? 0}deg)` }}
             >
               {profile?.profile_image_url ? (
