@@ -71,7 +71,9 @@ export function isAdminUser(): boolean {
     // 만료(exp) 체크 — exp는 초 단위 Unix timestamp
     if (typeof payload.exp === 'number' && payload.exp * 1000 < Date.now()) return false;
 
-    return Array.isArray(payload.groups) && payload.groups.includes('admin');
+    // Authentik: payload.groups / Cognito: payload['cognito:groups']
+    const groups = payload.groups ?? payload['cognito:groups'];
+    return Array.isArray(groups) && groups.includes('admin');
   } catch {
     return false;
   }
