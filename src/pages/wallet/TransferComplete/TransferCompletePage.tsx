@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import { buildTransferReceiptPath } from '@/constants/routes';
+import { useStampCard } from '@/hooks/useStampCard';
 import styles from './TransferCompletePage.module.css';
 
 interface CompleteState {
@@ -19,13 +20,21 @@ const FALLBACK: CompleteState = {
   amount: '₫1,200,000',
 };
 
-const STAMPS = [true, true, true, false, false];
+/** 적립 카드 조회 실패/로딩 중 기본 칸 수(백엔드 기본 target과 동일). 표시용 fallback. */
+const DEFAULT_TARGET = 5;
 
 export default function TransferCompletePage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const location = useLocation();
   const state = (location.state as CompleteState) ?? FALLBACK;
+
+  // 스탬프 카드는 송금 직후 백엔드(AFTER_COMMIT 동기 적립)에 이미 반영돼 있어, 이 화면 진입 시 조회하면
+  // 최신값을 본다. 조회 실패·로딩 중에는 0/DEFAULT_TARGET로 표시(적립 자체는 이미 완료 — 카드 표시
+  // 실패가 송금 완료 UX를 막지 않게 한다).
+  const { data: stampCard } = useStampCard();
+  const target = stampCard?.target ?? DEFAULT_TARGET;
+  const filledCount = stampCard?.current_count ?? 0;
 
   return (
     <>
@@ -47,11 +56,14 @@ export default function TransferCompletePage() {
         <div className={styles.couponTitle}>{t('transfer.complete.couponTitle')}</div>
         <div className={styles.couponDesc}>{t('transfer.complete.couponDesc')}</div>
         <div className={styles.stampRow}>
-          {STAMPS.map((filled, i) => (
-            <div key={i} className={`${styles.stamp} ${filled ? styles.stampFilled : ''}`}>
-              {filled ? '✓' : ''}
-            </div>
-          ))}
+          {Array.from({ length: target }, (_, i) => {
+            const filled = i < filledCount;
+            return (
+              <div key={i} className={`${styles.stamp} ${filled ? styles.stampFilled : ''}`}>
+                {filled ? '✓' : ''}
+              </div>
+            );
+          })}
         </div>
         <div className={styles.couponNote}>{t('transfer.complete.couponNote')}</div>
       </div>
