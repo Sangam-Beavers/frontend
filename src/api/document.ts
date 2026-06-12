@@ -2,7 +2,7 @@ import { apiClient, ApiException } from './client';
 import type { AnalysisDocumentType } from '@/constants/docTypes';
 
 /**
- * document-service API 호출 함수 모음 (문서 분석 제출·S3 업로드·상태 폴링·결과 조회·목록·재요청).
+ * document-service API 호출 함수 모음 (문서 분석 제출·S3 업로드·상태 폴링·결과 조회·목록).
  *
  * - 모두 인증 필요(JWT) — interceptor가 토큰 자동 부착.
  *   백엔드 DocumentController는 @CurrentUserPublicId(JWT claim public_id) 전환 완료 상태라
@@ -33,7 +33,7 @@ export interface SubmitDocumentRequest {
   file_name: string;
 }
 
-/** 분석 요청/재요청 응답. upload_url 계열은 retry 응답에서 null. */
+/** 분석 요청 응답 (POST /documents). */
 export interface SubmissionResponse {
   /** 분석 요청 식별자 — 이후 상태/결과/챗봇 호출에 사용. */
   public_id: string;
@@ -201,13 +201,6 @@ export const documentApi = {
       // undefined로 두면 axios가 파라미터 자체를 생략 — 전체 조회와 동일하게 동작.
       params: { page, size, status: statuses?.length ? statuses.join(',') : undefined },
     }),
-
-  /**
-   * 분석 재요청 (200) — FAILED 상태일 때만 가능(S3 원본 재사용). 그 외 422(COMMON4221).
-   * 응답 SubmissionResponse의 upload_url 계열은 null이고 status만 ANALYZING으로 전환된다.
-   */
-  retry: (publicId: string) =>
-    apiClient.post<unknown, SubmissionResponse>(`/documents/${publicId}/retry`, {}),
 
   // TODO: 챗봇 SSE는 chat.ts에 이미 구현됨 (openChatStream)
 };

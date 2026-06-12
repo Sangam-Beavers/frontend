@@ -28,26 +28,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/api/v1/documents/{publicId}/retry': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * 분석 재요청
-     * @description FAILED 상태의 문서를 다시 분석한다. S3 원본을 재사용하므로 재업로드는 불필요. 비-FAILED 상태에서 호출 시 422.
-     */
-    post: operations['retry'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/api/v1/documents/{publicId}/chat': {
     parameters: {
       query?: never;
@@ -157,12 +137,12 @@ export interface components {
        */
       status?: 'ANALYZING' | 'COMPLETED' | 'FAILED';
       /**
-       * @description Pre-signed PUT URL. retry 응답에서는 null.
+       * @description Pre-signed PUT URL.
        * @example https://s3.ap-northeast-2.amazonaws.com/...
        */
       uploadUrl?: string;
       /**
-       * @description uploadUrl로 PUT 업로드할 때 그대로 함께 보내야 하는 헤더(이름+값). 서명에 포함되어 있어 누락/변경 시 403이 나고 메타데이터가 오브젝트에 박히지 않는다. retry 응답에서는 null.
+       * @description uploadUrl로 PUT 업로드할 때 그대로 함께 보내야 하는 헤더(이름+값). 서명에 포함되어 있어 누락/변경 시 403이 나고 메타데이터가 오브젝트에 박히지 않는다.
        * @example {
        *       "Content-Type": "application/octet-stream",
        *       "x-amz-meta-source": "production",
@@ -173,7 +153,7 @@ export interface components {
         [key: string]: string;
       };
       /**
-       * @description uploadUrl 만료 시각(ISO 8601 UTC Z). retry 응답에서는 null.
+       * @description uploadUrl 만료 시각(ISO 8601 UTC Z).
        * @example 2026-05-29T10:00:00Z
        */
       expiresAt?: string;
@@ -387,66 +367,6 @@ export interface operations {
       };
       /** @description COMMON5000 - 서버 오류. */
       500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          '*/*': components['schemas']['ErrorResponse'];
-        };
-      };
-    };
-  };
-  retry: {
-    parameters: {
-      query?: never;
-      header: {
-        'X-User-Public-Id': string;
-      };
-      path: {
-        publicId: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description 재요청 접수. status가 ANALYZING으로 전환된다. */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          '*/*': components['schemas']['ApiResponseSubmissionResponse'];
-        };
-      };
-      /** @description COMMON4001 - X-User-Public-Id 헤더 누락(필수 헤더 미전송). */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          '*/*': components['schemas']['ErrorResponse'];
-        };
-      };
-      /** @description COMMON4031 - 다른 사용자의 문서. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          '*/*': components['schemas']['ErrorResponse'];
-        };
-      };
-      /** @description DOCUMENT4001 - 존재하지 않는 문서. */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          '*/*': components['schemas']['ErrorResponse'];
-        };
-      };
-      /** @description COMMON4221 - FAILED 상태가 아닌 문서. */
-      422: {
         headers: {
           [name: string]: unknown;
         };
