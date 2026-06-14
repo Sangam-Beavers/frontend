@@ -347,7 +347,7 @@ export default function HomePage() {
               key={notif.id}
               className={`${styles.card} ${styles.notifCard}`}
               onClick={() =>
-                navigate(notif.id === 'legal' ? '/doc-analysis' : '/mypage/wallet-history')
+                navigate(notif.id === 'legal' ? ROUTES.LAWYERS : '/mypage/wallet-history')
               }
               style={{ cursor: 'pointer' }}
             >
