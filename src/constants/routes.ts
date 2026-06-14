@@ -14,6 +14,9 @@ export const ROUTES = {
   ALL_MENU: '/menu',
   HOME_CURRENCY_SETTINGS: '/home/currency-settings',
 
+  // ===== 변호사 상담(광고/홍보) — 이슈 #221 =====
+  LAWYERS: '/lawyers',
+
   // ===== Main: Community =====
   COMMUNITY: '/community',
   COMMUNITY_RESIDENCE: '/community/residence',

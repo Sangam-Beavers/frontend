@@ -23,6 +23,7 @@ import DocAnalysisResultPage from '@/pages/docAnalysis/Result/DocAnalysisResultP
 import DocAnalysisSelectPage from '@/pages/docAnalysis/Select/DocAnalysisSelectPage';
 import CurrencySettingsPage from '@/pages/home/CurrencySettings/CurrencySettingsPage';
 import HomePage from '@/pages/home/HomePage';
+import LawyersPage from '@/pages/lawyers/LawyersPage';
 import AccountManagePage from '@/pages/MyPage/AccountManage/AccountManagePage';
 import AllMenuPage from '@/pages/MyPage/AllMenu/AllMenuPage';
 import AdditionalCertPage from '@/pages/MyPage/AdditionalCert/AdditionalCertPage';
@@ -88,6 +89,7 @@ export const mainRoutes: PageRoute[] = [
   { path: ROUTES.HOME, Component: HomePage },
   { path: ROUTES.HOME_CURRENCY_SETTINGS, Component: CurrencySettingsPage },
   { path: ROUTES.ALL_MENU, Component: AllMenuPage },
+  { path: ROUTES.LAWYERS, Component: LawyersPage },
 
   { path: ROUTES.COMMUNITY, Component: CommunityPage },
   { path: ROUTES.COMMUNITY_RESIDENCE, Component: CommunityResidencePage },

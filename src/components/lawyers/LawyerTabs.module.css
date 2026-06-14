@@ -1,0 +1,41 @@
+.tabs {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--line);
+  margin: 6px 0 14px;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  position: relative;
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: inherit;
+  padding: 4px 2px 12px;
+  cursor: pointer;
+}
+
+.tab.active {
+  color: var(--blue);
+}
+
+/* 활성 탭 밑줄 */
+.tab.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--blue);
+}

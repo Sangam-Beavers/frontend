@@ -1,0 +1,147 @@
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 16px rgba(21, 71, 140, 0.05);
+}
+
+.row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+/* ===== 아바타 ===== */
+.avatarWrap {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.avatarImg {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--soft2);
+}
+
+.avatarFallback {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--soft2);
+  color: var(--blue);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.onlineDot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #fff;
+}
+
+/* ===== 본문 ===== */
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.badge_labor {
+  background: #eef0ff;
+  color: #4f5bd5;
+}
+
+.badge_visa {
+  background: #e3f7f0;
+  color: #0f9d77;
+}
+
+.badge_contract {
+  background: #f1ebff;
+  color: #7c4dff;
+}
+
+.badge_wage {
+  background: #ffeaea;
+  color: #e0556b;
+}
+
+.badge_accident {
+  background: #ffeede;
+  color: #e0823a;
+}
+
+.name {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.suffix {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+}
+
+/* ===== 해시태그 ===== */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-bottom: 10px;
+}
+
+.tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a97ad;
+}
+
+/* ===== 메타(연락처/지역/언어) ===== */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #70809a;
+}
+
+.metaItem {
+  white-space: nowrap;
+}
+
+.divider {
+  width: 1px;
+  height: 11px;
+  background: var(--line);
+}
