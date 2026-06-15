@@ -1,6 +1,8 @@
 .flexColumn {
   display: flex;
   flex-direction: column;
+  /* .content 높이를 가득 채워, 아래 .shell(flex:1)이 높이를 갖고 .rightContent가 독립 스크롤되게 한다. */
+  height: 100%;
 }
 
 /* Profile header */
