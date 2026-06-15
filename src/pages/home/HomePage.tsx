@@ -12,6 +12,7 @@ import { useSetting } from '@/hooks/useServiceSettings';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useWalletMe } from '@/hooks/useWalletMe';
 import { useSecuritySummary } from '@/hooks/useSecuritySummary';
+import { UserIcon } from '@/components/common/icons';
 import { HOME_NOTIFICATIONS_MOCK } from '@/mocks/homeMock';
 import styles from './HomePage.module.css';
 
@@ -58,8 +59,8 @@ function loadMainCurrency(): string {
 /** 통화별 표시 포맷(KRW는 정수, 외화는 소수 2자리). */
 function formatAmountByCurrency(code: string, value: number): string {
   const symbol = CURRENCY_SYMBOL[code] ?? '';
-  if (code === 'KRW') return `${symbol}${Math.round(value).toLocaleString()}`;
-  return `${symbol}${value.toLocaleString(undefined, {
+  if (code === 'KRW') return `${symbol} ${Math.round(value).toLocaleString()}`;
+  return `${symbol} ${value.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -143,11 +144,18 @@ export default function HomePage() {
           {t('home.appName')}
         </div>
         <div className={styles.headerActions}>
-          <button className={styles.langBtn} onClick={() => navigate('/mypage/language')}>
+          <button
+            className={styles.langBtn}
+            onClick={() => navigate('/mypage/language', { state: { from: ROUTES.HOME } })}
+          >
             🌐 {currentLangCode} ▾
           </button>
-          <button className={styles.iconBtn} onClick={() => navigate('/mypage')}>
-            👤
+          <button
+            className={styles.iconBtn}
+            onClick={() => navigate('/mypage')}
+            aria-label="마이페이지"
+          >
+            <UserIcon size={22} />
           </button>
         </div>
       </header>
@@ -270,8 +278,8 @@ export default function HomePage() {
             : walletMeLoading
               ? '—'
               : walletMeError instanceof ApiException && walletMeError.code === 'WALLET4001'
-                ? '₩0'
-                : `₩${Number(walletMe?.total_balance_in_krw ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+                ? '₩ 0'
+                : `₩ ${Number(walletMe?.total_balance_in_krw ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
         </div>
       </div>
 

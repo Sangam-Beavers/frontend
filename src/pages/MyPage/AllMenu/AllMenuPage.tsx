@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { startLogout } from '@/auth/logout';
 import Identicon from '@/components/common/Identicon';
 import ScreenHeader from '@/components/layout/ScreenHeader';
+import { SearchIcon, SettingsIcon } from '@/components/common/icons';
 import { LANGUAGE_CODE_TO_LABEL } from '@/constants/languages';
 import { ROUTES } from '@/constants/routes';
 import { useMyProfile } from '@/hooks/useMyProfile';
@@ -196,8 +197,12 @@ export default function AllMenuPage() {
               </div>
             </div>
             <div className={styles.headIcons}>
-              <span onClick={() => navigate(ROUTES.MYPAGE)} style={{ cursor: 'pointer' }}>
-                ⚙️
+              <span
+                onClick={() => navigate(ROUTES.MYPAGE)}
+                style={{ cursor: 'pointer' }}
+                aria-label="설정"
+              >
+                <SettingsIcon size={20} />
               </span>
             </div>
           </div>
@@ -224,7 +229,9 @@ export default function AllMenuPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <span className={styles.searchIcon}>🔍</span>
+            <span className={styles.searchIcon}>
+              <SearchIcon size={18} />
+            </span>
           </div>
 
           {/* Tags */}

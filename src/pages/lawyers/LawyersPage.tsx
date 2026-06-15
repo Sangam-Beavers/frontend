@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
 import ScreenHeader from '@/components/layout/ScreenHeader';
+import { BellIcon, SearchIcon } from '@/components/common/icons';
 import LawyerCard from '@/components/lawyers/LawyerCard';
 import LawyerTabs from '@/components/lawyers/LawyerTabs';
 import { LAWYERS_MOCK } from '@/mocks/lawyersMock';
@@ -32,15 +33,15 @@ export default function LawyersPage() {
             ‹
           </button>
           <div className={styles.brand}>
-            <span className={styles.logoBox} />
+            <img className={styles.logoBox} src="/logo.png" alt="" />
             Global Bridge
           </div>
           <div className={styles.headerActions}>
             <button className={styles.iconBtn} aria-label="검색">
-              🔍
+              <SearchIcon size={21} />
             </button>
             <button className={styles.iconBtn} aria-label="알림">
-              🔔
+              <BellIcon size={21} />
             </button>
           </div>
         </header>

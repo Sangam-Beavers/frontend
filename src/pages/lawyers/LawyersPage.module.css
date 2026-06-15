@@ -18,10 +18,10 @@
 }
 
 .logoBox {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 7px;
-  background: linear-gradient(135deg, var(--blue), #11c6bd);
+  object-fit: contain;
 }
 
 .headerActions {
