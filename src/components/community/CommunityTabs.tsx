@@ -19,10 +19,17 @@ export default function CommunityTabs({ active }: CommunityTabsProps) {
     const list = listRef.current;
     const tab = activeRef.current;
     if (!list || !tab) return;
+    // 가운데로 정렬하지 않고, 활성 탭이 가려졌을 때만 최소로 스크롤해 보이게 한다(어색한 재정렬 방지).
     const listRect = list.getBoundingClientRect();
     const tabRect = tab.getBoundingClientRect();
-    const delta = tabRect.left - listRect.left - (list.clientWidth - tabRect.width) / 2;
-    list.scrollLeft += delta;
+    const pad = 12;
+    const leftOverflow = tabRect.left - (listRect.left + pad);
+    const rightOverflow = tabRect.right - (listRect.right - pad);
+    if (leftOverflow < 0) {
+      list.scrollLeft += leftOverflow;
+    } else if (rightOverflow > 0) {
+      list.scrollLeft += rightOverflow;
+    }
   }, [active]);
 
   return (

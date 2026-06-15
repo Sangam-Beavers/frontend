@@ -1,48 +1,62 @@
+/* 여러 행이 모여 하나의 박스처럼 보이도록 — 행마다 좌/우/하 테두리, 첫/마지막 행만 라운드 */
 .post {
   background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 20px;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   padding: 14px;
-  margin-bottom: 10px;
-  box-shadow: 0 6px 16px rgba(21, 71, 140, 0.05);
 }
 
-.head {
-  display: flex;
-  gap: 11px;
-  align-items: center;
+.post:first-of-type {
+  border-top: 1px solid var(--line);
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
 }
 
-.head b {
-  font-size: 14px;
+.post:last-of-type {
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  margin-bottom: 16px;
 }
 
-.head p {
-  margin: 3px 0 0;
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.text {
-  margin-top: 10px;
-  color: #334155;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-/* 카드 하단 액션 영역 — 번역 버튼 + 신고 버튼 */
-.actions {
-  margin-top: 8px;
+/* 상단: 아바타+메타(좌) + 신고(우) */
+.top {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 8px;
 }
 
+.author {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nickname {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.metaRest {
+  color: var(--muted);
+}
+
 .reportBtn {
+  flex-shrink: 0;
   background: none;
   border: none;
-  padding: 3px 6px;
+  padding: 2px 6px;
   font-size: 11px;
   color: #9ca3af;
   cursor: pointer;
@@ -54,11 +68,46 @@
   background: #fef2f2;
 }
 
+/* 제목 */
+.title {
+  display: block;
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* 본문 미리보기 */
+.text {
+  margin-top: 6px;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* 하단: 댓글·좋아요(좌) + 번역 보기(우) */
+.footer {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stats {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.translateWrap {
+  flex-shrink: 0;
+}
+
 .avatar {
-  width: 46px;
-  height: 46px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 3px solid var(--blue);
+  border: 2px solid var(--blue);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -96,5 +145,7 @@
 /* Phase 3 — GOLD 금색 실선 + glow */
 .avatarGold {
   border-color: #f59e0b;
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25), 0 0 8px rgba(245, 158, 11, 0.4);
+  box-shadow:
+    0 0 0 2px rgba(245, 158, 11, 0.25),
+    0 0 8px rgba(245, 158, 11, 0.4);
 }

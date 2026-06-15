@@ -135,3 +135,13 @@ export function HeartIcon(props: IconProps) {
     </Svg>
   );
 }
+
+/** 지갑(돈) */
+export function WalletIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+      <path d="M21 12h-5a2 2 0 0 0 0 4h5a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z" />
+    </Svg>
+  );
+}

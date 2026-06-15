@@ -12,7 +12,7 @@ import { useSetting } from '@/hooks/useServiceSettings';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useWalletMe } from '@/hooks/useWalletMe';
 import { useSecuritySummary } from '@/hooks/useSecuritySummary';
-import { UserIcon } from '@/components/common/icons';
+import { UserIcon, WalletIcon } from '@/components/common/icons';
 import { HOME_NOTIFICATIONS_MOCK } from '@/mocks/homeMock';
 import styles from './HomePage.module.css';
 
@@ -28,8 +28,8 @@ const MAIN_CURRENCY_KEY = 'homeMainCurrency'; // 메인 통화(이슈 #194) — 
 function formatBalance(code: string, balance: string): string {
   const symbol = CURRENCY_SYMBOL[code] ?? '';
   const num = Number(balance);
-  if (code === 'KRW') return `${symbol}${num.toLocaleString()}`;
-  return `${symbol}${num.toLocaleString(undefined, {
+  if (code === 'KRW') return `${symbol} ${num.toLocaleString()}`;
+  return `${symbol} ${num.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 4,
   })}`;
@@ -210,7 +210,7 @@ export default function HomePage() {
           <div
             className={styles.amount}
             style={{ cursor: 'pointer' }}
-            onClick={() => navigate(ROUTES.MYPAGE_WALLET_HISTORY)}
+            onClick={() => navigate(ROUTES.MYPAGE_WALLET_HISTORY, { state: { from: ROUTES.HOME } })}
           >
             {mainAmount}
           </div>
@@ -268,7 +268,10 @@ export default function HomePage() {
           이슈 #108 — 미인증이면 마스킹(가드된 영역이라도 표시 가짜값 방지).
           인증 후엔 실 API 값 표시: 로딩 중 '—' / WALLET4001(지갑 없음) 시 ₩0 fallback. */}
       <div className={styles.card}>
-        <div className={styles.cardTitle}>{t('home.myKrwTitle')}</div>
+        <div className={styles.cardTitle}>
+          <WalletIcon size={16} style={{ color: 'var(--blue)', flexShrink: 0 }} />
+          {t('home.myKrwTitle')}
+        </div>
         <div className={styles.cardText}>
           {isVerified ? t('home.myKrwSub') : t('home.unverifiedHint')}
         </div>

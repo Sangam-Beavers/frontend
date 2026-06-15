@@ -5,7 +5,10 @@ export type AvatarTone = 'best' | 'good' | 'mid' | 'warn' | 'bad' | 'purple' | '
 export interface FeedPostItem {
   id: string;
   title: string;
+  /** 상단 메타 — 닉네임 · 카테고리. */
   meta: string;
+  /** 하단 메타 — 댓글 N · 좋아요 N. */
+  stats: string;
   body: string;
   /** 작성자별 고정 아바타 시드(닉네임). 사진 미설정 시 identicon 생성에 사용. */
   avatarSeed: string;

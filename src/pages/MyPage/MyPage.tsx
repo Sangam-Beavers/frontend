@@ -139,7 +139,11 @@ export default function MyPage() {
             <div className={styles.section}>앱 관리</div>
             <div className={styles.list}>
               {ADMIN_ITEMS.map((item) => (
-                <div key={item.path} className={styles.item} onClick={() => navigate(item.path)}>
+                <div
+                  key={item.path}
+                  className={styles.item}
+                  onClick={() => navigate(item.path, { state: { from: ROUTES.MYPAGE } })}
+                >
                   <div className={styles.itemTitle}>{item.label}</div>
                   <span className={styles.arrow}>›</span>
                 </div>
@@ -152,7 +156,11 @@ export default function MyPage() {
 
         <div className={styles.list}>
           {MY_ACTIVITY.map((item) => (
-            <div key={item.label} className={styles.item} onClick={() => navigate(item.path)}>
+            <div
+              key={item.label}
+              className={styles.item}
+              onClick={() => navigate(item.path, { state: { from: ROUTES.MYPAGE } })}
+            >
               <div className={styles.itemTitle}>{item.label}</div>
               <span className={styles.arrow}>›</span>
             </div>
@@ -163,7 +171,11 @@ export default function MyPage() {
 
         <div className={styles.list}>
           {SETTINGS.map((item) => (
-            <div key={item.label} className={styles.item} onClick={() => navigate(item.path)}>
+            <div
+              key={item.label}
+              className={styles.item}
+              onClick={() => navigate(item.path, { state: { from: ROUTES.MYPAGE } })}
+            >
               <div className={styles.itemTitle}>{item.label}</div>
               {item.badge ? (
                 <span className={styles.pill}>{item.badge}</span>
