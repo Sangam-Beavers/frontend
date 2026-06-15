@@ -20,7 +20,7 @@ function Login() {
         <div className="auth-content">
           <div className="auth-top">
             <div className="auth-brand">
-              <div className="auth-logo">GB</div>
+              <img className="auth-logo" src="/logo.png" alt="" />
               <span>Global Bridge</span>
             </div>
             <select
@@ -39,7 +39,7 @@ function Login() {
 
           <div className="auth-hero">
             <div className="auth-hero-logo">
-              <div>GB</div>
+              <img src="/logo.png" alt="Global Bridge" />
             </div>
             <h2>
               {t('auth.login.heroTitleLine1')}

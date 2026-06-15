@@ -19,9 +19,8 @@
 .logoBox {
   width: 34px;
   height: 34px;
-  border-radius: 12px;
-  background: var(--soft2);
-  border: 1px solid var(--line);
+  border-radius: 10px;
+  object-fit: contain;
 }
 
 .headerActions {

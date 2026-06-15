@@ -76,16 +76,10 @@
 }
 
 .auth-logo {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #0959ff, #11c6bd);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  object-fit: contain;
 }
 
 .auth-lang-pill {
@@ -112,10 +106,10 @@
 }
 
 .auth-hero-logo {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 14px;
-  border-radius: 24px;
+  width: 108px;
+  height: 108px;
+  margin: 0 auto 16px;
+  border-radius: 28px;
   background: #fff;
   display: flex;
   align-items: center;
@@ -123,17 +117,11 @@
   box-shadow: 0 8px 22px rgba(7, 91, 255, 0.12);
 }
 
-.auth-hero-logo > div {
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #0959ff, #11c6bd);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 20px;
+.auth-hero-logo img {
+  width: 92px;
+  height: 92px;
+  border-radius: 20px;
+  object-fit: contain;
 }
 
 .auth-hero h2 {

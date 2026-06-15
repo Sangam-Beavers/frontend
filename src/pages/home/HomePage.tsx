@@ -139,7 +139,7 @@ export default function HomePage() {
     <>
       <header className={styles.header}>
         <div className={styles.brand}>
-          <div className={styles.logoBox} />
+          <img className={styles.logoBox} src="/logo.png" alt="" />
           {t('home.appName')}
         </div>
         <div className={styles.headerActions}>
