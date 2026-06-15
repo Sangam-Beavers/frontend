@@ -11,6 +11,8 @@ import styles from './LawyersPage.module.css';
  * 변호사 상담(광고/홍보) 페이지 — 이슈 #221.
  * 백엔드 연동 없이 하드코딩 mock({@link LAWYERS_MOCK})으로 변호사 광고 목록을 노출한다.
  * 홈 '변호사 상담' 알림 카드에서 진입한다.
+ *
+ * <p>상단 영역(헤더~탭)은 sticky로 고정하고, 그 아래 안내·변호사 목록만 스크롤된다.
  */
 export default function LawyersPage() {
   const navigate = useNavigate();
@@ -23,33 +25,35 @@ export default function LawyersPage() {
 
   return (
     <>
-      <header className={styles.header}>
-        <button className={styles.iconBtn} onClick={() => navigate(-1)} aria-label="뒤로">
-          ‹
-        </button>
-        <div className={styles.brand}>
-          <span className={styles.logoBox} />
-          Global Bridge
-        </div>
-        <div className={styles.headerActions}>
-          <button className={styles.iconBtn} aria-label="검색">
-            🔍
+      <div className={styles.stickyTop}>
+        <header className={styles.header}>
+          <button className={styles.iconBtn} onClick={() => navigate(-1)} aria-label="뒤로">
+            ‹
           </button>
-          <button className={styles.iconBtn} aria-label="알림">
-            🔔
-          </button>
+          <div className={styles.brand}>
+            <span className={styles.logoBox} />
+            Global Bridge
+          </div>
+          <div className={styles.headerActions}>
+            <button className={styles.iconBtn} aria-label="검색">
+              🔍
+            </button>
+            <button className={styles.iconBtn} aria-label="알림">
+              🔔
+            </button>
+          </div>
+        </header>
+
+        <p className={styles.subtitle}>외국인 노동자를 위한 법률 전문가 연결</p>
+        <h1 className={styles.pageTitle}>변호사 상담</h1>
+
+        <div className={styles.sectionRow}>
+          <span className={styles.sectionTitle}>실시간 상담 가능 변호사</span>
+          <span className={styles.moreLink}>더 보기 ›</span>
         </div>
-      </header>
 
-      <p className={styles.subtitle}>외국인 노동자를 위한 법률 전문가 연결</p>
-      <h1 className={styles.pageTitle}>변호사 상담</h1>
-
-      <div className={styles.sectionRow}>
-        <span className={styles.sectionTitle}>실시간 상담 가능 변호사</span>
-        <span className={styles.moreLink}>더 보기 ›</span>
+        <LawyerTabs active={active} onChange={setActive} />
       </div>
-
-      <LawyerTabs active={active} onChange={setActive} />
 
       <div className={styles.notice}>
         <span className={styles.noticeIcon}>ℹ️</span>

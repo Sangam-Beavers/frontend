@@ -1,3 +1,27 @@
+/* ===== 상단 고정 영역(헤더~탭) — 아래 목록만 스크롤 ===== */
+.stickyTop {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #fff;
+  /* 좌우로 .content 패딩(18px)을 상쇄해 배경을 화면 끝까지 채운다(스크롤 콘텐츠가 옆으로 비치지 않게). */
+  margin: 0 -18px;
+  padding: 0 18px 4px;
+  box-shadow: 0 6px 10px -6px rgba(7, 91, 255, 0.15);
+}
+
+/* .content 의 overflow 클립은 padding-box 기준이라 padding-top(18px) 영역에 스크롤 콘텐츠가 비친다.
+   sticky 헤더는 그 패딩 아래에 붙으므로, 위 18px 띠를 같은 흰색으로 덮어 콘텐츠가 헤더 위로 보이지 않게 한다. */
+.stickyTop::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -18px;
+  height: 18px;
+  background: #fff;
+}
+
 /* ===== 상단 헤더(뒤로 / 브랜드 / 검색·알림) ===== */
 .header {
   display: flex;
@@ -88,6 +112,7 @@
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 13px 14px;
+  margin-top: 14px;
   margin-bottom: 16px;
 }
 
