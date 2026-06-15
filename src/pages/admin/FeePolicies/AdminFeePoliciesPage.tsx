@@ -28,7 +28,7 @@ export default function AdminFeePoliciesPage() {
 
   const updateMut = useMutation({
     mutationFn: (p: FeePolicyResponse) =>
-      feePolicyApi.update(p.publicId, {
+      feePolicyApi.update(p.public_id, {
         feeType: editForm.feeType || undefined,
         feeValue: editForm.feeValue || undefined,
         minFee: editForm.minFee || undefined,
@@ -44,10 +44,10 @@ export default function AdminFeePoliciesPage() {
   const startEdit = (p: FeePolicyResponse) => {
     setEditTarget(p);
     setEditForm({
-      feeType: p.feeType,
-      feeValue: p.feeValue,
-      minFee: p.minFee ?? '',
-      maxFee: p.maxFee ?? '',
+      feeType: p.fee_type,
+      feeValue: p.fee_value,
+      minFee: p.min_fee ?? '',
+      maxFee: p.max_fee ?? '',
       active: p.active,
     });
   };
@@ -73,16 +73,16 @@ export default function AdminFeePoliciesPage() {
       ) : (
         <div className={styles.list}>
           {policies.map((p) => (
-            <div key={p.publicId} className={styles.card}>
+            <div key={p.public_id} className={styles.card}>
               <div className={styles.cardHeader}>
                 <span className={styles.svcBadge}>
-                  {SERVICE_LABEL[p.serviceType] ?? p.serviceType}
+                  {SERVICE_LABEL[p.service_type] ?? p.service_type}
                 </span>
                 <span className={p.active ? styles.pillOn : styles.pillOff}>
                   {p.active ? '활성' : '비활성'}
                 </span>
               </div>
-              {editTarget?.publicId === p.publicId ? (
+              {editTarget?.public_id === p.public_id ? (
                 <div className={styles.editArea}>
                   <div className={styles.row}>
                     <span className={styles.label}>타입</span>
@@ -151,28 +151,28 @@ export default function AdminFeePoliciesPage() {
                 <div className={styles.infoArea}>
                   <div className={styles.infoRow}>
                     <span className={styles.label}>유형</span>
-                    <span>{p.feeType === 'FIXED' ? '고정' : '비율(%)'}</span>
+                    <span>{p.fee_type === 'FIXED' ? '고정' : '비율(%)'}</span>
                   </div>
                   <div className={styles.infoRow}>
                     <span className={styles.label}>값</span>
                     <span>
-                      {p.feeValue}
-                      {p.feeType === 'PERCENT' ? '%' : ` ${p.currency}`}
+                      {p.fee_value}
+                      {p.fee_type === 'PERCENT' ? '%' : ` ${p.currency}`}
                     </span>
                   </div>
-                  {p.minFee && (
+                  {p.min_fee && (
                     <div className={styles.infoRow}>
                       <span className={styles.label}>최소</span>
                       <span>
-                        {p.minFee} {p.currency}
+                        {p.min_fee} {p.currency}
                       </span>
                     </div>
                   )}
-                  {p.maxFee && (
+                  {p.max_fee && (
                     <div className={styles.infoRow}>
                       <span className={styles.label}>최대</span>
                       <span>
-                        {p.maxFee} {p.currency}
+                        {p.max_fee} {p.currency}
                       </span>
                     </div>
                   )}

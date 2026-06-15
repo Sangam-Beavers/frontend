@@ -33,15 +33,15 @@ export interface FaqResponse {
 }
 
 export interface FeePolicyResponse {
-  publicId: string;
-  serviceType: string;
-  feeType: string;
-  feeValue: string;
-  minFee: string | null;
-  maxFee: string | null;
+  public_id: string;
+  service_type: string;
+  fee_type: string;
+  fee_value: string;
+  min_fee: string | null;
+  max_fee: string | null;
   currency: string;
   active: boolean;
-  updatedAt: string;
+  updated_at: string;
 }
 
 export interface ServiceSettingResponse {
