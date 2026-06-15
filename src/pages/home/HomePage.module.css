@@ -269,3 +269,12 @@
   min-width: 220px;
 }
 
+.cardWarn {
+  background: var(--warn);
+  border-color: #f0cf86;
+}
+
+.cardSafe {
+  background: var(--ok);
+  border-color: #9dd5c7;
+}

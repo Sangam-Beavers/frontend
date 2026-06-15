@@ -11,6 +11,7 @@ import { useExchangeRatesWidget } from '@/hooks/useExchangeRatesWidget';
 import { useSetting } from '@/hooks/useServiceSettings';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useWalletMe } from '@/hooks/useWalletMe';
+import { useSecuritySummary } from '@/hooks/useSecuritySummary';
 import { HOME_NOTIFICATIONS_MOCK } from '@/mocks/homeMock';
 import styles from './HomePage.module.css';
 
@@ -93,6 +94,7 @@ export default function HomePage() {
   const isVerified = profile?.is_verified ?? false;
   // "지금 나의 원화" 카드용 — 보유 통화 전체의 KRW 환산 합계.
   const { data: walletMe, isLoading: walletMeLoading, error: walletMeError } = useWalletMe();
+  const { data: security } = useSecuritySummary();
   // 서비스 설정 — 환율 갱신 주기 (분 단위, 0이면 자동 갱신 없음)
   const rateRefreshMin = Number(useSetting('EXCHANGE_RATE_REFRESH_MIN', '0'));
   const rateRefreshMs = rateRefreshMin > 0 ? rateRefreshMin * 60_000 : 0;
@@ -339,16 +341,31 @@ export default function HomePage() {
           // 매핑 없으면 mock 원본을 fallback으로 표시.
           const keyMap = NOTIFICATION_KEYS[notif.id];
           const title = keyMap ? t(keyMap.titleKey, { defaultValue: notif.title }) : notif.title;
-          const description = keyMap
-            ? t(keyMap.descKey, { defaultValue: notif.description })
-            : notif.description;
+          const isFraud = notif.id === 'fraud';
+          const fraudWarning = isFraud && security?.status === 'WARNING';
+          const description =
+            isFraud && security
+              ? security.status === 'WARNING'
+                ? t('home.notifications.fraudDescWarning', {
+                    count: security.suspicious_count,
+                    defaultValue: `주의가 필요한 거래 ${security.suspicious_count}건이 있어요.`,
+                  })
+                : t('home.notifications.fraudDescSafe', {
+                    defaultValue: '현재 전자지갑은 안전합니다.',
+                  })
+              : keyMap
+                ? t(keyMap.descKey, { defaultValue: notif.description })
+                : notif.description;
+          const target = isFraud
+            ? ROUTES.MYPAGE_SECURITY_CHECK
+            : notif.id === 'legal'
+              ? ROUTES.LAWYERS
+              : '/mypage/wallet-history';
           return (
             <div
               key={notif.id}
-              className={`${styles.card} ${styles.notifCard}`}
-              onClick={() =>
-                navigate(notif.id === 'legal' ? ROUTES.LAWYERS : '/mypage/wallet-history')
-              }
+              className={`${styles.card} ${styles.notifCard}${fraudWarning ? ` ${styles.cardWarn}` : ''}`}
+              onClick={() => navigate(target)}
               style={{ cursor: 'pointer' }}
             >
               <div className={styles.cardTitle}>{title}</div>
