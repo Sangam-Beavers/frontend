@@ -203,9 +203,11 @@
 /* ─────────── ④ 액션 버튼 row ─────────── */
 .btnRow {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
   margin-top: 0;
+  /* 아래 disclaimer(참고용 안내)와 너무 붙지 않게 최소 여백 확보 */
+  margin-bottom: 18px;
 }
 
 .primaryBtn {

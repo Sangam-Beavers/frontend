@@ -14,11 +14,12 @@
 }
 
 .softbox {
-  background: linear-gradient(160deg, #eef7ff, #fff);
+  background: #fff;
   border: 1px solid var(--line);
   border-radius: 22px;
   padding: 16px;
   margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.06);
 }
 
 .softboxTitle {

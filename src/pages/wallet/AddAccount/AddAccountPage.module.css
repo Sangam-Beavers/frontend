@@ -34,8 +34,9 @@
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #fff;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.06);
   padding: 12px 14px;
-  color: #34445f;
+  color: #1f2937;
   font-size: 14px;
   font-family: inherit;
   box-sizing: border-box;

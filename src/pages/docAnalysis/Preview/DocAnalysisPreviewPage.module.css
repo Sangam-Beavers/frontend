@@ -3,7 +3,8 @@
   height: 210px;
   border: 1.5px dashed #a8c9ff;
   border-radius: 18px;
-  background: #f8fbff;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,7 +55,8 @@
 
 .cardWarn {
   background: var(--warn);
-  box-shadow: none;
+  border: 1px solid #f3d28a;
+  box-shadow: 0 4px 12px rgba(202, 138, 4, 0.1);
 }
 
 .cardTitle {
@@ -94,7 +96,7 @@
 .ghostBtn {
   border-radius: 15px;
   padding: 14px 16px;
-  background: var(--soft);
+  background: #fff;
   color: var(--blue);
   font-weight: 900;
   font-size: 14px;
