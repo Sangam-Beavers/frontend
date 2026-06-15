@@ -13,8 +13,8 @@
 }
 
 .cardInfo {
-  background: var(--soft);
-  box-shadow: none;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.06);
 }
 
 .cardTitle {
@@ -72,7 +72,7 @@
   min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: var(--soft);
+  background: #eef1f6;
   padding: 12px 14px;
   color: var(--muted);
   font-size: 14px;

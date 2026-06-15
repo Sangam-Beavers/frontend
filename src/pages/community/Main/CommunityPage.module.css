@@ -18,9 +18,10 @@
   width: 100%;
   padding: 12px 16px;
   margin: 0 0 8px;
-  background: #f0f7ff;
+  background: #fff;
   border: 1px solid #bfdbfe;
   border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(7, 91, 255, 0.08);
   cursor: pointer;
   text-align: left;
 }

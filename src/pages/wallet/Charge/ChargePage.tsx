@@ -10,7 +10,7 @@ import { useChargeAccount } from '@/hooks/useChargeAccount';
 import { accountErrorMessage } from '@/utils/accountErrorMessage';
 import styles from './ChargePage.module.css';
 
-const formatKRW = (value: number) => `₩${value.toLocaleString('ko-KR')}`;
+const formatKRW = (value: number) => `₩ ${value.toLocaleString('ko-KR')}`;
 
 export default function ChargePage() {
   const { t } = useTranslation();

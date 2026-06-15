@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
 import { ROUTES } from '@/constants/routes';
+import ScreenHeader from '@/components/layout/ScreenHeader';
+import { InfoIcon } from '@/components/common/icons';
 import { ChatbotEntryButton, ChatbotSheet } from '@/components/chat';
 import { ApiException, documentApi } from '@/api';
 import type { RiskLevelCode } from '@/api/document';
@@ -74,7 +76,9 @@ export default function DocAnalysisResultPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <TopBar title={t('doc.result.title')} onBack={() => navigate(ROUTES.DOC_ANALYSIS)} />
+      <ScreenHeader>
+        <TopBar title={t('doc.result.title')} onBack={() => navigate(ROUTES.DOC_ANALYSIS)} />
+      </ScreenHeader>
 
       {/* ① 결론 — 메인 결과 강조 */}
       {isPending && (
@@ -170,13 +174,6 @@ export default function DocAnalysisResultPage() {
       <div className={styles.btnRow}>
         <button
           type="button"
-          className={styles.secondaryBtn}
-          onClick={() => navigate(ROUTES.MYPAGE_DOC_ANALYSIS_HISTORY)}
-        >
-          {t('doc.result.saveExport')}
-        </button>
-        <button
-          type="button"
           className={styles.primaryBtn}
           onClick={() => navigate(ROUTES.COMMUNITY_WRITE)}
         >
@@ -187,7 +184,7 @@ export default function DocAnalysisResultPage() {
       {/* ⑤ 작은 disclaimer — 큰 카드에서 축소된 안내. 전문가 상담 카드 바로 위에 둠 */}
       <p className={styles.disclaimer}>
         <span className={styles.disclaimerIcon} aria-hidden>
-          ℹ️
+          <InfoIcon size={14} />
         </span>
         {t('doc.result.disclaimer')}
       </p>
@@ -195,7 +192,11 @@ export default function DocAnalysisResultPage() {
       {/* ⑥ 인간 에스컬레이션 */}
       <div className={`${styles.card} ${styles.cardPurple} ${styles.expertCard}`}>
         <div className={styles.cardTitle}>{t('doc.result.expertTitle')}</div>
-        <button type="button" className={styles.secondaryBtn}>
+        <button
+          type="button"
+          className={styles.secondaryBtn}
+          onClick={() => navigate(ROUTES.LAWYERS)}
+        >
           {t('doc.result.expertCta')}
         </button>
       </div>

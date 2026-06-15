@@ -4,7 +4,8 @@
   max-width: 430px;
   min-height: 100dvh;
   height: 100dvh;
-  background: #fff;
+  /* 전 화면 공통 배경 — 위에서 아래로 아주 옅은 블루 그라데이션(하단까지 색이 들어감) */
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f8ff 52%, #eef4ff 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;

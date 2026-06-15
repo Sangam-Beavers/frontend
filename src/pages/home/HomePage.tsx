@@ -267,7 +267,7 @@ export default function HomePage() {
       {/* "지금 나의 원화" 환산 총액 (GET /wallets/me).
           이슈 #108 — 미인증이면 마스킹(가드된 영역이라도 표시 가짜값 방지).
           인증 후엔 실 API 값 표시: 로딩 중 '—' / WALLET4001(지갑 없음) 시 ₩0 fallback. */}
-      <div className={styles.card}>
+      <div className={`${styles.card} ${styles.cardKrw}`}>
         <div className={styles.cardTitle}>
           <WalletIcon size={16} style={{ color: 'var(--blue)', flexShrink: 0 }} />
           {t('home.myKrwTitle')}
