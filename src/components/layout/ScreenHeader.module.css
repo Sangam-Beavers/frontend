@@ -1,0 +1,5 @@
+/* 고정 헤더 내부 래퍼 — 좌우 18px 여백은 본문(.content)과 동일하게 맞춘다. */
+.pinned {
+  background: #fff;
+  padding: 14px 18px 4px;
+}

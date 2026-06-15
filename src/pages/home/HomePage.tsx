@@ -11,6 +11,8 @@ import { useExchangeRatesWidget } from '@/hooks/useExchangeRatesWidget';
 import { useSetting } from '@/hooks/useServiceSettings';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useWalletMe } from '@/hooks/useWalletMe';
+import { useSecuritySummary } from '@/hooks/useSecuritySummary';
+import { UserIcon, WalletIcon } from '@/components/common/icons';
 import { HOME_NOTIFICATIONS_MOCK } from '@/mocks/homeMock';
 import styles from './HomePage.module.css';
 
@@ -26,8 +28,8 @@ const MAIN_CURRENCY_KEY = 'homeMainCurrency'; // 메인 통화(이슈 #194) — 
 function formatBalance(code: string, balance: string): string {
   const symbol = CURRENCY_SYMBOL[code] ?? '';
   const num = Number(balance);
-  if (code === 'KRW') return `${symbol}${num.toLocaleString()}`;
-  return `${symbol}${num.toLocaleString(undefined, {
+  if (code === 'KRW') return `${symbol} ${num.toLocaleString()}`;
+  return `${symbol} ${num.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 4,
   })}`;
@@ -57,8 +59,8 @@ function loadMainCurrency(): string {
 /** 통화별 표시 포맷(KRW는 정수, 외화는 소수 2자리). */
 function formatAmountByCurrency(code: string, value: number): string {
   const symbol = CURRENCY_SYMBOL[code] ?? '';
-  if (code === 'KRW') return `${symbol}${Math.round(value).toLocaleString()}`;
-  return `${symbol}${value.toLocaleString(undefined, {
+  if (code === 'KRW') return `${symbol} ${Math.round(value).toLocaleString()}`;
+  return `${symbol} ${value.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -93,6 +95,7 @@ export default function HomePage() {
   const isVerified = profile?.is_verified ?? false;
   // "지금 나의 원화" 카드용 — 보유 통화 전체의 KRW 환산 합계.
   const { data: walletMe, isLoading: walletMeLoading, error: walletMeError } = useWalletMe();
+  const { data: security } = useSecuritySummary();
   // 서비스 설정 — 환율 갱신 주기 (분 단위, 0이면 자동 갱신 없음)
   const rateRefreshMin = Number(useSetting('EXCHANGE_RATE_REFRESH_MIN', '0'));
   const rateRefreshMs = rateRefreshMin > 0 ? rateRefreshMin * 60_000 : 0;
@@ -137,15 +140,22 @@ export default function HomePage() {
     <>
       <header className={styles.header}>
         <div className={styles.brand}>
-          <div className={styles.logoBox} />
+          <img className={styles.logoBox} src="/logo.png" alt="" />
           {t('home.appName')}
         </div>
         <div className={styles.headerActions}>
-          <button className={styles.langBtn} onClick={() => navigate('/mypage/language')}>
+          <button
+            className={styles.langBtn}
+            onClick={() => navigate('/mypage/language', { state: { from: ROUTES.HOME } })}
+          >
             🌐 {currentLangCode} ▾
           </button>
-          <button className={styles.iconBtn} onClick={() => navigate('/mypage')}>
-            👤
+          <button
+            className={styles.iconBtn}
+            onClick={() => navigate('/mypage')}
+            aria-label="마이페이지"
+          >
+            <UserIcon size={22} />
           </button>
         </div>
       </header>
@@ -200,7 +210,7 @@ export default function HomePage() {
           <div
             className={styles.amount}
             style={{ cursor: 'pointer' }}
-            onClick={() => navigate(ROUTES.MYPAGE_WALLET_HISTORY)}
+            onClick={() => navigate(ROUTES.MYPAGE_WALLET_HISTORY, { state: { from: ROUTES.HOME } })}
           >
             {mainAmount}
           </div>
@@ -258,7 +268,10 @@ export default function HomePage() {
           이슈 #108 — 미인증이면 마스킹(가드된 영역이라도 표시 가짜값 방지).
           인증 후엔 실 API 값 표시: 로딩 중 '—' / WALLET4001(지갑 없음) 시 ₩0 fallback. */}
       <div className={styles.card}>
-        <div className={styles.cardTitle}>{t('home.myKrwTitle')}</div>
+        <div className={styles.cardTitle}>
+          <WalletIcon size={16} style={{ color: 'var(--blue)', flexShrink: 0 }} />
+          {t('home.myKrwTitle')}
+        </div>
         <div className={styles.cardText}>
           {isVerified ? t('home.myKrwSub') : t('home.unverifiedHint')}
         </div>
@@ -268,8 +281,8 @@ export default function HomePage() {
             : walletMeLoading
               ? '—'
               : walletMeError instanceof ApiException && walletMeError.code === 'WALLET4001'
-                ? '₩0'
-                : `₩${Number(walletMe?.total_balance_in_krw ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+                ? '₩ 0'
+                : `₩ ${Number(walletMe?.total_balance_in_krw ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
         </div>
       </div>
 
@@ -339,16 +352,31 @@ export default function HomePage() {
           // 매핑 없으면 mock 원본을 fallback으로 표시.
           const keyMap = NOTIFICATION_KEYS[notif.id];
           const title = keyMap ? t(keyMap.titleKey, { defaultValue: notif.title }) : notif.title;
-          const description = keyMap
-            ? t(keyMap.descKey, { defaultValue: notif.description })
-            : notif.description;
+          const isFraud = notif.id === 'fraud';
+          const fraudWarning = isFraud && security?.status === 'WARNING';
+          const description =
+            isFraud && security
+              ? security.status === 'WARNING'
+                ? t('home.notifications.fraudDescWarning', {
+                    count: security.suspicious_count,
+                    defaultValue: `주의가 필요한 거래 ${security.suspicious_count}건이 있어요.`,
+                  })
+                : t('home.notifications.fraudDescSafe', {
+                    defaultValue: '현재 전자지갑은 안전합니다.',
+                  })
+              : keyMap
+                ? t(keyMap.descKey, { defaultValue: notif.description })
+                : notif.description;
+          const target = isFraud
+            ? ROUTES.MYPAGE_SECURITY_CHECK
+            : notif.id === 'legal'
+              ? ROUTES.LAWYERS
+              : '/mypage/wallet-history';
           return (
             <div
               key={notif.id}
-              className={`${styles.card} ${styles.notifCard}`}
-              onClick={() =>
-                navigate(notif.id === 'legal' ? ROUTES.LAWYERS : '/mypage/wallet-history')
-              }
+              className={`${styles.card} ${styles.notifCard}${fraudWarning ? ` ${styles.cardWarn}` : ''}`}
+              onClick={() => navigate(target)}
               style={{ cursor: 'pointer' }}
             >
               <div className={styles.cardTitle}>{title}</div>

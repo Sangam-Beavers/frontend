@@ -332,6 +332,37 @@ export interface WalletMeResponse {
 }
 
 /** 환율 위젯의 통화별 1건 (백엔드 ExchangeRateWidgetResponse.RateItem). */
+export interface SecurityCheckItem {
+  /** 항목 코드. */
+  code: 'LARGE_AMOUNT' | 'RAPID_SUCCESSION' | 'NIGHT_TRANSACTION' | 'FAILED_ATTEMPTS';
+  /** 항목 표시명(한국어). */
+  label: string;
+  status: 'SAFE' | 'WARNING';
+  /** 사유/설명. */
+  detail: string;
+}
+
+export interface FlaggedTransactionItem {
+  public_id: string;
+  type: string;
+  /** 금액(소수 4자리 string). */
+  amount: string;
+  currency_code: string;
+  /** 거래 시각(ISO 8601 UTC Z). */
+  created_at: string;
+  reason: string;
+}
+
+/** 전자지갑 보안 점검 요약 (GET /wallets/me/security-summary). */
+export interface WalletSecuritySummaryResponse {
+  status: 'SAFE' | 'WARNING';
+  checked_count: number;
+  suspicious_count: number;
+  checked_at: string;
+  checks: SecurityCheckItem[];
+  flagged_transactions: FlaggedTransactionItem[];
+}
+
 export interface ExchangeRateItem {
   currency_code: string;
   /** 한국어 통화명 (예: "미국 달러"). */
@@ -874,6 +905,17 @@ export const walletApi = {
    * AUTH4011(401 — interceptor 처리) / COMMON5000(500, 서버 오류).
    */
   getWalletMe: () => apiClient.get<unknown, WalletMeResponse>('/wallets/me'),
+
+  /**
+   * 전자지갑 보안 점검 (GET /wallets/me/security-summary).
+   *
+   * <p>홈 "이상거래 탐지" 카드 + 보안 점검 상세 화면용. 최근 거래를 규칙 기반으로 점검한 요약.
+   * 지갑이 없는 신규 사용자는 404 대신 SAFE 빈 요약을 받는다.
+   *
+   * <p>에러: AUTH4011(401 — interceptor 처리) / COMMON5000(500).
+   */
+  getSecuritySummary: () =>
+    apiClient.get<unknown, WalletSecuritySummaryResponse>('/wallets/me/security-summary'),
 
   /**
    * 주요 통화 환율 위젯 조회 (200) — KRW 기준 "1 외화→KRW" 환율 + 등락률.

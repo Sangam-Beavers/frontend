@@ -7,6 +7,7 @@ import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
 import Pagination from '@/components/community/Pagination';
 import TopBar from '@/components/navigation/TopBar';
+import ScreenHeader from '@/components/layout/ScreenHeader';
 import { usePagedPosts } from '@/hooks/usePagedPosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
 import { ROUTES } from '@/constants/routes';
@@ -24,15 +25,17 @@ export default function CommunityLifePage() {
 
   return (
     <>
-      <TopBar
-        title={t('community.title')}
-        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.COMMUNITY))}
-      />
+      <ScreenHeader>
+        <TopBar
+          title={t('community.title')}
+          onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.COMMUNITY))}
+        />
 
-      <CommunityTabs active="life" />
+        <CommunityTabs active="life" />
 
-      <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
-      {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
+        <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
+        {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
+      </ScreenHeader>
 
       <div className={styles.banner}>
         <b>{t('community.boards.life.title')}</b>

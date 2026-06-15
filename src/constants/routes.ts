@@ -39,6 +39,7 @@ export const ROUTES = {
   MYPAGE_LANGUAGE: '/mypage/language',
   MYPAGE_SUBSCRIPTION: '/mypage/subscription',
   MYPAGE_WALLET_HISTORY: '/mypage/wallet-history',
+  MYPAGE_SECURITY_CHECK: '/mypage/security-check',
   MYPAGE_EXCHANGE_HISTORY: '/mypage/exchange-history',
   MYPAGE_DOC_ANALYSIS_HISTORY: '/mypage/doc-analysis-history',
   MYPAGE_WITHDRAW: '/mypage/withdraw',

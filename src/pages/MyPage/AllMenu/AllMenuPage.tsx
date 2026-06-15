@@ -3,6 +3,8 @@ import { useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { startLogout } from '@/auth/logout';
 import Identicon from '@/components/common/Identicon';
+import ScreenHeader from '@/components/layout/ScreenHeader';
+import { SearchIcon, SettingsIcon } from '@/components/common/icons';
 import { LANGUAGE_CODE_TO_LABEL } from '@/constants/languages';
 import { ROUTES } from '@/constants/routes';
 import { useMyProfile } from '@/hooks/useMyProfile';
@@ -166,79 +168,87 @@ export default function AllMenuPage() {
   return (
     <>
       <div className={styles.flexColumn}>
-        {/* Profile header */}
-        <div className={styles.head}>
-          <div
-            className={styles.profileRow}
-            onClick={() => navigate(ROUTES.MYPAGE)}
-            style={{ cursor: 'pointer' }}
-          >
+        <ScreenHeader>
+          {/* Profile header */}
+          <div className={styles.head}>
             <div
-              className={`${styles.avatar} ${avatarToneClass}`}
-              style={{ filter: `hue-rotate(${profile?.avatar_hue ?? 0}deg)` }}
+              className={styles.profileRow}
+              onClick={() => navigate(ROUTES.MYPAGE)}
+              style={{ cursor: 'pointer' }}
             >
-              {profile?.profile_image_url ? (
-                <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
-              ) : (
-                <Identicon seed={avatarSeed} />
-              )}
-            </div>
-            <div>
-              <div className={styles.username}>
-                {isLoading ? t('common.loading') : nickname || t('common.user')}
-                {profile?.is_verified && (
-                  <span className={styles.verifiedBadge}>{t('mypage.verifiedBadge')}</span>
+              <div
+                className={`${styles.avatar} ${avatarToneClass}`}
+                style={{ filter: `hue-rotate(${profile?.avatar_hue ?? 0}deg)` }}
+              >
+                {profile?.profile_image_url ? (
+                  <img src={profile.profile_image_url} alt="" className={styles.avatarImg} />
+                ) : (
+                  <Identicon seed={avatarSeed} />
                 )}
               </div>
-              <div className={styles.userMeta}>{languageLabel}</div>
+              <div>
+                <div className={styles.username}>
+                  {isLoading ? t('common.loading') : nickname || t('common.user')}
+                  {profile?.is_verified && (
+                    <span className={styles.verifiedBadge}>{t('mypage.verifiedBadge')}</span>
+                  )}
+                </div>
+                <div className={styles.userMeta}>{languageLabel}</div>
+              </div>
+            </div>
+            <div className={styles.headIcons}>
+              <span
+                onClick={() => navigate(ROUTES.MYPAGE)}
+                style={{ cursor: 'pointer' }}
+                aria-label="설정"
+              >
+                <SettingsIcon size={20} />
+              </span>
             </div>
           </div>
-          <div className={styles.headIcons}>
-            <span onClick={() => navigate(ROUTES.MYPAGE)} style={{ cursor: 'pointer' }}>
-              ⚙️
+
+          {/* Quick access */}
+          <div className={styles.quickGrid}>
+            {QUICK_LINKS.map((q) => (
+              <span
+                key={q.labelKey}
+                onClick={() => {
+                  navigate(q.path, { state: { from: ROUTES.ALL_MENU } });
+                }}
+              >
+                {t(q.labelKey)}
+              </span>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className={styles.searchBar}>
+            <input
+              className={styles.searchInput}
+              placeholder={t('allmenu.searchPlaceholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <span className={styles.searchIcon}>
+              <SearchIcon size={18} />
             </span>
           </div>
-        </div>
 
-        {/* Quick access */}
-        <div className={styles.quickGrid}>
-          {QUICK_LINKS.map((q) => (
-            <span
-              key={q.labelKey}
-              onClick={() => {
-                navigate(q.path, { state: { from: ROUTES.ALL_MENU } });
-              }}
-            >
-              {t(q.labelKey)}
-            </span>
-          ))}
-        </div>
-
-        {/* Search */}
-        <div className={styles.searchBar}>
-          <input
-            className={styles.searchInput}
-            placeholder={t('allmenu.searchPlaceholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <span className={styles.searchIcon}>🔍</span>
-        </div>
-
-        {/* Tags */}
-        <div className={styles.tagRow}>
-          {TAGS.map((tag) => (
-            <span
-              key={tag.labelKey}
-              className={styles.tag}
-              onClick={() => {
-                navigate(tag.path, { state: { from: ROUTES.ALL_MENU } });
-              }}
-            >
-              {t(tag.labelKey)}
-            </span>
-          ))}
-        </div>
+          {/* Tags */}
+          <div className={styles.tagRow}>
+            {TAGS.map((tag) => (
+              <span
+                key={tag.labelKey}
+                className={styles.tag}
+                onClick={() => {
+                  navigate(tag.path, { state: { from: ROUTES.ALL_MENU } });
+                }}
+              >
+                {t(tag.labelKey)}
+              </span>
+            ))}
+          </div>
+        </ScreenHeader>
 
         {/* Search results OR menu shell */}
         {searchResults !== null ? (

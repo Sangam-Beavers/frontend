@@ -1,4 +1,4 @@
-/* ===== 상단 헤더(뒤로 / 브랜드 / 검색·알림) ===== */
+/* ===== 상단 헤더(뒤로 / 브랜드 / 검색·알림) — ScreenHeader 안에서 렌더 ===== */
 .header {
   display: flex;
   align-items: center;
@@ -18,10 +18,10 @@
 }
 
 .logoBox {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 7px;
-  background: linear-gradient(135deg, var(--blue), #11c6bd);
+  object-fit: contain;
 }
 
 .headerActions {

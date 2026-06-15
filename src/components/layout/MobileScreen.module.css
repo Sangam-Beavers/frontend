@@ -10,6 +10,12 @@
   flex-direction: column;
 }
 
+/* 스크롤 밖 고정 헤더 슬롯(앱바). ScreenHeader 미사용 시 비어서 높이 0 → 기존 페이지 영향 없음. */
+.headerSlot {
+  flex-shrink: 0;
+  background: #fff;
+}
+
 .content {
   flex: 1;
   height: 0;

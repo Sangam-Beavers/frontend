@@ -30,14 +30,12 @@ const AVATAR_TONE_CLASS: Partial<Record<AvatarTone, string>> = {
 };
 
 /**
- * 커뮤니티 목록 카드 + 카드별 번역 토글 (이슈 #160 후속).
+ * 커뮤니티 목록 한 행(row) + 행별 번역 토글 (이슈 #160 후속).
  *
- * <p>제목/본문 미리보기를 사용자 언어로 번역해서 보여준다 — 카드별 독립 상태(다른 카드 영향 X).
- * 번역 호출은 react-query 캐시(usePostTranslation)에 들어가 한 번 누른 뒤엔 토글이 즉시 동작.
+ * <p>여러 행이 모이면 {@code :first-of-type}/{@code :last-of-type}로 하나의 박스처럼 보인다(테두리 공유).
+ * 레이아웃: 상단 = 아바타·메타(닉네임·카테고리·댓글·좋아요)(좌) + 신고(우), 제목, 본문, 번역 보기(우측 하단).
  *
- * <p>가드: post.language === i18n.language면 TranslateButton이 null 반환해 버튼 비노출.
- *
- * <p>이벤트 격리: 카드 전체가 상세 페이지 네비게이션이라 번역 버튼 클릭 시 stopPropagation이 필수다.
+ * <p>이벤트 격리: 행 전체가 상세 페이지 네비게이션이라 신고·번역 클릭 시 stopPropagation이 필수다.
  */
 export default function FeedPost({ post }: FeedPostProps) {
   const navigate = useNavigate();
@@ -61,48 +59,63 @@ export default function FeedPost({ post }: FeedPostProps) {
     setShowTranslated((prev) => !prev);
   };
 
+  // 상단 메타 — 첫 토막(닉네임)은 진하게/크게, 나머지(카테고리 등)는 옅게 표시.
+  const [nickname, ...metaRest] = post.meta.split(' · ');
+  const metaRestText = metaRest.join(' · ');
+
   return (
     <article
       className={styles.post}
       onClick={() => navigate(buildCommunityPostPath(post.id))}
       style={{ cursor: 'pointer' }}
     >
-      <div className={styles.head}>
-        <div
-          className={`${styles.avatar} ${AVATAR_TONE_CLASS[post.avatarTone ?? 'default'] ?? styles.avatarNewcomer}`}
-          style={{ filter: `hue-rotate(${post.avatarHue ?? 0}deg)` }}
-        >
-          {post.avatarImageUrl ? (
-            <img src={post.avatarImageUrl} alt="" className={styles.avatarImg} />
-          ) : (
-            <Identicon seed={post.avatarSeed} />
-          )}
+      {/* 상단: 아바타 + 메타(닉네임·카테고리·댓글·좋아요)(좌) + 신고(우) */}
+      <div className={styles.top}>
+        <div className={styles.author}>
+          <div
+            className={`${styles.avatar} ${AVATAR_TONE_CLASS[post.avatarTone ?? 'default'] ?? styles.avatarNewcomer}`}
+            style={{ filter: `hue-rotate(${post.avatarHue ?? 0}deg)` }}
+          >
+            {post.avatarImageUrl ? (
+              <img src={post.avatarImageUrl} alt="" className={styles.avatarImg} />
+            ) : (
+              <Identicon seed={post.avatarSeed} />
+            )}
+          </div>
+          <span className={styles.meta}>
+            <b className={styles.nickname}>{nickname}</b>
+            {metaRestText && <span className={styles.metaRest}>{` · ${metaRestText}`}</span>}
+          </span>
         </div>
-        <div>
-          <b>{titleText}</b>
-          <p>{post.meta}</p>
-        </div>
-      </div>
-      <div className={styles.text}>{bodyText}</div>
-      <div className={styles.actions} onClick={(event) => event.stopPropagation()}>
-        <TranslateButton
-          variant="comment"
-          originalLanguage={post.language}
-          targetLanguage={targetLanguage}
-          isTranslated={isShowingTranslation}
-          isLoading={isTranslating}
-          onClick={handleTranslateClick}
-        />
         <button
           type="button"
           className={styles.reportBtn}
-          onClick={() => {
+          onClick={(event) => {
+            event.stopPropagation();
             reportPost.reset();
             setShowReport(true);
           }}
         >
           {t('community.report.button')}
         </button>
+      </div>
+
+      <b className={styles.title}>{titleText}</b>
+      <div className={styles.text}>{bodyText}</div>
+
+      {/* 하단: 댓글·좋아요(좌) + 번역 보기(우) */}
+      <div className={styles.footer}>
+        <span className={styles.stats}>{post.stats}</span>
+        <span className={styles.translateWrap} onClick={(event) => event.stopPropagation()}>
+          <TranslateButton
+            variant="comment"
+            originalLanguage={post.language}
+            targetLanguage={targetLanguage}
+            isTranslated={isShowingTranslation}
+            isLoading={isTranslating}
+            onClick={handleTranslateClick}
+          />
+        </span>
       </div>
 
       {showReport && (

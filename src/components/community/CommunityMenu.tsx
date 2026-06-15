@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ROUTES } from '@/constants/routes';
+import { HeartIcon, PencilIcon, SearchIcon } from '@/components/common/icons';
 import styles from './CommunityMenu.module.css';
 
 interface CommunityMenuProps {
@@ -31,7 +32,9 @@ export default function CommunityMenu({
         aria-pressed={searchActive}
         onClick={onToggleSearch}
       >
-        <span className={styles.icon}>🔍</span>
+        <span className={styles.icon}>
+          <SearchIcon size={17} />
+        </span>
         {t('community.search')}
       </button>
       <button
@@ -39,7 +42,9 @@ export default function CommunityMenu({
         className={`${styles.item} ${styles.primary}`}
         onClick={() => navigate(ROUTES.COMMUNITY_WRITE)}
       >
-        <span className={styles.icon}>✏️</span>
+        <span className={styles.icon}>
+          <PencilIcon size={17} />
+        </span>
         {t('community.write')}
       </button>
       <button
@@ -47,7 +52,9 @@ export default function CommunityMenu({
         className={styles.item}
         onClick={() => navigate(ROUTES.COMMUNITY_LIKED)}
       >
-        <span className={styles.icon}>❤️</span>
+        <span className={styles.icon}>
+          <HeartIcon size={17} fill="#ef4444" stroke="#ef4444" />
+        </span>
         {t('community.liked')}
       </button>
     </div>

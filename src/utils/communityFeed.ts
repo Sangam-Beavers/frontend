@@ -52,7 +52,8 @@ export function toFeedPostItem(item: PostSummaryItem): FeedPostItem {
     id: item.public_id,
     title: item.title,
     body: item.content_preview,
-    meta: `${item.author_nickname} · ${label} · 댓글 ${item.comment_count} · 좋아요 ${item.like_count}`,
+    meta: `${item.author_nickname} · ${label}`,
+    stats: `댓글 ${item.comment_count} · 좋아요 ${item.like_count}`,
     // 같은 작성자 → 항상 같은 identicon. 마이페이지와 동일하게 작성자 public_id를 시드로 쓴다
     // (닉네임을 바꿔도 그림 유지 + 같은 사용자는 어디서든 같은 그림). 빈 값이면 닉네임/글 id로 폴백.
     avatarSeed: item.author_public_id || item.author_nickname || item.public_id,
