@@ -88,13 +88,13 @@ export default function CommunityFaqPage() {
       ) : (
         <div className={styles.list}>
           {faqs.map((f: FaqItem) => {
-            const isOpen = openId === f.publicId;
+            const isOpen = openId === f.public_id;
             return (
-              <div key={f.publicId} className={styles.item}>
+              <div key={f.public_id} className={styles.item}>
                 <button
                   type="button"
                   className={`${styles.question} ${isOpen ? styles.questionOpen : ''}`}
-                  onClick={() => setOpenId(isOpen ? null : f.publicId)}
+                  onClick={() => setOpenId(isOpen ? null : f.public_id)}
                 >
                   <span className={styles.qMark}>Q</span>
                   <span className={styles.qText}>{f.question}</span>

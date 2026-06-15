@@ -16,7 +16,7 @@ export interface NoticeItem {
 }
 
 export interface FaqItem {
-  publicId: string;
+  public_id: string;
   question: string;
   answer: string;
   category: string;
