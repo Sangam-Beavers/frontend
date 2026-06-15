@@ -1,7 +1,7 @@
 .banner {
   border-radius: 18px;
   padding: 14px 16px;
-  margin: 12px 0;
+  margin: 0 0 12px;
   color: white;
   display: flex;
   flex-direction: column;
