@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
+import ScreenHeader from '@/components/layout/ScreenHeader';
 import LawyerCard from '@/components/lawyers/LawyerCard';
 import LawyerTabs from '@/components/lawyers/LawyerTabs';
 import { LAWYERS_MOCK } from '@/mocks/lawyersMock';
@@ -12,7 +13,7 @@ import styles from './LawyersPage.module.css';
  * 백엔드 연동 없이 하드코딩 mock({@link LAWYERS_MOCK})으로 변호사 광고 목록을 노출한다.
  * 홈 '변호사 상담' 알림 카드에서 진입한다.
  *
- * <p>상단 영역(헤더~탭)은 sticky로 고정하고, 그 아래 안내·변호사 목록만 스크롤된다.
+ * <p>상단 영역(헤더~탭)은 ScreenHeader로 스크롤 영역 밖에 고정하고, 그 아래 안내·변호사 목록만 스크롤된다.
  */
 export default function LawyersPage() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export default function LawyersPage() {
 
   return (
     <>
-      <div className={styles.stickyTop}>
+      <ScreenHeader>
         <header className={styles.header}>
           <button className={styles.iconBtn} onClick={() => navigate(-1)} aria-label="뒤로">
             ‹
@@ -53,7 +54,7 @@ export default function LawyersPage() {
         </div>
 
         <LawyerTabs active={active} onChange={setActive} />
-      </div>
+      </ScreenHeader>
 
       <div className={styles.notice}>
         <span className={styles.noticeIcon}>ℹ️</span>

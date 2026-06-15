@@ -7,6 +7,7 @@ import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
 import Pagination from '@/components/community/Pagination';
 import TopBar from '@/components/navigation/TopBar';
+import ScreenHeader from '@/components/layout/ScreenHeader';
 import { useQna } from '@/hooks/useQna';
 import { usePagedPosts } from '@/hooks/usePagedPosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
@@ -36,15 +37,17 @@ export default function CommunityJobPage() {
 
   return (
     <>
-      <TopBar
-        title={t('community.job.title')}
-        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.COMMUNITY))}
-      />
+      <ScreenHeader>
+        <TopBar
+          title={t('community.job.title')}
+          onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.COMMUNITY))}
+        />
 
-      <CommunityTabs active="job" />
+        <CommunityTabs active="job" />
 
-      <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
-      {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
+        <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
+        {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
+      </ScreenHeader>
 
       <div className={styles.jobAd}>
         <b>{t('community.job.adTitle')}</b>

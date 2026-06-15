@@ -7,6 +7,7 @@ import CommunityTabs from '@/components/community/CommunityTabs';
 import FeedPost from '@/components/community/FeedPost';
 import Pagination from '@/components/community/Pagination';
 import TopBar from '@/components/navigation/TopBar';
+import ScreenHeader from '@/components/layout/ScreenHeader';
 import { usePagedPosts } from '@/hooks/usePagedPosts';
 import { toFeedPostItem } from '@/utils/communityFeed';
 import { ROUTES } from '@/constants/routes';
@@ -24,16 +25,18 @@ export default function CommunityPage() {
 
   return (
     <>
-      <TopBar
-        title={t('community.title')}
-        showBack={false}
-        rightAction={<div style={{ width: 40 }} />}
-      />
+      <ScreenHeader>
+        <TopBar
+          title={t('community.title')}
+          showBack={false}
+          rightAction={<div style={{ width: 40 }} />}
+        />
 
-      <CommunityTabs active="all" />
+        <CommunityTabs active="all" />
 
-      <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
-      {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
+        <CommunityMenu onToggleSearch={() => setShowSearch((s) => !s)} searchActive={showSearch} />
+        {showSearch && <CommunitySearchBar value={searchQuery} onChange={setSearchQuery} />}
+      </ScreenHeader>
 
       {/* FAQ 빠른 진입 */}
       <button
