@@ -147,10 +147,10 @@ export const feePolicyApi = {
   update: (
     publicId: string,
     data: Partial<{
-      feeType: string;
-      feeValue: string;
-      minFee: string;
-      maxFee: string;
+      fee_type: string;
+      fee_value: string;
+      min_fee: string;
+      max_fee: string;
       active: boolean;
     }>
   ) =>
