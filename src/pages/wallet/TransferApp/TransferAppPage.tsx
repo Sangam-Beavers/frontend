@@ -28,6 +28,8 @@ interface RecipientDisplay {
   initial: string;
   currency: string;
   tone: AvatarTone;
+  /** 최근 송금 칩에서 고른 수신자만 true. 이메일로 새로 검증한 수신자는 false (메타 라벨 구분용). */
+  isRecent: boolean;
 }
 
 export default function TransferAppPage() {
@@ -63,6 +65,7 @@ export default function TransferAppPage() {
       initial: r.nickname.charAt(0).toUpperCase() || '?',
       currency: r.last_currency_code,
       tone: trustGradeToTone(r.trust_grade),
+      isRecent: true,
     }));
   }, [recipientsData]);
 
@@ -71,14 +74,18 @@ export default function TransferAppPage() {
   const [verifyError, setVerifyError] = useState<string | null>(null);
   // 검증 mutation (#131) — 사용자가 "확인" 누를 때 1회 호출.
   const validateMutation = useValidateMember();
-  const [currency, setCurrency] = useState('VND');
+  // 기본 통화는 KRW — 한국 거주 사용자 기준 가장 흔하고, 원화 송금 한도(최소/최대/일일)가
+  // 첫 화면부터 보이도록. 다른 통화는 드롭다운에서 선택.
+  const [currency, setCurrency] = useState('KRW');
   const [amount, setAmount] = useState('');
   const [memo, setMemo] = useState('');
 
   // 서비스 설정 — 송금 한도
-  const maxAmountSetting = useSetting('MAX_TRANSFER_AMOUNT', '0');
-  const minAmountSetting = useSetting('MIN_TRANSFER_AMOUNT', '0');
-  const dailyMaxSetting = useSetting('MAX_DAILY_TRANSFER', '0');
+  // 폴백 기본값은 백엔드 정책(app-admin-service)과 동일하게 둔다. 백엔드가 설정을 내려주면 그 값으로
+  // 덮어쓰고(배포), 설정 API가 값을 안 주는 환경(로컬 등)에선 이 기본값이 떠서 한도가 동일하게 표시·적용된다.
+  const maxAmountSetting = useSetting('MAX_TRANSFER_AMOUNT', '5000000');
+  const minAmountSetting = useSetting('MIN_TRANSFER_AMOUNT', '1100');
+  const dailyMaxSetting = useSetting('MAX_DAILY_TRANSFER', '100100');
   const maxAmount = Number(maxAmountSetting);
   const minAmount = Number(minAmountSetting);
   const dailyMax = Number(dailyMaxSetting);
@@ -86,14 +93,19 @@ export default function TransferAppPage() {
   function getAmountError(): string | null {
     const num = Number(amount);
     if (!amount || !Number.isFinite(num) || num <= 0) return null;
-    if (minAmount > 0 && num < minAmount) {
-      return `최소 송금 금액은 ₩${minAmount.toLocaleString()}입니다.`;
-    }
-    if (maxAmount > 0 && num > maxAmount) {
-      return `1회 최대 송금 금액은 ₩${maxAmount.toLocaleString()}입니다.`;
-    }
-    if (dailyMax > 0 && num > dailyMax) {
-      return `일일 한도 ₩${dailyMax.toLocaleString()}을 초과합니다.`;
+    // 송금 한도(MIN/MAX/일일)는 원화(KRW) 기준 설정값이고, 현재 송금은 same-currency만 지원한다
+    // (외화는 환전 없이 같은 통화로 이동). 따라서 KRW 송금일 때만 한도를 적용한다 — USD 등 외화 금액에
+    // ₩ 한도를 그대로 비교하면(예: 10 USD < 1100) 정상 송금이 막힌다.
+    if (currency === 'KRW') {
+      if (minAmount > 0 && num < minAmount) {
+        return `최소 송금 금액은 ₩${minAmount.toLocaleString()}입니다.`;
+      }
+      if (maxAmount > 0 && num > maxAmount) {
+        return `1회 최대 송금 금액은 ₩${maxAmount.toLocaleString()}입니다.`;
+      }
+      if (dailyMax > 0 && num > dailyMax) {
+        return `일일 한도 ₩${dailyMax.toLocaleString()}을 초과합니다.`;
+      }
     }
     return null;
   }
@@ -117,6 +129,8 @@ export default function TransferAppPage() {
           // 통화는 백엔드 응답에 없음 → 현재 selectedCurrency 유지 (사용자가 따로 선택).
           currency,
           tone: trustGradeToTone(res.trust_grade),
+          // 이메일로 새로 검증한 수신자 — '최근 송금했던 사용자'가 아님.
+          isRecent: false,
         });
       },
       onError: (err) => {
@@ -256,7 +270,11 @@ export default function TransferAppPage() {
                 {verified.name}
                 <span className={styles.pill}>{t('transfer.app.verifiedBadge')}</span>
               </div>
-              <div className={styles.verifiedMeta}>{t('transfer.app.verifiedMeta')}</div>
+              <div className={styles.verifiedMeta}>
+                {verified.isRecent
+                  ? t('transfer.app.verifiedMeta')
+                  : t('transfer.app.verifiedMetaVerified')}
+              </div>
             </div>
           </div>
         )}
@@ -302,14 +320,16 @@ export default function TransferAppPage() {
             onChange={(e) => setAmount(e.target.value)}
           />
           {amountError && <p className={styles.errorText}>{amountError}</p>}
-          {!amountError && (minAmount > 0 || maxAmount > 0 || dailyMax > 0) && (
-            <p className={styles.hintText}>
-              {minAmount > 0 && `최소 ₩${minAmount.toLocaleString()}`}
-              {minAmount > 0 && maxAmount > 0 && ' · '}
-              {maxAmount > 0 && `최대 ₩${maxAmount.toLocaleString()}`}
-              {dailyMax > 0 && ` · 일 한도 ₩${dailyMax.toLocaleString()}`}
-            </p>
-          )}
+          {!amountError &&
+            currency === 'KRW' &&
+            (minAmount > 0 || maxAmount > 0 || dailyMax > 0) && (
+              <p className={styles.hintText}>
+                {minAmount > 0 && `최소 ₩${minAmount.toLocaleString()}`}
+                {minAmount > 0 && maxAmount > 0 && ' · '}
+                {maxAmount > 0 && `최대 ₩${maxAmount.toLocaleString()}`}
+                {dailyMax > 0 && ` · 일 한도 ₩${dailyMax.toLocaleString()}`}
+              </p>
+            )}
         </div>
 
         <div className={styles.field}>

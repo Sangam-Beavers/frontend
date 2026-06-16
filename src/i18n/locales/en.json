@@ -748,6 +748,7 @@
       "verifying": "Verifying...",
       "verifiedBadge": "Verified",
       "verifiedMeta": "Previously sent recipient",
+      "verifiedMetaVerified": "Verified app user",
       "currencyLabel": "Send currency",
       "currencyLoadError": "Failed to load currencies",
       "amountLabel": "Send amount",

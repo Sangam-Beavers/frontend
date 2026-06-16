@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import ScreenHeader from '@/components/layout/ScreenHeader';
 import { useReceipt } from '@/hooks/useReceipt';
 import styles from './TransferReceiptPage.module.css';
 
@@ -68,15 +69,17 @@ export default function TransferReceiptPage() {
 
   return (
     <>
-      <TopBar
-        title={t('transfer.receipt.title')}
-        onBack={() => navigate(-1)}
-        rightAction={
-          <button className={styles.iconBtn} aria-label={t('transfer.receipt.more')}>
-            ⋯
-          </button>
-        }
-      />
+      <ScreenHeader>
+        <TopBar
+          title={t('transfer.receipt.title')}
+          onBack={() => navigate(-1)}
+          rightAction={
+            <button className={styles.iconBtn} aria-label={t('transfer.receipt.more')}>
+              ⋯
+            </button>
+          }
+        />
+      </ScreenHeader>
 
       {isLoading ? (
         <div className={styles.receipt}>
@@ -169,14 +172,6 @@ function ReceiptBody({ data }: { data: NonNullable<ReturnType<typeof useReceipt>
             <b className={isBlue ? styles.rowValueBlue : styles.rowValue}>{value}</b>
           </div>
         ))}
-      </div>
-
-      <div className={styles.qrCard}>
-        <div className={styles.qr} aria-label={t('transfer.receipt.qrAria')} />
-        <div className={styles.qrInfo}>
-          <div className={styles.qrTitle}>{t('transfer.receipt.qrTitle')}</div>
-          <div className={styles.qrDesc}>{t('transfer.receipt.qrDesc')}</div>
-        </div>
       </div>
     </>
   );

@@ -748,6 +748,7 @@
       "verifying": "Đang xác nhận...",
       "verifiedBadge": "Đã xác minh",
       "verifiedMeta": "Người dùng đã chuyển tiền gần đây",
+      "verifiedMetaVerified": "Người dùng ứng dụng đã xác minh",
       "currencyLabel": "Loại tiền gửi",
       "currencyLoadError": "Không tải được tiền tệ",
       "amountLabel": "Số tiền gửi",
