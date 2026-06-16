@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/navigation/TopBar';
+import ScreenHeader from '@/components/layout/ScreenHeader';
 import { ROUTES } from '@/constants/routes';
 import { useSecuritySummary } from '@/hooks/useSecuritySummary';
 import styles from './WalletSecurityCheckPage.module.css';
@@ -15,7 +16,9 @@ export default function WalletSecurityCheckPage() {
 
   return (
     <>
-      <TopBar title="전자지갑 보안 점검" onBack={() => navigate(-1)} />
+      <ScreenHeader>
+        <TopBar title="전자지갑 보안 점검" onBack={() => navigate(-1)} />
+      </ScreenHeader>
 
       {isLoading ? (
         <div className={styles.state}>점검 결과를 불러오는 중…</div>

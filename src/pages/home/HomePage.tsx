@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
-import type { ExchangeRateItem } from '@/api/wallet';
 import { ROUTES } from '@/constants/routes';
-import { SUPPORTED_CURRENCIES, CURRENCY_SYMBOL, isSupportedCurrency } from '@/constants/currencies';
+import { CURRENCY_SYMBOL, isSupportedCurrency } from '@/constants/currencies';
 import { isAdminUser } from '@/auth/tokenStore';
 import { balanceOf, useBalances } from '@/hooks/useBalances';
 import { useExchangeRatesWidget } from '@/hooks/useExchangeRatesWidget';
@@ -40,7 +39,8 @@ function loadDisplayCurrencies(): string[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const codes: string[] = raw ? JSON.parse(raw) : ['USD', 'VND'];
-    return codes.filter(isSupportedCurrency);
+    // KRW는 항상 디폴트로 풀에 포함되므로 '선택 표시 통화'(외화)에서는 제외. 최대 2개.
+    return codes.filter((c) => isSupportedCurrency(c) && c !== 'KRW').slice(0, 2);
   } catch {
     return ['USD', 'VND'];
   }
@@ -64,22 +64,6 @@ function formatAmountByCurrency(code: string, value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
-}
-
-/**
- * 총 원화환산액(total_balance_in_krw)을 메인 통화로 환산해 문자열로 반환한다(이슈 #194).
- * KRW면 그대로, 외화면 ÷(1 외화→KRW 환율). 환율을 모르면 null(호출 측이 '—' 처리).
- */
-function formatMainAmount(
-  currency: string,
-  totalKrw: number,
-  rates?: ExchangeRateItem[]
-): string | null {
-  if (currency === 'KRW') return formatAmountByCurrency('KRW', totalKrw);
-  const rate = rates?.find((r) => r.currency_code === currency)?.exchange_rate;
-  const rateNum = Number(rate);
-  if (!rate || !rateNum) return null;
-  return formatAmountByCurrency(currency, totalKrw / rateNum);
 }
 
 export default function HomePage() {
@@ -119,18 +103,21 @@ export default function HomePage() {
     setMainCurrencyOpen(false);
   };
 
-  // 표시 통화 칩 = 저장된 표시 통화 중 메인 통화를 제외한 것(메인은 큰 금액으로 이미 표기).
-  const displayCurrencies = currencies.filter((code) => code !== mainCurrency);
+  // 표시 통화 풀 = KRW(디폴트) + 사용자가 고른 외화(최대 2). 메인 통화는 이 풀 안에서만 고른다.
+  const displayPool = ['KRW', ...currencies.filter((c) => c !== 'KRW')];
+  // 저장된 메인 통화가 풀에 없으면(외화 선택 해제 등) KRW로 폴백.
+  const effectiveMain = displayPool.includes(mainCurrency) ? mainCurrency : 'KRW';
+  // 하단 칩 = 풀에서 메인 통화를 뺀 것 (KRW + 선택 외화 − 메인).
+  // 메인이 KRW면 선택 외화들이, 메인이 외화면 KRW + 남은 외화가 뜬다.
+  const displayCurrencies = displayPool.filter((code) => code !== effectiveMain);
 
-  // 카드 큰 금액 = 총 원화환산액(/wallets/me)을 메인 통화로 환산(이슈 #194).
-  // 지갑 없음(WALLET4001)이면 0, 로딩/환율 미준비면 '—'.
-  const totalKrw =
-    walletMeError instanceof ApiException && walletMeError.code === 'WALLET4001'
-      ? 0
-      : Number(walletMe?.total_balance_in_krw ?? 0);
-  const mainAmountReady = !walletMeLoading && (mainCurrency === 'KRW' || !ratesLoading);
+  // 카드 큰 금액 = 메인 통화의 "실제 잔액"(해당 통화 보유액). 이전엔 총 원화환산액을 메인 통화로 환산해
+  // 보여줘(이슈 #194) "지금 나의 원화" 카드와 값이 똑같았고, 환전해도 총액이 보존돼 메인 통화 잔액이
+  // 안 줄어든 것처럼 보였다. 총 환산액은 아래 "지금 나의 원화" 카드가 별도로 보여준다.
+  // 지갑 없음(WALLET4001)이면 balances가 비어 balanceOf가 '0.0000' 폴백.
+  const mainAmountReady = !balancesLoading;
   const mainAmount = mainAmountReady
-    ? (formatMainAmount(mainCurrency, totalKrw, ratesData?.rates) ?? '—')
+    ? formatAmountByCurrency(effectiveMain, Number(balanceOf(balances, effectiveMain)))
     : '—';
 
   // 현재 언어 코드 (i18n 기준). 헤더의 언어 셀렉터에 표시.
@@ -170,7 +157,7 @@ export default function HomePage() {
             {/* 메인 통화 변경(이슈 #194) — 클릭 시 지원 4통화 드롭다운. 선택 시 큰 금액이 해당 통화로 환산됨. */}
             <span style={{ position: 'relative' }}>
               <span style={{ cursor: 'pointer' }} onClick={() => setMainCurrencyOpen((o) => !o)}>
-                {t('home.mainCurrency')} {mainCurrency} · {t('home.change')} ▾
+                {t('home.mainCurrency')} {effectiveMain} · {t('home.change')} ▾
               </span>
               {mainCurrencyOpen && (
                 <div
@@ -188,7 +175,7 @@ export default function HomePage() {
                     minWidth: 132,
                   }}
                 >
-                  {SUPPORTED_CURRENCIES.map((code) => (
+                  {displayPool.map((code) => (
                     <div
                       key={code}
                       onClick={() => selectMainCurrency(code)}
@@ -196,7 +183,7 @@ export default function HomePage() {
                         padding: '8px 12px',
                         cursor: 'pointer',
                         whiteSpace: 'nowrap',
-                        fontWeight: code === mainCurrency ? 700 : 400,
+                        fontWeight: code === effectiveMain ? 700 : 400,
                       }}
                     >
                       {code} · {t(`home.currencies.${code}`)}

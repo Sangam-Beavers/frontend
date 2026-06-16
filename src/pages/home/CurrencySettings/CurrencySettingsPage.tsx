@@ -2,30 +2,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TopBar from '@/components/navigation/TopBar';
-import { SUPPORTED_CURRENCIES, isSupportedCurrency } from '@/constants/currencies';
+import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
 import styles from './CurrencySettingsPage.module.css';
 
 const STORAGE_KEY = 'homeCurrencies';
-const MAIN_CURRENCY_KEY = 'homeMainCurrency';
 const MAX_SELECT = 2;
-
-/** 메인 통화(이슈 #194) — 표시 통화 후보에서 제외 대상. */
-function loadMainCurrency(): string {
-  try {
-    const raw = localStorage.getItem(MAIN_CURRENCY_KEY);
-    return raw && isSupportedCurrency(raw) ? raw : 'KRW';
-  } catch {
-    return 'KRW';
-  }
-}
 
 export default function CurrencySettingsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // 표시 통화 후보 = 지원 통화 4개 − 메인 통화 1개 = 3개(이슈 #194).
-  const mainCurrency = loadMainCurrency();
-  const candidates = SUPPORTED_CURRENCIES.filter((code) => code !== mainCurrency);
+  // 표시 통화 후보 = 외화 3종(VND/PHP/USD). KRW는 항상 디폴트로 풀에 포함되므로 선택 대상이 아니다.
+  // 메인 통화는 홈에서 'KRW + 선택 외화' 중 하나로 고른다.
+  const candidates = SUPPORTED_CURRENCIES.filter((code) => code !== 'KRW');
 
   // 저장값 정제: 후보(지원 통화 ∧ ≠메인)에 없는 코드는 제거.
   function loadSaved(): string[] {
@@ -84,12 +73,7 @@ export default function CurrencySettingsPage() {
       </div>
 
       <div className={styles.fixedBtn}>
-        <button
-          type="button"
-          className={styles.primaryBtn}
-          disabled={selected.length === 0}
-          onClick={save}
-        >
+        <button type="button" className={styles.primaryBtn} onClick={save}>
           {t('currencySettings.save', { selected: selected.length, max: MAX_SELECT })}
         </button>
       </div>

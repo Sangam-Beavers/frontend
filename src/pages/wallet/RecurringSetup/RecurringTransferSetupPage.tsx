@@ -10,6 +10,8 @@ import { useRecentInternalRecipients } from '@/hooks/useRecentInternalRecipients
 import { useTransferSupportedCurrencies } from '@/hooks/useTransferSupportedCurrencies';
 import { useValidateMember } from '@/hooks/useValidateMember';
 import { useValidateScheduled } from '@/hooks/useValidateScheduled';
+import { useVerifyTransferPin } from '@/hooks/useVerifyTransferPin';
+import { sanitizePinInput } from '@/utils/input';
 import styles from './RecurringTransferSetupPage.module.css';
 
 type AvatarTone = 'best' | 'good' | 'mid' | 'warn' | 'bad';
@@ -113,8 +115,17 @@ export default function RecurringTransferSetupPage() {
 
   const validateScheduled = useValidateScheduled();
   const createScheduled = useCreateScheduled();
+  const verifyPin = useVerifyTransferPin();
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const isSubmitting = validateScheduled.isPending || createScheduled.isPending;
+  const isSubmitting = validateScheduled.isPending;
+
+  // 정기송금 설정 인가용 PIN 확인 단계 (TX-PIN — 설정 시 1회 검증 = standing order 인가).
+  // 백엔드 ScheduledTransferServiceImpl.create()가 TransferPinGate.requireVerified로 마커를 원자 소비한다.
+  const [pinModalOpen, setPinModalOpen] = useState(false);
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [pendingBody, setPendingBody] = useState<CreateScheduledTransferRequest | null>(null);
+  const pinBusy = verifyPin.isPending || createScheduled.isPending;
 
   const canSubmit =
     verified !== null &&
@@ -157,20 +168,11 @@ export default function RecurringTransferSetupPage() {
           setSubmitError(res.reason ?? t('recurring.setup.errValidate'));
           return;
         }
-        createScheduled.mutate(body, {
-          onSuccess: (created) => {
-            navigate('/recurring/complete', {
-              state: { scheduled: created, recipientName: verified?.name ?? null },
-            });
-          },
-          onError: (err) => {
-            if (err instanceof ApiException) {
-              setSubmitError(err.message || t('recurring.setup.errCreate'));
-            } else {
-              setSubmitError(t('recurring.setup.errCreate'));
-            }
-          },
-        });
+        // 검증 통과 → PIN 인가 단계로. 정기송금은 설정 시 1회 PIN 검증으로 인가한다(백엔드 TransferPinGate).
+        setPendingBody(body);
+        setPin('');
+        setPinError(null);
+        setPinModalOpen(true);
       },
       onError: (err) => {
         if (err instanceof ApiException) {
@@ -180,6 +182,63 @@ export default function RecurringTransferSetupPage() {
         }
       },
     });
+  }
+
+  /**
+   * PIN 확인 → 검증 마커 발급(pin-verify) → 정기송금 등록(create). 일반 송금 TransferAuth와 동일한
+   * 2단계(검증→실행) 패턴. 백엔드는 등록 시 TransferPinGate.requireVerified로 마커를 원자 소비한다.
+   */
+  function handlePinConfirm() {
+    if (!pendingBody || pin.length !== 6) return;
+    setPinError(null);
+    verifyPin.mutate(
+      { pin },
+      {
+        onSuccess: () => {
+          createScheduled.mutate(pendingBody, {
+            onSuccess: (created) => {
+              setPinModalOpen(false);
+              navigate('/recurring/complete', {
+                state: { scheduled: created, recipientName: verified?.name ?? null },
+              });
+            },
+            onError: (err) => {
+              if (err instanceof ApiException && err.code === 'TRANSFER4010') {
+                // 마커 만료(180초 초과) — PIN 다시 입력.
+                setPinError('PIN 검증이 만료되었습니다. 다시 입력해주세요.');
+                setPin('');
+              } else if (err instanceof ApiException) {
+                setPinError(err.message || t('recurring.setup.errCreate'));
+              } else {
+                setPinError(t('recurring.setup.errCreate'));
+              }
+            },
+          });
+        },
+        onError: (e) => {
+          if (e instanceof ApiException) {
+            if (e.code === 'TRANSFER4009') {
+              // PIN 미설정 → 설정 화면으로. (설정 후 정기송금을 다시 등록)
+              setPinModalOpen(false);
+              navigate(ROUTES.TRANSFER_PIN_SETUP);
+              return;
+            }
+            if (e.code === 'TRANSFER4007') {
+              setPinError(e.message || 'PIN이 일치하지 않습니다. 다시 입력해주세요.');
+              setPin('');
+            } else if (e.code === 'TRANSFER4008') {
+              setPinError(e.message || 'PIN을 5회 잘못 입력했습니다. 10분 후 다시 시도해주세요.');
+            } else if (e.code === 'COMMON4291') {
+              setPinError('요청이 너무 잦습니다. 잠시 후 다시 시도해주세요.');
+            } else {
+              setPinError(e.message || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+            }
+          } else {
+            setPinError('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+          }
+        },
+      }
+    );
   }
 
   const weekdayLabels: Record<(typeof WEEKDAY_KEYS)[number], string> = {
@@ -391,6 +450,61 @@ export default function RecurringTransferSetupPage() {
           {isSubmitting ? t('recurring.setup.submitting') : t('recurring.setup.submitLabel')}
         </button>
       </div>
+
+      {pinModalOpen && (
+        <div className={styles.pinOverlay} role="dialog" aria-modal="true">
+          <div className={styles.pinModal}>
+            <div className={styles.pinTitle}>
+              {t('recurring.setup.pinTitle', { defaultValue: '송금 PIN 확인' })}
+            </div>
+            <div className={styles.pinSub}>
+              {t('recurring.setup.pinSub', {
+                defaultValue: '정기 송금을 설정하려면 송금 PIN 6자리를 입력하세요.',
+              })}
+            </div>
+            <input
+              type="password"
+              inputMode="numeric"
+              autoComplete="off"
+              maxLength={6}
+              className={styles.input}
+              placeholder={t('recurring.setup.pinPlaceholder', { defaultValue: 'PIN 6자리' })}
+              value={pin}
+              onChange={(e) => setPin(sanitizePinInput(e.target.value))}
+              autoFocus
+            />
+            {pinError && (
+              <div className={styles.errorText} role="alert">
+                {pinError}
+              </div>
+            )}
+            <div className={styles.pinActions}>
+              <button
+                type="button"
+                className={styles.pinCancel}
+                onClick={() => {
+                  setPinModalOpen(false);
+                  setPin('');
+                  setPinError(null);
+                }}
+                disabled={pinBusy}
+              >
+                {t('recurring.setup.pinCancel', { defaultValue: '취소' })}
+              </button>
+              <button
+                type="button"
+                className={styles.pinConfirm}
+                onClick={handlePinConfirm}
+                disabled={pin.length !== 6 || pinBusy}
+              >
+                {pinBusy
+                  ? t('recurring.setup.submitting')
+                  : t('recurring.setup.pinConfirm', { defaultValue: '확인' })}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
