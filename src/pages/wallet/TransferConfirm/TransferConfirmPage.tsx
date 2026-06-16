@@ -169,7 +169,7 @@ export default function TransferConfirmPage() {
         </div>
         <div className={styles.row}>
           <span>{t('transfer.confirm.amount')}</span>
-          <b>{state.amount}</b>
+          <b>{amountForBody ? formatMoney(state.currency, amountForBody) : state.amount}</b>
         </div>
         <div className={styles.row}>
           <span>{t('transfer.confirm.fee')}</span>

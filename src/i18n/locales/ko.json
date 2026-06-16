@@ -749,6 +749,7 @@
       "verifying": "확인 중...",
       "verifiedBadge": "인증",
       "verifiedMeta": "최근 송금했던 사용자",
+      "verifiedMetaVerified": "인증된 앱 사용자",
       "currencyLabel": "보낼 통화",
       "currencyLoadError": "통화 불러오기 실패",
       "amountLabel": "보낼 금액",
