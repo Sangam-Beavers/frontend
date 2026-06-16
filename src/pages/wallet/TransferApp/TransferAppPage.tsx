@@ -82,15 +82,15 @@ export default function TransferAppPage() {
   const [amount, setAmount] = useState('');
   const [memo, setMemo] = useState('');
 
-  // 서비스 설정 — 송금 한도
-  // 폴백 기본값은 백엔드 정책(app-admin-service)과 동일하게 둔다. 백엔드가 설정을 내려주면 그 값으로
-  // 덮어쓰고(배포), 설정 API가 값을 안 주는 환경(로컬 등)에선 이 기본값이 떠서 한도가 동일하게 표시·적용된다.
+  // 서비스 설정 — 1회 송금 한도(최소/최대). 폴백 기본값은 백엔드 시드(app-admin-service)와 동일하게 둔다.
+  // 백엔드가 값을 내려주면 그 값으로 덮어쓰고(배포), 설정 API가 값을 안 주는 환경(로컬 등)에선 폴백을 쓴다.
+  // ※ 일일 한도(MAX_DAILY_TRANSFER)는 '하루 누적' 기준이라 단건 입력만 아는 프론트에선 올바르게 검증할 수 없다.
+  //   단건을 일일 총액과 직접 비교하면(num > daily) 정상 송금이 잘못 차단된다(설정값이 낮게 들어오면 더 심함).
+  //   일일 누적 검증은 백엔드(거래 합산)가 담당하므로 프론트 차단/표시에서 제외한다.
   const maxAmountSetting = useSetting('MAX_TRANSFER_AMOUNT', '5000000');
-  const minAmountSetting = useSetting('MIN_TRANSFER_AMOUNT', '1100');
-  const dailyMaxSetting = useSetting('MAX_DAILY_TRANSFER', '100100');
+  const minAmountSetting = useSetting('MIN_TRANSFER_AMOUNT', '1000');
   const maxAmount = Number(maxAmountSetting);
   const minAmount = Number(minAmountSetting);
-  const dailyMax = Number(dailyMaxSetting);
 
   function getAmountError(): string | null {
     const num = Number(amount);
@@ -104,9 +104,6 @@ export default function TransferAppPage() {
       }
       if (maxAmount > 0 && num > maxAmount) {
         return `1회 최대 송금 금액은 ₩${maxAmount.toLocaleString()}입니다.`;
-      }
-      if (dailyMax > 0 && num > dailyMax) {
-        return `일일 한도 ₩${dailyMax.toLocaleString()}을 초과합니다.`;
       }
     }
     return null;
@@ -324,16 +321,13 @@ export default function TransferAppPage() {
             onChange={(e) => setAmount(e.target.value)}
           />
           {amountError && <p className={styles.errorText}>{amountError}</p>}
-          {!amountError &&
-            currency === 'KRW' &&
-            (minAmount > 0 || maxAmount > 0 || dailyMax > 0) && (
-              <p className={styles.hintText}>
-                {minAmount > 0 && `최소 ₩${minAmount.toLocaleString()}`}
-                {minAmount > 0 && maxAmount > 0 && ' · '}
-                {maxAmount > 0 && `최대 ₩${maxAmount.toLocaleString()}`}
-                {dailyMax > 0 && ` · 일 한도 ₩${dailyMax.toLocaleString()}`}
-              </p>
-            )}
+          {!amountError && currency === 'KRW' && (minAmount > 0 || maxAmount > 0) && (
+            <p className={styles.hintText}>
+              {minAmount > 0 && `최소 ₩${minAmount.toLocaleString()}`}
+              {minAmount > 0 && maxAmount > 0 && ' · '}
+              {maxAmount > 0 && `최대 ₩${maxAmount.toLocaleString()}`}
+            </p>
+          )}
         </div>
 
         <div className={styles.field}>
