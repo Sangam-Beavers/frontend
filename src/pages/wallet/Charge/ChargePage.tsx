@@ -63,7 +63,7 @@ export default function ChargePage() {
       {
         onSuccess: () => {
           lastCharge.current = null;
-          navigate('/mypage/wallet-history');
+          navigate('/mypage/wallet-history', { state: { from: '/' } });
         },
       }
     );

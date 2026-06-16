@@ -12,6 +12,8 @@ interface CompleteState {
   /** 송금 실행 응답의 public_id. 영수증 페이지가 path로 받아 API 조회한다.
    * 송금 실행 연동 사이클에서 호출처가 채워준다. 없으면 영수증 버튼 disabled. */
   transferPublicId?: string;
+  /** 송금 유형 — 'REMITTANCE'(타행, 수수료 O)일 때만 적립/쿠폰 카드를 노출한다. 앱 내(INTERNAL)는 미노출. */
+  transferType?: 'INTERNAL_TRANSFER' | 'REMITTANCE';
 }
 
 const FALLBACK: CompleteState = {
@@ -35,6 +37,8 @@ export default function TransferCompletePage() {
   const { data: stampCard } = useStampCard();
   const target = stampCard?.target ?? DEFAULT_TARGET;
   const filledCount = stampCard?.current_count ?? 0;
+  // 적립/쿠폰은 수수료가 있는 타행 송금(REMITTANCE)만 대상이다. 앱 내 송금(INTERNAL)에서는 카드를 숨긴다.
+  const isRemittance = state.transferType === 'REMITTANCE';
 
   return (
     <>
@@ -52,21 +56,23 @@ export default function TransferCompletePage() {
         </div>
       </div>
 
-      <div className={styles.couponCard}>
-        <div className={styles.couponTitle}>{t('transfer.complete.couponTitle')}</div>
-        <div className={styles.couponDesc}>{t('transfer.complete.couponDesc')}</div>
-        <div className={styles.stampRow}>
-          {Array.from({ length: target }, (_, i) => {
-            const filled = i < filledCount;
-            return (
-              <div key={i} className={`${styles.stamp} ${filled ? styles.stampFilled : ''}`}>
-                {filled ? '✓' : ''}
-              </div>
-            );
-          })}
+      {isRemittance && (
+        <div className={styles.couponCard}>
+          <div className={styles.couponTitle}>{t('transfer.complete.couponTitle')}</div>
+          <div className={styles.couponDesc}>{t('transfer.complete.couponDesc')}</div>
+          <div className={styles.stampRow}>
+            {Array.from({ length: target }, (_, i) => {
+              const filled = i < filledCount;
+              return (
+                <div key={i} className={`${styles.stamp} ${filled ? styles.stampFilled : ''}`}>
+                  {filled ? '✓' : ''}
+                </div>
+              );
+            })}
+          </div>
+          <div className={styles.couponNote}>{t('transfer.complete.couponNote')}</div>
         </div>
-        <div className={styles.couponNote}>{t('transfer.complete.couponNote')}</div>
-      </div>
+      )}
 
       <div className={styles.btnCol}>
         <button type="button" className={styles.primaryBtn} onClick={() => navigate('/')}>
@@ -75,7 +81,7 @@ export default function TransferCompletePage() {
         <button
           type="button"
           className={styles.ghostBtn}
-          onClick={() => navigate('/mypage/wallet-history')}
+          onClick={() => navigate('/mypage/wallet-history', { state: { from: '/' } })}
         >
           {t('transfer.complete.viewHistory')}
         </button>

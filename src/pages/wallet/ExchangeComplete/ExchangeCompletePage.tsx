@@ -80,7 +80,7 @@ export default function ExchangeCompletePage() {
 
       <button
         className={styles.primaryBtn}
-        onClick={() => navigate(ROUTES.MYPAGE_EXCHANGE_HISTORY)}
+        onClick={() => navigate(ROUTES.MYPAGE_EXCHANGE_HISTORY, { state: { from: ROUTES.HOME } })}
       >
         {t('exchange.complete.viewHistory')}
       </button>

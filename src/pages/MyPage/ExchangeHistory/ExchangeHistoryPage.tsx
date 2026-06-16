@@ -76,7 +76,7 @@ export default function ExchangeHistoryPage() {
     <>
       <TopBar
         title={t('mypage2.exchangeHistory.title')}
-        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.MYPAGE))}
+        onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
       />
 
       {isLoading ? (
