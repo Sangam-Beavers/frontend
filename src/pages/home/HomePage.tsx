@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiException } from '@/api';
-import type { ExchangeRateItem } from '@/api/wallet';
 import { ROUTES } from '@/constants/routes';
 import { SUPPORTED_CURRENCIES, CURRENCY_SYMBOL, isSupportedCurrency } from '@/constants/currencies';
 import { isAdminUser } from '@/auth/tokenStore';
@@ -66,22 +65,6 @@ function formatAmountByCurrency(code: string, value: number): string {
   })}`;
 }
 
-/**
- * 총 원화환산액(total_balance_in_krw)을 메인 통화로 환산해 문자열로 반환한다(이슈 #194).
- * KRW면 그대로, 외화면 ÷(1 외화→KRW 환율). 환율을 모르면 null(호출 측이 '—' 처리).
- */
-function formatMainAmount(
-  currency: string,
-  totalKrw: number,
-  rates?: ExchangeRateItem[]
-): string | null {
-  if (currency === 'KRW') return formatAmountByCurrency('KRW', totalKrw);
-  const rate = rates?.find((r) => r.currency_code === currency)?.exchange_rate;
-  const rateNum = Number(rate);
-  if (!rate || !rateNum) return null;
-  return formatAmountByCurrency(currency, totalKrw / rateNum);
-}
-
 export default function HomePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -122,15 +105,13 @@ export default function HomePage() {
   // 표시 통화 칩 = 저장된 표시 통화 중 메인 통화를 제외한 것(메인은 큰 금액으로 이미 표기).
   const displayCurrencies = currencies.filter((code) => code !== mainCurrency);
 
-  // 카드 큰 금액 = 총 원화환산액(/wallets/me)을 메인 통화로 환산(이슈 #194).
-  // 지갑 없음(WALLET4001)이면 0, 로딩/환율 미준비면 '—'.
-  const totalKrw =
-    walletMeError instanceof ApiException && walletMeError.code === 'WALLET4001'
-      ? 0
-      : Number(walletMe?.total_balance_in_krw ?? 0);
-  const mainAmountReady = !walletMeLoading && (mainCurrency === 'KRW' || !ratesLoading);
+  // 카드 큰 금액 = 메인 통화의 "실제 잔액"(해당 통화 보유액). 이전엔 총 원화환산액을 메인 통화로 환산해
+  // 보여줘(이슈 #194) "지금 나의 원화" 카드와 값이 똑같았고, 환전해도 총액이 보존돼 메인 통화 잔액이
+  // 안 줄어든 것처럼 보였다. 총 환산액은 아래 "지금 나의 원화" 카드가 별도로 보여준다.
+  // 지갑 없음(WALLET4001)이면 balances가 비어 balanceOf가 '0.0000' 폴백.
+  const mainAmountReady = !balancesLoading;
   const mainAmount = mainAmountReady
-    ? (formatMainAmount(mainCurrency, totalKrw, ratesData?.rates) ?? '—')
+    ? formatAmountByCurrency(mainCurrency, Number(balanceOf(balances, mainCurrency)))
     : '—';
 
   // 현재 언어 코드 (i18n 기준). 헤더의 언어 셀렉터에 표시.
