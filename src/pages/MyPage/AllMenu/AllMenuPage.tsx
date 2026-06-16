@@ -91,7 +91,6 @@ const TAGS: MenuItem[] = [
 
 const QUICK_LINKS: MenuItem[] = [
   { labelKey: 'allmenu.quickLinks.finance', path: ROUTES.CHARGE },
-  { labelKey: 'allmenu.quickLinks.languageTranslate', path: ROUTES.MYPAGE_LANGUAGE },
   { labelKey: 'allmenu.quickLinks.language', path: ROUTES.MYPAGE_LANGUAGE },
 ];
 
