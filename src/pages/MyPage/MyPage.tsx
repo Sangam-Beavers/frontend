@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Identicon from '@/components/common/Identicon';
 import GradeUpCelebration from '@/components/common/GradeUpCelebration';
 import TopBar from '@/components/navigation/TopBar';
+import ScreenHeader from '@/components/layout/ScreenHeader';
 import TrustGradeSheet from '@/components/mypage/TrustGradeSheet';
 import { useMyProfile } from '@/hooks/useMyProfile';
 import { useMyVerification } from '@/hooks/useMyVerification';
@@ -82,10 +83,12 @@ export default function MyPage() {
 
   return (
     <>
-      <TopBar
-        title={t('mypage.title')}
-        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.HOME))}
-      />
+      <ScreenHeader>
+        <TopBar
+          title={t('mypage.title')}
+          onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.HOME))}
+        />
+      </ScreenHeader>
       <div className={styles.noTopPad}>
         {/* Profile card */}
         <div className={styles.card}>
