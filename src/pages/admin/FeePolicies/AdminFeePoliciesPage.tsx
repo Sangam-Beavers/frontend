@@ -29,10 +29,10 @@ export default function AdminFeePoliciesPage() {
   const updateMut = useMutation({
     mutationFn: (p: FeePolicyResponse) =>
       feePolicyApi.update(p.public_id, {
-        feeType: editForm.feeType || undefined,
-        feeValue: editForm.feeValue || undefined,
-        minFee: editForm.minFee || undefined,
-        maxFee: editForm.maxFee || undefined,
+        fee_type: editForm.feeType || undefined,
+        fee_value: editForm.feeValue || undefined,
+        min_fee: editForm.minFee || undefined,
+        max_fee: editForm.maxFee || undefined,
         active: editForm.active,
       }),
     onSuccess: () => {
