@@ -23,7 +23,7 @@ const AVATAR_CLASS: Partial<Record<AvatarTone, string>> = {
 
 /** 화면에서 다루는 수신자 표시 모델 — API 응답에서 파생. */
 interface RecipientDisplay {
-  identifier: string; // nickname (검증/송금 API용 식별자는 다음 PR에서 member_public_id로 교체 검토)
+  identifier: string; // 송금/검증 API 식별자(UUID). 최근 수신자=member_public_id, 이메일 검증=receiver_public_id
   name: string;
   initial: string;
   currency: string;
@@ -60,7 +60,9 @@ export default function TransferAppPage() {
   const recentRecipients: RecipientDisplay[] = useMemo(() => {
     const list = recipientsData?.receivers ?? [];
     return list.map((r) => ({
-      identifier: r.nickname,
+      // 송금/검증 API 식별자는 member_public_id(UUID)여야 한다. 닉네임을 넣으면 receiver_public_id로
+      // 닉네임이 전송돼 "존재하지 않는 지갑(WALLET4001)"으로 실패한다.
+      identifier: r.member_public_id,
       name: r.nickname,
       initial: r.nickname.charAt(0).toUpperCase() || '?',
       currency: r.last_currency_code,
@@ -148,7 +150,9 @@ export default function TransferAppPage() {
   }
 
   function handleRecentSelect(user: RecipientDisplay) {
-    setRecipient(user.identifier);
+    // 이메일 입력칸은 비운다 — 식별자(member_public_id)를 칸에 넣으면 닉네임/UUID가 노출되고 혼란스럽다.
+    // 선택 사실은 아래 검증 카드(닉네임 + 인증 배지)로 표시된다(정기송금 설정 화면과 동일 패턴).
+    setRecipient('');
     setVerified(user);
     setCurrency(user.currency);
   }

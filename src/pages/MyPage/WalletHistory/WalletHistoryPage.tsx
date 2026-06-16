@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiException } from '@/api';
 import TopBar from '@/components/navigation/TopBar';
+import ScreenHeader from '@/components/layout/ScreenHeader';
 import { buildTransferReceiptPath, ROUTES } from '@/constants/routes';
 import { useTransactions } from '@/hooks/useTransactions';
 import type { WalletTabKey, WalletTransaction } from '@/types/history';
@@ -59,23 +60,25 @@ export default function WalletHistoryPage() {
 
   return (
     <>
-      <TopBar
-        title={t('mypage2.walletHistory.title')}
-        onBack={() => (location.state?.from != null ? navigate(-1) : navigate(ROUTES.MYPAGE))}
-      />
+      <ScreenHeader>
+        <TopBar
+          title={t('mypage2.walletHistory.title')}
+          onBack={() => navigate(location.state?.from ?? ROUTES.MYPAGE)}
+        />
 
-      <div className={styles.tabs}>
-        {TABS.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            className={`${styles.tab} ${activeTab === tab.key ? styles.active : ''}`}
-            onClick={() => setActiveTab(tab.key)}
-          >
-            {t(tab.labelKey)}
-          </button>
-        ))}
-      </div>
+        <div className={styles.tabs}>
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`${styles.tab} ${activeTab === tab.key ? styles.active : ''}`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {t(tab.labelKey)}
+            </button>
+          ))}
+        </div>
+      </ScreenHeader>
 
       {isLoading ? (
         <div className={styles.stateCard}>{t('mypage2.walletHistory.loading')}</div>

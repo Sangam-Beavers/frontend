@@ -139,6 +139,8 @@ export default function TransferAuthPage() {
                     recipientName: state.recipientName,
                     currency: state.currency,
                     amount: state.amount,
+                    // 적립/쿠폰 카드는 REMITTANCE(타행)일 때만 노출 — Complete로 유형 전달.
+                    transferType: state.transferType,
                     // Receipt 버튼 활성화용 — 영수증 페이지로 path param 전달
                     transferPublicId: res.public_id,
                   },
