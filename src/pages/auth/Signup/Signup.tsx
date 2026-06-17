@@ -322,8 +322,8 @@ function Signup() {
                 >
                   <option value="">{t('auth.signup.selectOption')}</option>
                   {NATIONALITIES.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
+                    <option key={n.code} value={n.code}>
+                      {n.label}
                     </option>
                   ))}
                 </select>

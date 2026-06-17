@@ -105,8 +105,8 @@ function GoogleSignupInfo() {
               >
                 <option value="">{t('auth.googleSignup.nationalityPlaceholder')}</option>
                 {NATIONALITIES.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
+                  <option key={n.code} value={n.code}>
+                    {n.label}
                   </option>
                 ))}
               </select>
